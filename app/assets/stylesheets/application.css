@@ -30,3 +30,99 @@ body {
   border: none;
   text-transform: uppercase;
 }
+/* Estilo da Barra de Navegação - Quero Lanches */
+.navbar-quero {
+  background-color: var(--bege-fundo); /* Usa o bege que você definiu */
+  padding: 20px;
+  text-align: center;
+  border-bottom: 4px solid var(--vermelho-quero); /* Linha vermelha grossinha embaixo */
+}
+
+.nav-link-quero {
+  color: var(--vermelho-quero);
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 15px;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.nav-link-quero:hover {
+  color: #b5151b; /* Um vermelho um pouco mais escuro ao passar o mouse */
+  text-decoration: underline;
+}
+/* Botão Padrão Quero Lanches */
+.btn-quero {
+  background-color: var(--vermelho-quero);
+  color: white !important; /* Força o texto a ser branco */
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px; /* Cantos arredondados conforme o Figma */
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  text-align: center;
+}
+
+.btn-quero:hover {
+  background-color: #b5151b; /* Vermelho um pouco mais escuro */
+  transform: translateY(-2px); /* Efeito de levante ao passar o mouse */
+  color: white !important;
+}
+
+.btn-quero:active {
+  transform: translateY(0);
+}
+/* Estilo para as Tabelas da Cantina */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+th {
+  background-color: var(--vermelho-quero);
+  color: white;
+  padding: 15px;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #555;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background-color: #fffcf5; /* Um leve realce ao passar o mouse na linha */
+}
+/* Botão de Excluir / Perigo */
+.btn-perigo {
+  background-color: #ff4d4d;
+  color: white !important;
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 13px;
+  display: inline-block;
+  border: none;
+  transition: 0.3s;
+}
+
+.btn-perigo:hover {
+  background-color: #d32f2f;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

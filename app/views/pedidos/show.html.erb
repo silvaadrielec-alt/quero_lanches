@@ -7,6 +7,6 @@
   <%= link_to "Voltar aos pedidos", pedidos_path, style: "color: #666; text-decoration: none; margin-left: 15px;" %>
 
   <div style="margin-top: 30px;">
-    <%= button_to "Excluir este pedido", @pedido, method: :delete, data: { confirm: "Tem certeza?" }, style: "background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;" %>
+    <%= button_to "Excluir este pedido", @pedido, method: :delete, class: "btn-perigo", data: { confirm: "Tem certeza que deseja cancelar este pedido?" } %>
   </div>
 </div>

@@ -24,32 +24,32 @@
   </head>
 
  <body style="margin: 0;">
-  <nav style="background-color: #FFF3CD; padding: 15px; text-align: center; width: 100%; border-bottom: 3px solid #FFC107; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+<nav class="navbar-quero">
+  <%# Logo centralizada - O caminho "logo.png" é o que você já está usando %>
   <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
- <div style="margin-top: 10px;">
-  <% if funcionario_signed_in? %> <%# ESTA É A LINHA MÁGICA QUE FALTA %>
-    <%= link_to "Cardápio", produtos_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
-    <%= link_to "Clientes", clientes_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
+  
+  <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; align-items: center;">
+    <% if funcionario_signed_in? %>
+      <%= link_to "CARDÁPIO", produtos_path, class: "nav-link-quero" %>
+      <%= link_to "CLIENTES", clientes_path, class: "nav-link-quero" %>
+      
+      <% if current_funcionario.admin? %>
+        <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
+      <% end %>
 
-    <% if current_funcionario.admin? %>
-      <%= link_to "Funcionários", funcionarios_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
+      <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
+
+      <% if current_funcionario.admin? %>
+        <%= link_to "FATURAMENTO", relatorios_path, class: "nav-link-quero" %>
+      <% end %>
+
+      <%# Botão de Sair com destaque %>
+      <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
+          style: "border: 2px solid var(--vermelho-quero); padding: 5px 15px; border-radius: 20px; font-size: 13px;" %>
+    <% else %>
+      <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>
     <% end %>
-
-    <%= link_to "Pedidos", pedidos_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %>
-
-    <% if current_funcionario.admin? %>
-      <span style="color: #ccc; margin: 0 10px;">|</span>
-      <%= link_to "Faturamento", relatorios_path, style: "color: #D71920; font-weight: bold; text-decoration: none;" %>
-    <% end %>
-
-    <span style="color: #ccc; margin: 0 10px;">|</span>
-    <%= link_to "SAIR", "/funcionarios/sign_out", style: "color: #D71920; font-weight: bold; text-decoration: none; margin-left: 10px;" %>
-
-  <% else %>
-    <%# Se não estiver logado, você pode colocar um link de "Entrar" aqui ou deixar vazio %>
-    <%= link_to "ENTRAR", new_funcionario_session_path, style: "color: #D71920; font-weight: bold; text-decoration: none;" %>
-  <% end %>
-</div>
+  </div>
 </nav>
 
   <div style="padding: 20px;">

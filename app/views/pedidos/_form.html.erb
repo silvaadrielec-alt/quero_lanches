@@ -17,9 +17,9 @@
     <%= form.select :produto_id, Produto.all.map { |p| [p.nome, p.id, { 'data-price': p.valor_unitario }] }, { prompt: "Escolha um produto" }, { id: "select-produto", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
   </div>
 
-  <div class="field" style="margin-bottom: 15px;">
-  <%= form.label :cliente_nome, "Nome do Cliente ou Nº do Pedido", style: "color: #D71920; font-weight: bold;" %>
-<%= form.text_field :cliente_nome, placeholder: "Ex: Adriele ou 01", style: "width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" %>
+ <div class="field" style="margin-bottom: 15px;">
+  <%= form.label :cliente_nome, "Identificação (Nome ou Nº do Pedido)", style: "display: block; font-weight: bold; color: var(--vermelho-quero);" %>
+  <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Aluno", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
 </div>
 
   <div class="field" style="margin-bottom: 15px; opacity: 0.8;">
@@ -49,7 +49,7 @@
   </div>
 
   <div style="margin-top: 20px; text-align: center;">
-    <%= form.submit "FINALIZAR PEDIDO", class: "btn-anotar", style: "cursor: pointer; width: 100%;" %>
+   <%= form.submit "FINALIZAR PEDIDO", class: "btn-quero", style: "width: 100%;" %>
   </div>
 <% end %>
 <script>

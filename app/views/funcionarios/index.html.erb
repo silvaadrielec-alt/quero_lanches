@@ -1,14 +1,30 @@
-<div class="card-principal" style="max-width: 600px; margin: 40px auto; text-align: center;">
-  <h1 style="color: #D71920;">Equipe Quero Lanches</h1>
+<div class="card-principal" style="max-width: 900px; margin: 40px auto; text-align: center;">
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Equipe Quero Lanches</h1>
 
-  <div id="funcionarios" style="margin-bottom: 20px;">
-    <% @funcionarios.each do |funcionario| %>
-      <div style="padding: 10px; border-bottom: 1px dashed #ccc;">
-        <strong>Nome:</strong> <%= funcionario.nome %> |
-        <%= link_to "Perfil", funcionario, style: "color: #D71920;" %>
-      </div>
-    <% end %>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome do Colaborador</th>
+        <th>E-mail</th>
+        <th>Cargo</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @funcionarios.each do |funcionario| %>
+        <tr>
+          <td><strong><%= funcionario.nome %></strong></td>
+          <td><%= funcionario.email %></td>
+          <td><%= funcionario.admin? ? "Administrador" : "Funcionário" %></td>
+          <td style="text-align: center;">
+            <%= link_to "Perfil", funcionario, style: "color: var(--vermelho-quero);" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 30px;">
+    <%= link_to "CADASTRAR FUNCIONÁRIO", new_funcionario_path, class: "btn-quero" %>
   </div>
-
-  <%= link_to "Cadastrar Funcionário", new_funcionario_path, class: "btn-anotar", style: "text-decoration: none; display: inline-block;" %>
 </div>
