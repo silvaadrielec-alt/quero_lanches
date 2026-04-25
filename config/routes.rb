@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   end
 
   # 2. Configuração do Devise
-  devise_for :funcionarios
+  devise_for :funcionarios, skip: [:registrations]
 
   # 3. Gestão dos Recursos (Funcionários, Produtos, etc.)
   resources :funcionarios

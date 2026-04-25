@@ -23,15 +23,29 @@ class FuncionariosController < ApplicationController
     if @funcionario.save
       redirect_to funcionarios_path, notice: "Funcionário cadastrado com sucesso!"
     else
-      render json: @funcionario.errors.full_messages, status: :unprocessable_entity
+      # Isso ajuda a ver o erro caso falte algo (ex: senha curta)
+      render :new, status: :unprocessable_entity
     end
   end
 
+  # --- ADICIONE DAQUI PARA BAIXO ---
+
+  def edit
+    # Apenas abre o formulário de edição
+  end
+
   def update
-    if @funcionario.update(funcionario_params)
-      redirect_to funcionarios_path, notice: "Funcionário atualizado com sucesso!"
+    # Se você não quiser exigir a senha na hora de mudar apenas o e-mail:
+    params_para_atualizar = funcionario_params
+    if params_para_atualizar[:password].blank?
+      params_para_atualizar.delete(:password)
+      params_para_atualizar.delete(:password_confirmation)
+    end
+
+    if @funcionario.update(params_para_atualizar)
+      redirect_to funcionarios_path, notice: "Informações atualizadas com sucesso!"
     else
-      render :new, status: :unprocessable_entity
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -47,7 +61,8 @@ class FuncionariosController < ApplicationController
   end
 
   def funcionario_params
-    params.expect(funcionario: [:nome, :email, :password, :password_confirmation, :admin])
+    # Usando require/permit que é o mais seguro para evitar conflitos
+    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin)
   end
 
   def verificar_admin
