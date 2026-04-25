@@ -30,11 +30,11 @@
 </div>
 
   <div style="margin-bottom: 15px;">
-    <%= form.label :quantidade, "Quantidade", style: "display: block; font-weight: bold; color: #D71920;" %>
-    <%= form.number_field :quantidade, id: "input-quantidade", value: 1, min: 1, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-  </div>
+  <%= form.label :quantidade, "Quantidade / Peso", style: "display: block; font-weight: bold; color: #D71920;" %>
+  <%= form.number_field :quantidade, id: "input-quantidade", step: :any, value: 1, min: 0.01, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+</div>
 
-  <div>
+<div>
   <%= form.label :unidade, "Unidade da Venda", style: "display: block; font-weight: bold;" %>
   <%= form.select :unidade, 
       [["Matriz Centro", "centro"], ["Pavilhão Novo", "pavilhao_novo"], ["Pavilhão Antigo", "pavilhao_antigo"]], 
@@ -61,7 +61,7 @@
     function calcularTotal() {
       const selectedOption = selectProduto.options[selectProduto.selectedIndex];
       const preco = parseFloat(selectedOption.getAttribute("data-price") || 0);
-      const quantidade = parseInt(inputQuantidade.value || 0);
+      const quantidade = parseFloat(inputQuantidade.value || 0);
       
       const total = preco * quantidade;
       inputTotal.value = total.toFixed(2);

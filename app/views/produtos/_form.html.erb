@@ -20,6 +20,16 @@
     <%= form.text_field :valor_unitario %>
   </div>
 
+ <div class="field" style="margin-bottom: 20px;">
+  <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold;" %>
+  <%= form.select :categoria, ["Venda", "Insumo"], {}, class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+ </div>
+
+ <div class="field" style="margin-bottom: 15px;">
+  <%= form.label :unidade_medida, "Medida do Produto (Ex: Kg, Un, Litro)" %>
+  <%= form.select :unidade_medida, ["Unidade", "Kg", "Gramas", "Litro", "Caixa"], {}, class: "input-estilizado" %>
+</div>
+
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
   <h3 style="color: #856404; background-color: #FFF3CD; padding: 10px; border-radius: 5px; font-size: 1em;">Estoques por Unidade</h3>
 
@@ -41,6 +51,6 @@
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit "SALVAR ITEM NO ESTOQUE", class: "btn-quero", style: "width: 100%; margin-top: 20px;" %>
   </div>
 <% end %>

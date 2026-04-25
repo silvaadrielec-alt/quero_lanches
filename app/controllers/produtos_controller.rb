@@ -66,7 +66,7 @@ private
   end
 
   def produto_params
-    params.require(:produto).permit(:nome, :valor_unitario, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo)
+    params.require(:produto).permit(:nome, :valor_unitario, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo, :categoria, :unidade_medida)
   end
 
   # Adicione o método aqui, antes do último 'end'

@@ -1,31 +1,31 @@
 <div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
+  
   <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Gestão de Estoque Geral</h1>
 
+  <%# --- TABELA DE PRODUTOS PARA VENDA --- %>
+  <h2 style="color: #555; text-align: left; margin-left: 20px;">Produtos p/ Venda (Lanches, Sucos, Açaí)</h2>
   <table>
     <thead>
       <tr>
         <th>Produto</th>
-        <th>Preço</th>
-        <th>Matriz Centro</th>
-        <th>Pavilhão Novo</th>
-        <th>Pavilhão Antigo</th>
+        <th>Preço / Medida</th>
+        <th>Matriz</th>
+        <th>Pav. Novo</th>
+        <th>Pav. Antigo</th>
         <th style="text-align: center;">Ações</th>
       </tr>
     </thead>
     <tbody>
-      <% @produtos.each do |produto| %>
-        <tr>
-          <td><strong><%= produto.nome %></strong></td>
-          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
-          
-          <%# Usando os campos corretos que vi no seu print %>
+      <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
+        <td>
+  <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
+  <br>
+  <small style="color: #666;">(por <%= produto.unidade_medida %>)</small>
+</td>
           <td><%= produto.estoque_centro.to_i %></td>
           <td><%= produto.estoque_pavilhao_novo.to_i %></td>
           <td><%= produto.estoque_pavilhao_antigo.to_i %></td>
-          
           <td style="text-align: center;">
-            <%= link_to "Ver", produto, style: "color: #555; margin-right: 10px;" %>
-            
             <% if current_funcionario.admin? %>
               <%= link_to "Editar", edit_produto_path(produto), style: "color: var(--vermelho-quero); font-weight: bold;" %>
             <% end %>
@@ -35,9 +35,42 @@
     </tbody>
   </table>
 
+  <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+  <%# --- TABELA DE INSUMOS (O QUE NÃO SAI DIRETO NA VENDA) --- %>
+  <h2 style="color: #555; text-align: left; margin-left: 20px;">Insumos e Matérias-primas (Queijo, Carne, Frutas)</h2>
+  <table style="border-left: 5px solid #666;">
+    <thead style="background-color: #666;"> <%# Cabeçalho cinza para diferenciar %>
+      <tr>
+        <th>Insumo</th>
+        <th>Medida</th>
+        <th>Matriz</th>
+        <th>Pav. Novo</th>
+        <th>Pav. Antigo</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @produtos.where(categoria: "Insumo").each do |insumo| %>
+        <tr>
+          <td><strong><%= insumo.nome %></strong></td>
+          <td><%= insumo.unidade_medida %></td>
+          <td><%= insumo.estoque_centro %></td>
+          <td><%= insumo.estoque_pavilhao_novo %></td>
+          <td><%= insumo.estoque_pavilhao_antigo %></td>
+          <td style="text-align: center;">
+            <% if current_funcionario.admin? %>
+              <%= link_to "Ajustar", edit_produto_path(insumo), style: "color: #666; font-weight: bold;" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
   <% if current_funcionario.admin? %>
     <div style="margin-top: 30px;">
-      <%= link_to "CADASTRAR NOVO PRODUTO", new_produto_path, class: "btn-quero" %>
+      <%= link_to "CADASTRAR NOVO ITEM", new_produto_path, class: "btn-quero" %>
     </div>
   <% end %>
 </div>
