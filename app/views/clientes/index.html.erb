@@ -1,14 +1,27 @@
-<div class="card-principal" style="max-width: 600px; margin: 40px auto; text-align: center;">
-  <h1 style="color: #D71920;">Lista de Clientes</h1>
+<div class="card-principal" style="max-width: 900px; margin: 40px auto; text-align: center;">
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Cadastro de Clientes</h1>
 
-  <div id="clientes" style="margin-bottom: 20px;">
-    <% @clientes.each do |cliente| %>
-      <div style="padding: 10px; border-bottom: 1px dashed #ccc;">
-        <strong>Nome:</strong> <%= cliente.nome %> |
-        <%= link_to "Ver", cliente, style: "color: #D71920;" %>
-      </div>
-    <% end %>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome do Cliente</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @clientes.each do |cliente| %>
+        <tr>
+          <td><strong><%= cliente.nome %></strong></td>
+          <td style="text-align: center;">
+            <%= link_to "Perfil", cliente, style: "color: var(--vermelho-quero); font-weight: bold; margin-right: 10px;" %>
+            <%= link_to "Editar", edit_cliente_path(cliente), style: "color: #555;" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 30px;">
+    <%= link_to "CADASTRAR NOVO CLIENTE", new_cliente_path, class: "btn-quero" %>
   </div>
-
-  <%= link_to "Novo Cliente", new_cliente_path, class: "btn-anotar", style: "text-decoration: none; display: inline-block;" %>
 </div>

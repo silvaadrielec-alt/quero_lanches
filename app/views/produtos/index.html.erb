@@ -1,50 +1,43 @@
-<p style="color: green"><%= notice %></p>
+<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Gestão de Estoque Geral</h1>
 
-<% content_for :title, "Produtos" %>
+  <table>
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th>Preço</th>
+        <th>Matriz Centro</th>
+        <th>Pavilhão Novo</th>
+        <th>Pavilhão Antigo</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @produtos.each do |produto| %>
+        <tr>
+          <td><strong><%= produto.nome %></strong></td>
+          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
+          
+          <%# Usando os campos corretos que vi no seu print %>
+          <td><%= produto.estoque_centro.to_i %></td>
+          <td><%= produto.estoque_pavilhao_novo.to_i %></td>
+          <td><%= produto.estoque_pavilhao_antigo.to_i %></td>
+          
+          <td style="text-align: center;">
+            <%= link_to "Ver", produto, style: "color: #555; margin-right: 10px;" %>
+            
+            <% if current_funcionario.admin? %>
+              <%= link_to "Editar", edit_produto_path(produto), style: "color: var(--vermelho-quero); font-weight: bold;" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 
-<div class="card-principal" style="max-width: 900px; margin: 40px auto; text-align: center;">
-  <h1 style="color: #D71920;">Gestão de Estoque Geral</h1>
-
-  <div id="produtos" style="margin-top: 20px;">
-    <% @produtos.each do |produto| %>
-      <div style="background: #fff; border: 1px solid #ddd; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #FFF3CD; padding-bottom: 10px; margin-bottom: 15px;">
-          <h2 style="margin: 0; color: #D71920;"><%= produto.nome %></h2>
-          <span style="font-weight: bold; font-size: 1.2em; color: #333;">
-            <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
-          </span>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; text-align: center;">
-          <thead>
-            <tr style="background-color: #FFF3CD; color: #856404;">
-              <th style="padding: 10px; border-radius: 10px 0 0 10px;">Matriz Centro</th>
-              <th style="padding: 10px;">Pavilhão Novo</th>
-              <th style="padding: 10px; border-radius: 0 10px 10px 0;">Pavilhão Antigo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding: 15px; font-size: 1.1em; font-weight: bold;"><%= produto.estoque_centro.to_i %></td>
-              <td style="padding: 15px; font-size: 1.1em; font-weight: bold;"><%= produto.estoque_pavilhao_novo.to_i %></td>
-              <td style="padding: 15px; font-size: 1.1em; font-weight: bold;"><%= produto.estoque_pavilhao_antigo.to_i %></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style="margin-top: 15px; text-align: right;">
-          <div style="margin-top: 15px; text-align: right;">
   <% if current_funcionario.admin? %>
-    <%= link_to "Editar", edit_produto_path(produto), style: "color: #666; text-decoration: none; margin-right: 10px;" %>
-  <% end %>
-  <%= link_to "Ver Detalhes", produto, style: "color: #D71920; font-weight: bold; text-decoration: none;" %>
-</div>
-        </div>
-      </div>
-    <% end %>
-  </div>
-
- <% if current_funcionario.admin? %>
-    <%= link_to "CADASTRAR NOVO ITEM", new_produto_path, class: "btn-anotar", style: "text-decoration: none; display: inline-block; margin-top: 20px;" %>
+    <div style="margin-top: 30px;">
+      <%= link_to "CADASTRAR NOVO PRODUTO", new_produto_path, class: "btn-quero" %>
+    </div>
   <% end %>
 </div>
