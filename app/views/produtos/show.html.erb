@@ -1,0 +1,17 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @produto %>
+
+<div style="margin-top: 20px;">
+  <% if current_funcionario.admin? %>
+    <%= link_to "Editar este produto", edit_produto_path(@produto), style: "color: #D71920; text-decoration: none; margin-right: 15px;" %> |
+  <% end %>
+  
+  <%= link_to "Voltar aos produtos", produtos_path, style: "color: #666; text-decoration: none; margin-left: 15px;" %>
+
+  <% if current_funcionario.admin? %>
+    <div style="margin-top: 30px;">
+      <%= button_to "Excluir este produto", @produto, method: :delete, data: { confirm: "Tem certeza?" }, style: "background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;" %>
+    </div>
+  <% end %>
+</div>

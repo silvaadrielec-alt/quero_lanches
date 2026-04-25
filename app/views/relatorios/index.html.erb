@@ -1,0 +1,36 @@
+<div style="max-width: 900px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center;">
+  
+  <h1 style="color: #D71920; margin-bottom: 10px;">📊 Relatório de Faturamento</h1>
+  <p style="color: #666; margin-bottom: 30px;">Visão Geral da Cantina Quero Lanches</p>
+
+  <div style="background: white; border-radius: 15px; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; margin-bottom: 30px;">
+    <h2 style="color: #333; margin: 0; font-size: 1.2em; text-transform: uppercase;">Total Geral Vendido</h2>
+    <p style="font-size: 3em; font-weight: bold; color: #28a745; margin: 10px 0;">
+      <%= number_to_currency(@total_geral, unit: "R$ ", separator: ",", delimiter: ".") %>
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+    
+    <div style="background: #FFF3CD; padding: 25px; border-radius: 12px; border: 1px solid #ffeeba;">
+      <h3 style="margin: 0; font-size: 0.9em; color: #856404;">UNIDADE 1</h3>
+      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Matriz Centro</p>
+      <p style="font-size: 1.2em; margin-top: 10px; color: #856404;"><%= number_to_currency(@vendas_matriz, unit: "R$ ") %></p>
+    </div>
+
+    <div style="background: #D1ECF1; padding: 25px; border-radius: 12px; border: 1px solid #bee5eb;">
+      <h3 style="margin: 0; font-size: 0.9em; color: #0c5460;">UNIDADE 2</h3>
+      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Pavilhão Novo</p>
+      <p style="font-size: 1.2em; margin-top: 10px; color: #0c5460;"><%= number_to_currency(@vendas_pavilhao_novo, unit: "R$ ") %></p>
+    </div>
+
+    <div style="background: #E2E3E5; padding: 25px; border-radius: 12px; border: 1px solid #d6d8db;">
+      <h3 style="margin: 0; font-size: 0.9em; color: #383d41;">UNIDADE 3</h3>
+      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Pavilhão Antigo</p>
+      <p style="font-size: 1.2em; margin-top: 10px; color: #383d41;"><%= number_to_currency(@vendas_pavilhao_antigo, unit: "R$ ") %></p>
+    </div>
+
+  </div>
+
+  <%= link_to "← VOLTAR AO PAINEL", root_path, style: "display: inline-block; margin-top: 40px; color: #D71920; text-decoration: none; font-weight: bold; font-size: 0.9em;" %>
+</div>

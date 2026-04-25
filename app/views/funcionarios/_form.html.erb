@@ -1,0 +1,43 @@
+<%= form_with(model: @funcionario, url: funcionarios_path, local: true, data: { turbo: false }) do |form| %>
+  <% if funcionario.errors.any? %>
+    <div style="color: red">
+      <h2><%= funcionario.errors.count %> <%= funcionario.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este funcionário:</h2>
+
+      
+      <ul>
+        <% funcionario.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+ <div style="margin-bottom: 15px;">
+  <%= form.label :nome, style: "display: block" %>
+  <%= form.text_field :nome %>
+</div>
+<div style="margin-bottom: 15px;">
+    <%= form.label :email, "E-mail de Acesso", style: "display: block; font-weight: bold;" %>
+    <%= form.email_field :email, style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :password, "Senha Provisória", style: "display: block; font-weight: bold;" %>
+    <%= form.password_field :password, style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :password_confirmation, "Confirme a Senha", style: "display: block; font-weight: bold;" %>
+    <%= form.password_field :password_confirmation, style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 20px; padding: 10px; border: 1px dashed #D71920; border-radius: 8px; background-color: #fff;">
+    <%= form.label :admin, "Este funcionário terá acesso de Administrador?", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 5px;" %>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <%= form.check_box :admin, style: "width: 20px; height: 20px;" %>
+      <span style="color: #666; font-size: 14px;">(Marque para liberar menus de faturamento e gestão)</span>
+    </div>
+    <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+    <%= form.submit "Salvar Funcionário", style: "background-color: #D71920; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;" %>
+  </div>
+<% end %>

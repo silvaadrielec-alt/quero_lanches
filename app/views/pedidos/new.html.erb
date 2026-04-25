@@ -1,0 +1,11 @@
+<% content_for :title, "New pedido" %>
+
+<h1>Cadastrar Novo Pedido</h1>
+
+<%= render "form", pedido: @pedido %>
+
+<br>
+
+<div>
+  <%= link_to "Voltar para pedidos", pedidos_path %>
+</div>

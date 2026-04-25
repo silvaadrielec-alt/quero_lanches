@@ -1,0 +1,23 @@
+<div style="text-align: center; margin-top: 50px;">
+  <h1 style="color: #D71920;">Painel de Controle - Quero Lanche's</h1>
+
+  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px;">
+    
+    <% ["Unidade 1 - Matriz Centro", "Unidade 2 - Pavilhão Novo", "Unidade 3 - Pavilhão Antigo"].each do |unidade| %>
+      <div class="card-principal" style="width: 250px; padding: 30px; border: 1px solid #ccc; border-radius: 10px;">
+        <h2 style="color: #D71920;"><%= unidade %></h2>
+        <p>Gestão de Vendas e Caixa</p>
+        <%= link_to "Acessar Área", pedidos_path, class: "btn-anotar", style: "text-decoration: none; display: block; margin-top: 15px; background-color: #D71920; color: white; padding: 10px; border-radius: 5px;" %>
+      </div>
+    <% end %>
+
+    <% if current_funcionario.admin? %>
+      <div class="card-principal" style="width: 250px; padding: 30px; border: 2px solid #FFC107; border-radius: 10px;">
+        <h2 style="color: #333;">Estoque Geral</h2>
+        <p>Controle de Produtos</p>
+        <%= link_to "Gerenciar", produtos_path, class: "btn-anotar", style: "background-color: #FFC107; color: #333; text-decoration: none; display: block; margin-top: 15px; padding: 10px; border-radius: 5px;" %>
+      </div>
+    <% end %>
+
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<div id="<%= dom_id produto %>" style="margin-bottom: 15px; font-size: 1.1em;">
+  <p>
+    <strong>Item:</strong>
+    <%= produto.nome %>
+  </p>
+
+  <p>
+    <strong>Preço:</strong>
+    <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
+  </p>
+
+  <p>
+    <strong>Em estoque:</strong>
+    <%= produto.estoque %> unidades
+  </p>
+</div>

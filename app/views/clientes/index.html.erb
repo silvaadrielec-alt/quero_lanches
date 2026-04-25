@@ -1,0 +1,14 @@
+<div class="card-principal" style="max-width: 600px; margin: 40px auto; text-align: center;">
+  <h1 style="color: #D71920;">Lista de Clientes</h1>
+
+  <div id="clientes" style="margin-bottom: 20px;">
+    <% @clientes.each do |cliente| %>
+      <div style="padding: 10px; border-bottom: 1px dashed #ccc;">
+        <strong>Nome:</strong> <%= cliente.nome %> |
+        <%= link_to "Ver", cliente, style: "color: #D71920;" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= link_to "Novo Cliente", new_cliente_path, class: "btn-anotar", style: "text-decoration: none; display: inline-block;" %>
+</div>

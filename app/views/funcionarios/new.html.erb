@@ -1,0 +1,11 @@
+<% content_for :title, "New funcionario" %>
+
+<h1>Cadastrar Novo Funcionário</h1>
+
+<%= render "form", funcionario: @funcionario %>
+
+<br>
+
+<div>
+  <%= link_to "Voltar para funcionários", funcionarios_path %>
+</div>

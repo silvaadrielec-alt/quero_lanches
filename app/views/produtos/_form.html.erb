@@ -1,0 +1,46 @@
+<%= form_with(model: produto) do |form| %>
+  <% if produto.errors.any? %>
+    <div style="color: red">
+      <h2><%= produto.errors.count %> <%= produto.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este produto:</h2>
+      <ul>
+        <% produto.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :nome, style: "display: block" %>
+    <%= form.text_field :nome %>
+  </div>
+
+  <div>
+    <%= form.label :valor_unitario, style: "display: block" %>
+    <%= form.text_field :valor_unitario %>
+  </div>
+
+  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+  <h3 style="color: #856404; background-color: #FFF3CD; padding: 10px; border-radius: 5px; font-size: 1em;">Estoques por Unidade</h3>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+    <div>
+      <%= form.label :estoque_centro, "Matriz Centro", style: "display: block; font-weight: bold;" %>
+      <%= form.number_field :estoque_centro, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div>
+      <%= form.label :estoque_pavilhao_novo, "Pavilhão Novo", style: "display: block; font-weight: bold;" %>
+      <%= form.number_field :estoque_pavilhao_novo, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div>
+      <%= form.label :estoque_pavilhao_antigo, "Pavilhão Antigo", style: "display: block; font-weight: bold;" %>
+      <%= form.number_field :estoque_pavilhao_antigo, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

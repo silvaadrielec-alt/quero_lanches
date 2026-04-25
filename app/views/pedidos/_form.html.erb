@@ -1,0 +1,75 @@
+<%= form_with(model: pedido) do |form| %>
+  <% if pedido.errors.any? %>
+    <div style="color: red">
+      <h2><%= pedido.errors.count %> <%= pedido.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este pedido:</h2>
+
+      <ul>
+        <% pedido.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :produto_id, "Selecione o Lanche", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%# Aqui injetamos o preço no atributo data-price de cada opção %>
+    <%= form.select :produto_id, Produto.all.map { |p| [p.nome, p.id, { 'data-price': p.valor_unitario }] }, { prompt: "Escolha um produto" }, { id: "select-produto", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+  </div>
+
+  <div class="field" style="margin-bottom: 15px;">
+  <%= form.label :cliente_nome, "Nome do Cliente ou Nº do Pedido", style: "color: #D71920; font-weight: bold;" %>
+<%= form.text_field :cliente_nome, placeholder: "Ex: Adriele ou 01", style: "width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" %>
+</div>
+
+  <div class="field" style="margin-bottom: 15px; opacity: 0.8;">
+  <label style="color: #D71920; font-weight: bold;">Atendente:</label>
+  <p style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+    <%= current_funcionario.nome %>
+  </p>
+</div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :quantidade, "Quantidade", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.number_field :quantidade, id: "input-quantidade", value: 1, min: 1, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div>
+  <%= form.label :unidade, "Unidade da Venda", style: "display: block; font-weight: bold;" %>
+  <%= form.select :unidade, 
+      [["Matriz Centro", "centro"], ["Pavilhão Novo", "pavilhao_novo"], ["Pavilhão Antigo", "pavilhao_antigo"]], 
+      { prompt: "Selecione a Unidade" }, 
+      { style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 15px;" } %>
+</div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :valor_total, "Valor Total (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; background-color: #eee;", placeholder: "0,00" %>
+    <small style="color: #666;">Cálculo automático baseado no valor unitário.</small>
+  </div>
+
+  <div style="margin-top: 20px; text-align: center;">
+    <%= form.submit "FINALIZAR PEDIDO", class: "btn-anotar", style: "cursor: pointer; width: 100%;" %>
+  </div>
+<% end %>
+<script>
+  document.addEventListener("turbo:load", function() {
+    const selectProduto = document.getElementById("select-produto");
+    const inputQuantidade = document.getElementById("input-quantidade");
+    const inputTotal = document.getElementById("input-total");
+
+    function calcularTotal() {
+      const selectedOption = selectProduto.options[selectProduto.selectedIndex];
+      const preco = parseFloat(selectedOption.getAttribute("data-price") || 0);
+      const quantidade = parseInt(inputQuantidade.value || 0);
+      
+      const total = preco * quantidade;
+      inputTotal.value = total.toFixed(2);
+    }
+
+    if (selectProduto && inputQuantidade) {
+      selectProduto.addEventListener("change", calcularTotal);
+      inputQuantidade.addEventListener("input", calcularTotal);
+    }
+  });
+</script>

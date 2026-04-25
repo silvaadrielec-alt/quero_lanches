@@ -1,0 +1,42 @@
+<%= form_with(model: movimentacao) do |form| %>
+  <% if movimentacao.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(movimentacao.errors.count, "error") %> prohibited this movimentacao from being saved:</h2>
+
+      <ul>
+        <% movimentacao.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :produto_id, style: "display: block" %>
+    <%= form.text_field :produto_id %>
+  </div>
+
+  <div>
+    <%= form.label :origem, style: "display: block" %>
+    <%= form.text_field :origem %>
+  </div>
+
+  <div>
+    <%= form.label :destino, style: "display: block" %>
+    <%= form.text_field :destino %>
+  </div>
+
+  <div>
+    <%= form.label :quantidade, style: "display: block" %>
+    <%= form.number_field :quantidade %>
+  </div>
+
+  <div>
+    <%= form.label :funcionario_id, style: "display: block" %>
+    <%= form.text_field :funcionario_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,40 @@
+<style>
+  /* Esconde o cabeçalho, navegação e qualquer logo do layout padrão apenas nesta tela */
+  header, nav, .header, .navbar, #menu, .logo-topo { 
+    display: none !important; 
+  }
+  
+  /* Garante que o corpo da página ocupe todo o espaço sem margens do layout antigo */
+  body { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    background-color: #FDF5E6 !important; 
+  }
+</style>
+
+<div style="height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FDF5E6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; position: fixed; top: 0; left: 0; z-index: 9999;">
+  
+<% if params[:alerta] == "acesso_negado" %>
+  <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 8px; margin: 20px auto; max-width: 500px; text-align: center; font-weight: bold; border-left: 5px solid #d71920;">
+    ⚠️ Acesso negado: Esta área é exclusiva para administradores.
+  </div>
+<% end %>
+  
+<div style="background-color: #D71920; width: 220px; height: 220px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(215, 25, 32, 0.2); margin-bottom: 30px; border: 4px solid #FFD700;">
+    <h1 style="color: #FFD700; text-align: center; font-size: 32px; margin: 0; font-weight: bold; line-height: 1.1; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Quero<br>lanche's</h1>
+  </div>
+
+  <h2 style="color: #D71920; margin-bottom: 40px; font-weight: bold; letter-spacing: 1px;">SISTEMA DE GESTÃO</h2>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    
+    <%= link_to "ADMINISTRADOR", new_funcionario_session_path(role: 'admin'), style: "background-color: #D71920; color: white; text-decoration: none; padding: 18px 0; border-radius: 15px; font-weight: bold; text-align: center; width: 300px; font-size: 16px; box-shadow: 0 4px 15px rgba(215, 25, 32, 0.3); border: none;" %>
+    
+    <%= link_to "FUNCIONÁRIO", new_funcionario_session_path(role: 'comum'), style: "background-color: #FFD700; color: #333; text-decoration: none; padding: 18px 0; border-radius: 15px; font-weight: bold; text-align: center; width: 300px; font-size: 16px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); border: none;" %>
+
+  </div>
+
+  <p style="margin-top: 60px; color: #8B8989; font-size: 14px; font-weight: 500;">
+    Lanchonete Quero Lanches Matriz - Centro ● Cantinas IF Baiano Campus Catu
+  </p>
+</div>

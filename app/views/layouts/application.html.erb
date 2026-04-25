@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Quero Lanches - Sistema de Gestão" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Quero Lanches">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+       <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+ <body style="margin: 0;">
+  <nav style="background-color: #FFF3CD; padding: 15px; text-align: center; width: 100%; border-bottom: 3px solid #FFC107; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
+ <div style="margin-top: 10px;">
+  <% if funcionario_signed_in? %> <%# ESTA É A LINHA MÁGICA QUE FALTA %>
+    <%= link_to "Cardápio", produtos_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
+    <%= link_to "Clientes", clientes_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
+
+    <% if current_funcionario.admin? %>
+      <%= link_to "Funcionários", funcionarios_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %> |
+    <% end %>
+
+    <%= link_to "Pedidos", pedidos_path, style: "margin: 0 10px; text-decoration: none; color: #D71920; font-weight: bold;" %>
+
+    <% if current_funcionario.admin? %>
+      <span style="color: #ccc; margin: 0 10px;">|</span>
+      <%= link_to "Faturamento", relatorios_path, style: "color: #D71920; font-weight: bold; text-decoration: none;" %>
+    <% end %>
+
+    <span style="color: #ccc; margin: 0 10px;">|</span>
+    <%= link_to "SAIR", "/funcionarios/sign_out", style: "color: #D71920; font-weight: bold; text-decoration: none; margin-left: 10px;" %>
+
+  <% else %>
+    <%# Se não estiver logado, você pode colocar um link de "Entrar" aqui ou deixar vazio %>
+    <%= link_to "ENTRAR", new_funcionario_session_path, style: "color: #D71920; font-weight: bold; text-decoration: none;" %>
+  <% end %>
+</div>
+</nav>
+
+  <div style="padding: 20px;">
+
+   <% if notice %>
+  <p style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 10px; text-align: center; margin: 10px;">
+    <%= notice %>
+  </p>
+<% end %>
+
+<% if alert %>
+  <p style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 10px; text-align: center; margin: 10px;">
+    <%= alert %>
+  </p>
+<% end %>
+
+    <%= yield %>
+  </div>
+</body>

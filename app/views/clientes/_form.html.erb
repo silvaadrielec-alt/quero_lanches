@@ -1,0 +1,22 @@
+<%= form_with(model: cliente) do |form| %>
+  <% if cliente.errors.any? %>
+    <div style="color: red">
+      <h2><%= cliente.errors.count %> <%= cliente.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este cliente:</h2>
+
+      <ul>
+        <% cliente.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :nome, style: "display: block" %>
+    <%= form.text_field :nome %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

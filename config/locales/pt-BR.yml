@@ -1,0 +1,7 @@
+pt-BR:
+  hello: "Olá mundo"
+  helpers:
+    submit:
+      create: "Criar %{model}"
+      update: "Atualizar %{model}"
+      submit: "Salvar %{model}"

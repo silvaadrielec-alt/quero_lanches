@@ -1,0 +1,17 @@
+<div class="card-principal" style="max-width: 800px; margin: 40px auto; text-align: center;">
+  <h1 style="color: #D71920;">Histórico de Pedidos</h1>
+
+  <div id="pedidos" style="margin-bottom: 20px;">
+    <% @pedidos.each do |pedido| %>
+      <div style="padding: 15px; border-bottom: 1px dashed #ccc; text-align: left;">
+        <strong>🛒 Produto:</strong> <%= pedido.produto.nome %> <br>
+        <strong>👤 Cliente:</strong> <%= pedido.cliente_nome.presence || "Não identificado" %> <br>
+        <strong>👔 Atendido por:</strong> <%= pedido.funcionario.nome %> <br>
+        <strong>🔢 Qtd:</strong> <%= pedido.quantidade %> | 
+        <strong>💰 Total:</strong> <%= number_to_currency(pedido.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= link_to "ANOTAR NOVO PEDIDO", new_pedido_path, class: "btn-anotar", style: "text-decoration: none; display: inline-block;" %>
+</div>
