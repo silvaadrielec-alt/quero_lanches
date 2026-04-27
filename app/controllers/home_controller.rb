@@ -49,5 +49,7 @@ class HomeController < ApplicationController
                                  .select("produto_id, SUM(quantidade) as total_qtd")
                                  .order("total_qtd DESC")
                                  .limit(5)
-  end
+    @vendas_por_dia = @vendas_hoje.group_by_day(:created_at).sum(:valor_total)
+
+    end
 end

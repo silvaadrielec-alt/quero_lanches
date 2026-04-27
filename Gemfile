@@ -66,3 +66,6 @@ group :test do
 end
 gem 'devise'
 gem "devise-i18n", "~> 1.16"
+gem "chartkick"
+gem "groupdate" # Adicione esta também, ela ajuda o gráfico a organizar os dias
+

@@ -5,10 +5,13 @@
   <%= link_to "TRIMESTRAL", faturamento_path(periodo: 'trimestral'), class: "btn-filtro" %>
   <%= link_to "SEMESTRAL", faturamento_path(periodo: 'semestral'), class: "btn-filtro" %>
   <%= link_to "ANUAL", faturamento_path(periodo: 'anual'), class: "btn-filtro" %>
-  
-  <button onclick="window.print()" style="background: #333; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; font-weight: bold; margin-left: 10px;">
-    🖨️ IMPRIMIR
-  </button>
+<a href="javascript:void(0)" 
+   onclick="setTimeout(function(){ window.print(); }, 500);" 
+   data-turbo="false"
+   class="no-print" 
+   style="background: #333; color: white; padding: 10px 25px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; border: 2px solid #555;">
+   🖨️ GERAR PDF / IMPRIMIR
+</a>
 </div>
 
 <div style="text-align: center; margin-top: 30px; font-family: sans-serif;">
@@ -28,6 +31,16 @@
       <p style="color: #4caf50; font-weight: bold;">Margem de <%= margem %>%</p>
     </div>
   </div>
+
+  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 30px auto; max-width: 1000px;" class="no-print">
+  <h3 style="color: #D71920; margin-bottom: 20px; text-align: center;">📈 Evolução das Vendas</h3>
+  
+  <% if @vendas_por_dia.any? %>
+    <%= line_chart @vendas_por_dia, prefix: "R$ ", download: {filename: "grafico_vendas"}, library: { backgroundColor: "#ffffff" } %>
+  <% else %>
+    <p style="text-align: center; color: #999; padding: 20px;">Sem dados de vendas para exibir o gráfico neste período.</p>
+  <% end %>
+</div>
 
 <div style="max-width: 600px; margin: 40px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" class="no-print">
   <h3 style="color: #D71920; border-bottom: 2px solid #f2f2f2; padding-bottom: 10px;">🏆 Itens Mais Vendidos (<%= params[:periodo]&.capitalize || "Hoje" %>)</h3>
@@ -54,7 +67,40 @@
 </div>
 
 <style>
-  .btn-filtro { text-decoration: none; background: #f2f2f2; color: #333; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 0.9em; transition: 0.3s; }
+  .btn-filtro { text-decoration: none; background: #f2f2f2; color: #333; padding: 8px 15px; border-radius: 8px; font-weight: bold; transition: 0.3s; }
   .btn-filtro:hover { background: #D71920; color: white; }
-  @media print { .no-print, nav, .navbar-quero { display: none !important; } }
+
+ @media print {
+    /* Esconde o menu de botões e navegação no PDF */
+    .no-print, nav, .navbar, .navbar-quero, .btn-filtro { 
+      display: none !important; 
+    }
+    
+    /* FORÇA AS CORES, FUNDOS E O GRÁFICO EM TUDO */
+    * { 
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important; 
+      color-adjust: exact !important;
+    }
+
+    body { 
+      background-color: white !important;
+    }
+
+    /* Garante que o gráfico (SVG ou Canvas) seja tratado como prioridade */
+    canvas, svg {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+  }
+  
+  /* ADICIONE ESTE BLOCO AQUI: */
+ .chart-container, div[id^="chart-"], .chartkick-chart {
+   display: block !important;
+  visibility: visible !important;
+   opacity: 1 !important;
+   page-break-inside: avoid !important;
+  }
+  }
+  }
 </style>

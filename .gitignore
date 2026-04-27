@@ -32,4 +32,12 @@
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key
+# Ignora os bancos de dados SQLite (Segurança de Dados)
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-shm
+/db/*.sqlite3-wal
 
+# Ignora pastas de cache do sistema
+.sass-cache/
+.bundle/
