@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_26_013842) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_27_222047) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
@@ -18,14 +18,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_013842) do
   end
 
   create_table "composicaos", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.integer "insumo_id", null: false
-    t.integer "produto_id", null: false
+    t.datetime "created_at", precision: nil, null: false
+    t.integer "insumo_id"
+    t.integer "produto_id"
     t.decimal "quantidade"
     t.string "unidade_medida_uso"
-    t.datetime "updated_at", null: false
-    t.index ["insumo_id"], name: "index_composicaos_on_insumo_id"
-    t.index ["produto_id"], name: "index_composicaos_on_produto_id"
+    t.datetime "updated_at", precision: nil, null: false
   end
 
   create_table "funcionarios", force: :cascade do |t|
@@ -37,6 +35,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_013842) do
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.string "role"
     t.string "unidade"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_funcionarios_on_email", unique: true
@@ -95,8 +94,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_013842) do
     t.decimal "valor_unitario"
   end
 
-  add_foreign_key "composicaos", "insumos"
-  add_foreign_key "composicaos", "produtos"
   add_foreign_key "item_pedidos", "pedidos"
   add_foreign_key "item_pedidos", "produtos"
   add_foreign_key "movimentacaos", "funcionarios"
