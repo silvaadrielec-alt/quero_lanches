@@ -1,13 +1,7 @@
 Rails.application.routes.draw do
   root "home#index"
 
-  get '/configurar_mestre', to: proc { |env|
-    f = Funcionario.new(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
-    f.save(validate: false) # <--- O "pulo do gato": ignora campos obrigatórios
-    [200, {}, ['Usuario Admin Criado com Sucesso!']]
-  }
-
-  # 1. Rota de Logout (Tem que vir antes de resources para não dar erro de ID)
+    # 1. Rota de Logout (Tem que vir antes de resources para não dar erro de ID)
   devise_scope :funcionario do
     get '/funcionarios/sign_out' => 'devise/sessions#destroy'
   end
