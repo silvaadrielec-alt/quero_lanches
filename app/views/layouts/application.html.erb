@@ -31,7 +31,7 @@
 
   <%# Botão de Início adicionado aqui %>
   <div style="margin-top: 10px;">
-    <%= link_to "🏠 INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
+    <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
   </div>
 </nav>
   
@@ -47,8 +47,9 @@
       <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
 
       <% if current_funcionario.admin? %>
-        <%= link_to "FATURAMENTO", relatorios_path, class: "nav-link-quero" %>
-      <% end %>
+  <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
+  <%= link_to "FATURAMENTO", faturamento_path, class: "nav-link-quero" %>
+<% end %>
 
       <%# Botão de Sair com destaque %>
       <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
