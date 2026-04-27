@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   root "home#index"
 
+  # COLE O CÓDIGO AQUI (Abaixo do root)
+  get '/configurar_mestre', to: proc { |env|
+    Funcionario.create!(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123', role: 'admin')
+    [200, {}, ['Usuario Admin Criado com Sucesso!']]
+  }
+
   # 1. Rota de Logout (Tem que vir antes de resources para não dar erro de ID)
   devise_scope :funcionario do
     get '/funcionarios/sign_out' => 'devise/sessions#destroy'
