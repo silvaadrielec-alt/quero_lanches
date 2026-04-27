@@ -1,9 +1,8 @@
 Rails.application.routes.draw do
   root "home#index"
 
-  # COLE O CÓDIGO AQUI (Abaixo do root)
   get '/configurar_mestre', to: proc { |env|
-    Funcionario.create!(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123', role: 'admin')
+    Funcionario.create!(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
     [200, {}, ['Usuario Admin Criado com Sucesso!']]
   }
 
