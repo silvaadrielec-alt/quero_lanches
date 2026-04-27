@@ -2,15 +2,15 @@ Rails.application.routes.draw do
   root "home#index"
 
 get '/configurar_mestre', to: proc { |env|
-    # Criando o Administrador
-    admin = Funcionario.new(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123', role: 'admin')
+    # Limpa para evitar duplicidade
+    Funcionario.find_by(email: 'admin@admin.com')&.destroy
+
+    # Cria o Administrador com o campo 'admin' como TRUE
+    admin = Funcionario.new(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
+    admin.admin = true # <--- Aqui está a chave mestra!
     admin.save(validate: false)
 
-    # Criando um Funcionário Comum
-    func = Funcionario.new(email: 'funcionario@teste.com', password: 'password123', password_confirmation: 'password123', role: 'funcionario')
-    func.save(validate: false)
-
-    [200, {}, ['Usuarios criados! Admin: admin@admin.com | Func: funcionario@teste.com']]
+    [200, {}, ['Agora sim! Admin configurado. Tente o login no botao Administrador.']]
   }
 
     # 1. Rota de Logout (Tem que vir antes de resources para não dar erro de ID)
