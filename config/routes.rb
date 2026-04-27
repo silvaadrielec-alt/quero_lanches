@@ -1,18 +1,6 @@
 Rails.application.routes.draw do
   root "home#index"
 
-get '/configurar_mestre', to: proc { |env|
-    # Limpa para evitar duplicidade
-    Funcionario.find_by(email: 'admin@admin.com')&.destroy
-
-    # Cria o Administrador com o campo 'admin' como TRUE
-    admin = Funcionario.new(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
-    admin.admin = true # <--- Aqui está a chave mestra!
-    admin.save(validate: false)
-
-    [200, {}, ['Agora sim! Admin configurado. Tente o login no botao Administrador.']]
-  }
-
     # 1. Rota de Logout (Tem que vir antes de resources para não dar erro de ID)
   devise_scope :funcionario do
     get '/funcionarios/sign_out' => 'devise/sessions#destroy'
