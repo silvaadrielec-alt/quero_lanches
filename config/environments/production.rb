@@ -87,4 +87,12 @@ Rails.application.configure do
   #
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  # Forçar a criação do usuário admin assim que o sistema ligar
+  config.after_initialize do
+    User.find_or_create_by!(email: 'admin@admin.com') do |user|
+      user.password = 'password123'
+      user.password_confirmation = 'password123'
+      user.role = 'admin'
+    end
+  end
 end
