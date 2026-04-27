@@ -11,12 +11,17 @@ Rails.application.routes.draw do
 
   # 3. Gestão dos Recursos (Funcionários, Produtos, etc.)
   resources :funcionarios
-  resources :produtos
+ resources :produtos do
+  # Forçamos o nome da rota para 'composicoes'
+  resources :composicoes, as: 'composicoes', only: [:create]
+end
+resources :composicoes, only: [:destroy]
   resources :clientes
   resources :pedidos
   resources :movimentacaos
 
   # 4. Painel e Relatórios
   get "painel", to: "home#painel", as: :painel
+  get "faturamento", to: "home#faturamento", as: :faturamento # <--- Adicione esta linha
   get "relatorios/index", to: "relatorios#index", as: :relatorios
 end

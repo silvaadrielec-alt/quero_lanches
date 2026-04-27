@@ -25,29 +25,40 @@
   <%= form.select :categoria, ["Venda", "Insumo"], {}, class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
  </div>
 
- <div class="field" style="margin-bottom: 15px;">
-  <%= form.label :unidade_medida, "Medida do Produto (Ex: Kg, Un, Litro)" %>
-  <%= form.select :unidade_medida, ["Unidade", "Kg", "Gramas", "Litro", "Caixa"], {}, class: "input-estilizado" %>
-</div>
-
-  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-  <h3 style="color: #856404; background-color: #FFF3CD; padding: 10px; border-radius: 5px; font-size: 1em;">Estoques por Unidade</h3>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-    <div>
-      <%= form.label :estoque_centro, "Matriz Centro", style: "display: block; font-weight: bold;" %>
-      <%= form.number_field :estoque_centro, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+ <div style="background: #fdf8f5; padding: 20px; border-radius: 12px; border: 1px solid #eeb989; margin-bottom: 25px;">
+    <h5 style="margin-top: 0; color: #D71920; margin-bottom: 15px;">Controle de Inventário e Unidades</h5>
+    
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+      <div style="flex: 2; min-width: 200px;">
+        <%= form.label :unidade_medida, "Como você conta este item?", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
+        <%= form.select :unidade_medida, 
+            ['unidade', 'fatia', 'folha', 'rodela', 'kg', 'litro', 'gramas', 'ml'], 
+            { prompt: 'Selecione a unidade' }, 
+            { style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" } %>
+      </div>
     </div>
 
-    <div>
-      <%= form.label :estoque_pavilhao_novo, "Pavilhão Novo", style: "display: block; font-weight: bold;" %>
-      <%= form.number_field :estoque_pavilhao_novo, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 140px;">
+        <%= form.label :estoque_centro, "Qtd. Matriz", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
+        <%= form.number_field :estoque_centro, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 50" %>
+      </div>
+
+      <div style="flex: 1; min-width: 140px;">
+        <%= form.label :estoque_pavilhao_novo, "Qtd. Pav. Novo", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
+        <%= form.number_field :estoque_pavilhao_novo, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 30" %>
+      </div>
+
+      <div style="flex: 1; min-width: 140px;">
+        <%= form.label :estoque_pavilhao_antigo, "Qtd. Pav. Antigo", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
+        <%= form.number_field :estoque_pavilhao_antigo, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 20" %>
+      </div>
     </div>
 
-    <div>
-      <%= form.label :estoque_pavilhao_antigo, "Pavilhão Antigo", style: "display: block; font-weight: bold;" %>
-      <%= form.number_field :estoque_pavilhao_antigo, style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
-    </div>
+    <p style="margin-top: 15px; font-size: 0.85em; color: #666; line-height: 1.4;">
+      <strong>💡 Dica de Ouro:</strong> Para facilitar, converta o que comprou para a unidade de uso. <br>
+      <em>Exemplo: Se comprou 1kg de queijo e ele rende 50 fatias, registre "50" na unidade correspondente.</em>
+    </p>
   </div>
 
   <div>

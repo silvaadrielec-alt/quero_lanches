@@ -16,22 +16,34 @@
       </tr>
     </thead>
     <tbody>
-      <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
-        <td>
-  <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
-  <br>
-  <small style="color: #666;">(por <%= produto.unidade_medida %>)</small>
-</td>
-          <td><%= produto.estoque_centro.to_i %></td>
-          <td><%= produto.estoque_pavilhao_novo.to_i %></td>
-          <td><%= produto.estoque_pavilhao_antigo.to_i %></td>
-          <td style="text-align: center;">
-            <% if current_funcionario.admin? %>
-              <%= link_to "Editar", edit_produto_path(produto), style: "color: var(--vermelho-quero); font-weight: bold;" %>
-            <% end %>
-          </td>
-        </tr>
+     <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
+  <tr>
+    <td style="text-align: left; padding-left: 20px;">
+      <strong><%= produto.nome %></strong>
+    </td>
+
+    <td>
+      <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %><br>
+      <small style="color: #666;">(por <%= produto.unidade_medida %>)</small>
+    </td>
+
+    <td><%= produto.estoque_centro.to_i %></td>
+
+    <td><%= produto.estoque_pavilhao_novo.to_i %></td>
+
+    <td style="color: var(--vermelho-quero); font-weight: bold;">
+      <%= produto.estoque_pavilhao_antigo.to_i %>
+    </td>
+
+    <td style="text-align: center;">
+     <%# Botão visível para todos os funcionários %>
+     <%= link_to 'Ver Receita', produto_path(produto), class: 'btn btn-info btn-sm' %>
+      <% if current_funcionario.admin? %>
+        <%= link_to 'Editar', edit_produto_path(produto), class: 'btn btn-warning btn-sm' %>
       <% end %>
+    </td>
+  </tr>
+<% end %>
     </tbody>
   </table>
 
@@ -59,8 +71,10 @@
           <td><%= insumo.estoque_pavilhao_novo %></td>
           <td><%= insumo.estoque_pavilhao_antigo %></td>
           <td style="text-align: center;">
-            <% if current_funcionario.admin? %>
-              <%= link_to "Ajustar", edit_produto_path(insumo), style: "color: #666; font-weight: bold;" %>
+           <%# Botão visível para todos os funcionários %>
+           <%= link_to 'Ver Detalhes', produto_path(insumo), class: 'btn btn-info btn-sm' %>
+            <% if current_funcionario.admin? %>            
+              <%= link_to 'Editar', edit_produto_path(insumo), class: 'btn btn-warning btn-sm' %>
             <% end %>
           </td>
         </tr>

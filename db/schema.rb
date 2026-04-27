@@ -10,11 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_185900) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_26_013842) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "composicaos", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "insumo_id", null: false
+    t.integer "produto_id", null: false
+    t.decimal "quantidade"
+    t.string "unidade_medida_uso"
+    t.datetime "updated_at", null: false
+    t.index ["insumo_id"], name: "index_composicaos_on_insumo_id"
+    t.index ["produto_id"], name: "index_composicaos_on_produto_id"
   end
 
   create_table "funcionarios", force: :cascade do |t|
@@ -30,6 +41,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_185900) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_funcionarios_on_email", unique: true
     t.index ["reset_password_token"], name: "index_funcionarios_on_reset_password_token", unique: true
+  end
+
+  create_table "item_pedidos", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "pedido_id", null: false
+    t.integer "produto_id", null: false
+    t.decimal "quantidade"
+    t.datetime "updated_at", null: false
+    t.index ["pedido_id"], name: "index_item_pedidos_on_pedido_id"
+    t.index ["produto_id"], name: "index_item_pedidos_on_produto_id"
   end
 
   create_table "movimentacaos", force: :cascade do |t|
@@ -67,12 +88,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_185900) do
     t.integer "estoque_centro"
     t.integer "estoque_pavilhao_antigo"
     t.integer "estoque_pavilhao_novo"
+    t.boolean "insumo"
     t.string "nome"
     t.string "unidade_medida"
     t.datetime "updated_at", null: false
     t.decimal "valor_unitario"
   end
 
+  add_foreign_key "composicaos", "insumos"
+  add_foreign_key "composicaos", "produtos"
+  add_foreign_key "item_pedidos", "pedidos"
+  add_foreign_key "item_pedidos", "produtos"
   add_foreign_key "movimentacaos", "funcionarios"
   add_foreign_key "movimentacaos", "produtos"
   add_foreign_key "pedidos", "clientes"

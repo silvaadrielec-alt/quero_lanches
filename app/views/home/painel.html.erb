@@ -1,3 +1,43 @@
+<% if @estoque_critico.any? %>
+  <div style="background: #fff5f5; border: 2px solid #feb2b2; padding: 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); font-family: sans-serif;">
+    <h3 style="color: #c53030; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+      ⚠️ ATENÇÃO: Reposição de Estoque Necessária
+    </h3>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 10px;">
+        <thead>
+          <tr style="background: #fed7d7; color: #9b2c2c; text-align: left;">
+            <th style="padding: 12px; border-radius: 10px 0 0 0;">Item</th>
+            <th style="padding: 12px;">Matriz</th>
+            <th style="padding: 12px;">Pav. Novo</th>
+            <th style="padding: 12px;">Pav. Antigo</th>
+            <th style="padding: 12px; border-radius: 0 10px 0 0; text-align: center;">Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @estoque_critico.each do |produto| %>
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 12px; font-weight: bold;"><%= produto.nome %></td>
+              <td style="padding: 12px; color: <%= produto.estoque_centro < 10 ? '#e53e3e' : '#2d3748' %>;">
+                <%= produto.estoque_centro %> <%= produto.unidade_medida %>
+              </td>
+              <td style="padding: 12px; color: <%= produto.estoque_pavilhao_novo < 10 ? '#e53e3e' : '#2d3748' %>;">
+                <%= produto.estoque_pavilhao_novo %> <%= produto.unidade_medida %>
+              </td>
+              <td style="padding: 12px; color: <%= produto.estoque_pavilhao_antigo < 10 ? '#e53e3e' : '#2d3748' %>;">
+                <%= produto.estoque_pavilhao_antigo %> <%= produto.unidade_medida %>
+              </td>
+              <td style="padding: 12px; text-align: center;">
+                <%= link_to "Abastecer", edit_produto_path(produto), style: "background: #c53030; color: white; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85em; font-weight: bold;" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% end %>
+
 <div style="text-align: center; margin-top: 50px;">
   <h1 style="color: #D71920;">Painel de Controle - Quero Lanche's</h1>
 

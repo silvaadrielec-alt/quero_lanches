@@ -1,0 +1,22 @@
+<div style="text-align: center; margin-top: 30px; font-family: sans-serif;">
+  <h1 style="color: #D71920;">Resumo de Faturamento - Hoje</h1>
+  
+  <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap;">
+    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-top: 8px solid #2196f3;">
+      <span style="color: #666; font-weight: bold;">TOTAL VENDIDO</span>
+      <h2 style="color: #0d47a1; font-size: 2.2em; margin: 15px 0;"><%= number_to_currency(@total_faturado) %></h2>
+      <p style="color: #666;"><%= @vendas_hoje.count %> pedidos realizados</p>
+    </div>
+
+    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-top: 8px solid #4caf50;">
+      <span style="color: #666; font-weight: bold;">LUCRO ESTIMADO</span>
+      <h2 style="color: #1b5e20; font-size: 2.2em; margin: 15px 0;"><%= number_to_currency(@lucro_estimado) %></h2>
+      <% margem = (@total_faturado > 0) ? ((@lucro_estimado / @total_faturado) * 100).round(1) : 0 %>
+      <p style="color: #4caf50; font-weight: bold;">Margem de <%= margem %>%</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 50px;">
+    <%= link_to "VOLTAR AO PAINEL", root_path, style: "text-decoration: none; padding: 12px 25px; background: #666; color: white; border-radius: 10px; font-weight: bold;" %>
+  </div>
+</div>

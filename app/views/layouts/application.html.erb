@@ -23,10 +23,17 @@
     <%= javascript_importmap_tags %>
   </head>
 
- <body style="margin: 0;">
-<nav class="navbar-quero">
-  <%# Logo centralizada - O caminho "logo.png" é o que você já está usando %>
-  <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
+ <nav class="navbar-quero">
+  <%# Logo centralizada com link para a home %>
+  <%= link_to root_path do %>
+    <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
+  <% end %>
+
+  <%# Botão de Início adicionado aqui %>
+  <div style="margin-top: 10px;">
+    <%= link_to "🏠 INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
+  </div>
+</nav>
   
   <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; align-items: center;">
     <% if funcionario_signed_in? %>

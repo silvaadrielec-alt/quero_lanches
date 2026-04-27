@@ -67,6 +67,6 @@ class PedidosController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def pedido_params
-      params.expect(pedido: [ :produto_id, :cliente_nome, :quantidade, :unidade, :valor_total ])
+      params.require(:pedido).permit(:produto_id, :cliente_nome, :quantidade, :unidade, :valor_total, ingredientes_removidos: [])
     end
 end

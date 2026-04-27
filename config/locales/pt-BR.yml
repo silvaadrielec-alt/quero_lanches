@@ -1,7 +1,21 @@
 pt-BR:
-  hello: "Olá mundo"
   helpers:
     submit:
       create: "Criar %{model}"
       update: "Atualizar %{model}"
       submit: "Salvar %{model}"
+  errors:
+    messages:
+      not_found: "não encontrado"
+      already_confirmed: "já foi confirmado, por favor tente efetuar login"
+      not_locked: "não foi bloqueado"
+  devise:
+    sessions:
+      signed_in: "Login efetuado com sucesso!"
+      signed_out: "Saiu com sucesso."
+      already_signed_out: "Saiu com sucesso."
+    failure:
+      already_authenticated: "Você já está logado."
+      unauthenticated: "Para continuar, faça login ou registre-se."
+      invalid: "%{authentication_keys} ou senha inválida."
+      not_found_in_database: "%{authentication_keys} ou senha inválida."

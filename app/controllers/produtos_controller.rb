@@ -10,8 +10,15 @@ class ProdutosController < ApplicationController
 
   # GET /produtos/1 or /produtos/1.json
   def show
-  end
+  @produto = Produto.find(params[:id])
 
+  respond_to do |format|
+    format.html # Abre a página normal
+    format.json { 
+      render json: @produto.as_json(include: { composicoes: { include: :insumo } }) 
+    }
+  end
+end
   # GET /produtos/new
   def new
     @produto = Produto.new

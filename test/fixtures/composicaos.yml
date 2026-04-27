@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  produto: one
+  insumo: one
+  quantidade: 9.99
+  unidade_medida_uso: MyString
+
+two:
+  produto: two
+  insumo: two
+  quantidade: 9.99
+  unidade_medida_uso: MyString
