@@ -2,7 +2,8 @@ Rails.application.routes.draw do
   root "home#index"
 
   get '/configurar_mestre', to: proc { |env|
-    Funcionario.create!(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
+    f = Funcionario.new(email: 'admin@admin.com', password: 'password123', password_confirmation: 'password123')
+    f.save(validate: false) # <--- O "pulo do gato": ignora campos obrigatórios
     [200, {}, ['Usuario Admin Criado com Sucesso!']]
   }
 
