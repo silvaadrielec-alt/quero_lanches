@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: quero-lanches
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quero-lanches-db
+          property: connectionString
+
+databases:
+  - name: quero-lanches-db
+    plan: free
