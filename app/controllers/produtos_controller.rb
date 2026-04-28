@@ -66,6 +66,12 @@ end
     end
   end
 
+  def cardapio
+    # Buscamos apenas os produtos marcados como 'Venda'
+    @produtos = Produto.where(categoria: 'Venda')
+    # O Rails vai carregar automaticamente o arquivo app/views/produtos/cardapio.html.erb
+  end
+
 private
 
   def set_produto
@@ -73,7 +79,7 @@ private
   end
 
   def produto_params
-    params.require(:produto).permit(:nome, :valor_unitario, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo, :categoria, :unidade_medida)
+    params.require(:produto).permit(:nome, :valor_unitario, :preco_venda, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo, :categoria, :unidade_medida)
   end
 
   # Adicione o método aqui, antes do último 'end'

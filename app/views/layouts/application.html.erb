@@ -39,28 +39,30 @@
 </nav>
   
   <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; align-items: center;">
-    <% if funcionario_signed_in? %>
-      <%= link_to "CARDÁPIO", produtos_path, class: "nav-link-quero" %>
-      <%= link_to "CLIENTES", clientes_path, class: "nav-link-quero" %>
-      
-      <% if current_funcionario.admin? %>
-        <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
-      <% end %>
+  <% if funcionario_signed_in? %>
+    <%# O Cardápio agora vai para a rota filtrada %>
+    <%= link_to "CARDÁPIO", cardapio_path, class: "nav-link-quero" %>
 
-      <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
-
-      <% if current_funcionario.admin? %>
-  <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
-  <%= link_to "FATURAMENTO", faturamento_path, class: "nav-link-quero" %>
-<% end %>
-
-      <%# Botão de Sair com destaque %>
-      <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
-          style: "border: 2px solid var(--vermelho-quero); padding: 5px 15px; border-radius: 20px; font-size: 13px;" %>
-    <% else %>
-      <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>
+    <% if current_funcionario.admin? %>
+      <%# Botão exclusivo do Admin para gerenciar tudo %>
+      <%= link_to "ESTOQUE GERAL", produtos_path, class: "nav-link-quero" %>
+      <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
     <% end %>
-  </div>
+
+    <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
+
+    <% if current_funcionario.admin? %>
+      <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
+      <%= link_to "FATURAMENTO", faturamento_path, class: "nav-link-quero" %>
+    <% end %>
+
+    <%# Botão de Sair %>
+    <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
+        style: "border: 2px solid var(--vermelho-quero); padding: 5px 15px; border-radius: 20px; font-size: 13px;" %>
+  <% else %>
+    <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>
+  <% end %>
+</div>
 </nav>
 
   <div style="padding: 20px;">

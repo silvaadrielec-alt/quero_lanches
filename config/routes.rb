@@ -16,7 +16,6 @@ Rails.application.routes.draw do
   resources :composicoes, as: 'composicoes', only: [:create]
 end
 resources :composicoes, only: [:destroy]
-  resources :clientes
   resources :pedidos
   resources :movimentacaos
 
@@ -24,4 +23,7 @@ resources :composicoes, only: [:destroy]
   get "painel", to: "home#painel", as: :painel
   get "faturamento", to: "home#faturamento", as: :faturamento # <--- Adicione esta linha
   get "relatorios/index", to: "relatorios#index", as: :relatorios
+
+  # Adicione esta linha aqui:
+  get '/cardapio', to: 'produtos#cardapio', as: 'cardapio'
 end

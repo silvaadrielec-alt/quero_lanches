@@ -20,6 +20,12 @@
     <%= form.text_field :valor_unitario %>
   </div>
 
+  <div class="field mb-3">
+    <%= form.label :preco_venda, "Preço de Venda" %>
+    <%= form.number_field :preco_venda, step: 0.01, class: "form-control", placeholder: "R$ 0,00" %>
+    <small class="text-muted">Deixe zerado se for apenas Insumo.</small>
+  </div>
+
  <div class="field" style="margin-bottom: 20px;">
   <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold;" %>
   <%= form.select :categoria, ["Venda", "Insumo"], {}, class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>

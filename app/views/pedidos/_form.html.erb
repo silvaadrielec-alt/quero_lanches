@@ -14,7 +14,7 @@
   <div style="margin-bottom: 15px;">
     <%= form.label :produto_id, "Selecione o Lanche", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%# Aqui injetamos o preço no atributo data-price de cada opção %>
-    <%= form.select :produto_id, Produto.where(categoria: ["Venda", nil]).map { |p| [p.nome, p.id, { 'data-price': p.valor_unitario }] }, { prompt: "Escolha um produto" }, { id: "select-produto", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+    <%= form.select :produto_id, Produto.where(categoria: ["Venda", nil]).map { |p| [p.nome, p.id, { 'data-price': p.preco_venda }] }, { prompt: "Escolha um produto" }, { id: "select-produto", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px;" } %>
   </div>
 
   <div id="ingredientes-checkout" style="margin-top: 15px; padding: 10px; border: 1px dashed #ccc; display: none;">
@@ -25,7 +25,7 @@
 
  <div class="field" style="margin-bottom: 15px;">
   <%= form.label :cliente_nome, "Identificação (Nome ou Nº do Pedido)", style: "display: block; font-weight: bold; color: var(--vermelho-quero);" %>
-  <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Aluno", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Cliente", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
 </div>
 
   <div class="field" style="margin-bottom: 15px; opacity: 0.8;">
@@ -51,7 +51,7 @@
   <div style="margin-bottom: 15px;">
     <%= form.label :valor_total, "Valor Total (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; background-color: #eee;", placeholder: "0,00" %>
-    <small style="color: #666;">Cálculo automático baseado no valor unitário.</small>
+    <small style="color: #666;">Cálculo automático baseado no preço de venda.</small>
   </div>
 
   <div style="margin-top: 20px; text-align: center;">
