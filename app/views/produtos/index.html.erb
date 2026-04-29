@@ -2,6 +2,27 @@
   
   <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Gestão de Estoque Geral</h1>
 
+  <%# BARRA DE PESQUISA IDENTICA AO CARDÁPIO (BORDA AZUL) %>
+<div style="margin-bottom: 30px; text-align: center;">
+  <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
+         style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+</div>
+
+<% if current_funcionario.admin? %>
+  <div style="margin-top: -10px; margin-bottom: 30px;">
+    <%= link_to "Cadastrar Novo Item no Estoque", new_produto_path, 
+        style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" %>
+  </div>
+<% end %>
+
+  <% if params[:query].present? %>
+    <p style="text-align: left; margin-left: 20px; color: #666;">
+      Resultados para: <strong>"<%= params[:query] %>"</strong> 
+      <%= link_to "(Limpar)", produtos_path, style: "margin-left: 10px; color: #D71920; font-size: 0.9em;" %>
+    </p>
+  <% end %>
+</div>
+
   <%# --- TABELA DE PRODUTOS PARA VENDA --- %>
   <h2 style="color: #555; text-align: left; margin-left: 20px;">Produtos p/ Venda (Lanches, Sucos, Açaí)</h2>
   <table>
@@ -85,10 +106,30 @@
       <% end %>
     </tbody>
   </table>
+  
+<script>
+function filtrarEstoque() {
+  var input = document.getElementById("buscaEstoque");
+  var filter = input.value.toUpperCase();
+  
+  // Seleciona todas as tabelas da página
+  var tabelas = document.getElementsByTagName("table");
 
-  <% if current_funcionario.admin? %>
-    <div style="margin-top: 30px;">
-      <%= link_to "CADASTRAR NOVO ITEM", new_produto_path, class: "btn-quero" %>
-    </div>
-  <% end %>
-</div>
+  for (var t = 0; t < tabelas.length; t++) {
+    var tr = tabelas[t].getElementsByTagName("tr");
+
+    // Começa do 1 para pular o cabeçalho (thead)
+    for (var i = 1; i < tr.length; i++) {
+      var td = tr[i].getElementsByTagName("td")[0]; // Pega a primeira coluna (Nome)
+      if (td) {
+        var txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+}
+</script>

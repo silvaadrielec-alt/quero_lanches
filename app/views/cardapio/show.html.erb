@@ -12,11 +12,17 @@
   <p> Pavilhão Antigo: <%= @produto.estoque_pavilhao_antigo || 0 %> <%= @produto.unidade_medida %></p>
 </div>
 
-  <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
-  <% if current_funcionario.admin? %>
-    <%= link_to 'EDITAR LANCHE', edit_cardapio_path(@produto), class: "btn-quero", style: "padding: 10px 25px; text-decoration: none; background-color: #ffc107; color: black; border-radius: 8px;" %>
-  <% end %>
+  <div style="margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 25px;">
   
-  <%= link_to 'VOLTAR PARA O CARDÁPIO', cardapio_index_path, style: "padding: 10px 25px; color: #007bff; text-decoration: underline;" %>
+  <%# Botão de Editar apenas para Admin - Agora em Vermelho %>
+  <% if current_funcionario.admin? %>
+    <%= link_to "EDITAR LANCHE", edit_cardapio_path(@produto), 
+        style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer;" %>
+  <% end %>
+
+  <%# Link de Voltar - Agora no padrão Azul Sublinhado %>
+  <%= link_to "VOLTAR PARA O CARDÁPIO", cardapio_index_path, 
+      style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+
 </div>
 </div>

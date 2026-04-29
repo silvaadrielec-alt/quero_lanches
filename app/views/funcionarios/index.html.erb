@@ -17,8 +17,10 @@
           <td><%= funcionario.email %></td>
           <td><%= funcionario.admin? ? "Administrador" : "Funcionário" %></td>
           <td style="text-align: center;">
-            <%= link_to "Perfil", funcionario, style: "color: var(--vermelho-quero);" %>
-          </td>
+          <%# Aplicando o azul padrão de navegação da Cantina Adri Lanches %>
+          <%= link_to 'Perfil', funcionario_path(funcionario), 
+          style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+        </td>
         </tr>
       <% end %>
     </tbody>

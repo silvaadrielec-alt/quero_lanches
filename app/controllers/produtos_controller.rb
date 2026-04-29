@@ -5,8 +5,14 @@ class ProdutosController < ApplicationController
 
   # GET /produtos or /produtos.json
   def index
+  if params[:query].present?
+    # Busca o termo em todos os produtos, independente de ser Venda ou Insumo
+    termo = "%#{params[:query].downcase}%"
+    @produtos = Produto.where("lower(nome) LIKE ?", termo)
+  else
     @produtos = Produto.all
   end
+end
 
   # GET /produtos/1 or /produtos/1.json
   def show

@@ -7,6 +7,13 @@
            style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none;">
   </div>
 
+<% if current_funcionario.admin? %>
+  <div style="margin-top: -10px; margin-bottom: 30px;">
+    <%= link_to "Cadastrar Novo Item no Cardápio", new_cardapio_path, 
+        style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" %>
+  </div>
+<% end %>
+
   <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
     <thead>
       <tr style="background: #D71920; color: white;">
@@ -23,19 +30,19 @@
           </td>
           <td style="padding: 15px; text-align: center; font-weight: bold;">
             <%= number_to_currency(produto.preco_venda) %>
-          <td style="padding: 15px; text-align: center;">
-          <% if current_funcionario.admin? %>
-          <%# Link de Editar - Só Admin vê %>
-          <%= link_to "Editar", edit_cardapio_path(produto), 
-        style: "color: #007bff; text-decoration: underline; margin-right: 10px;" %>
+          <td style="text-align: center;">
+  <%# Link 'Detalhes' - Visível para todos os funcionários %>
+  <%= link_to 'Detalhes', cardapio_path(produto), 
+      style: "color: #0000FF; text-decoration: underline; margin-right: 15px; font-family: sans-serif;" %>
 
-          <%# Link de Excluir - Só Admin vê %>
-          <%= link_to "Excluir", cardapio_path(produto), 
-        data: { turbo_method: :delete, turbo_confirm: "Tem certeza que deseja remover este item?" }, 
-        style: "color: #d33; text-decoration: underline;" %>
-      <% else %>
-      <%# Opcional: O que o funcionário vê no lugar dos botões %>
-      <span style="color: #666; font-style: italic;">Apenas visualização</span>
+  <%# Links de Gestão - Visíveis APENAS para Admin %>
+  <% if current_funcionario.admin? %>
+    <%= link_to 'Editar', edit_cardapio_path(produto), 
+        style: "color: #0000FF; text-decoration: underline; margin-right: 15px; font-family: sans-serif;" %>
+
+    <%= link_to 'Excluir', cardapio_path(produto), method: :delete, 
+        data: { confirm: 'Tem certeza que deseja excluir este item do cardápio?' },
+        style: "color: #D71920; text-decoration: underline; font-family: sans-serif;" %>
   <% end %>
     </td>
     </tr>

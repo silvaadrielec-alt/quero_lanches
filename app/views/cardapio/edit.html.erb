@@ -1,4 +1,4 @@
-<h1 style="text-align: center; color: #007bff;">Editar Lanche do Cardápio</h1>
+<h1 style="text-align: center; color: #333; font-weight: bold; margin-top: 20px;">Editar Item no Cardápio</h1>
 
 <div class="card-principal" style="max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px;">
   <%= form_with(model: @produto, url: cardapio_path(@produto), method: :patch, local: true) do |form| %>
@@ -19,7 +19,7 @@
     </div>
 
     <div style="text-align: center; margin-top: 30px;">
-      <%= form.submit "ATUALIZAR LANCHE", style: "background-color: #ffc107; color: black; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%;" %>
+      <%= form.submit "ATUALIZAR NO CARDÁPIO", style: "background-color: #D71920; color: white; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%;" %>
       
       <div style="margin-top: 20px;">
         <%= link_to "← VOLTAR PARA O CARDÁPIO", cardapio_index_path, style: "color: #007bff; text-decoration: underline;" %>

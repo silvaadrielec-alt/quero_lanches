@@ -1,6 +1,17 @@
 <div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
   <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Histórico de Pedidos</h1>
 
+  <%# BARRA DE PESQUISA PARA PEDIDOS (JS) %>
+<div style="margin-bottom: 20px; text-align: center;">
+  <input type="text" id="buscaPedidos" onkeyup="filtrarPedidos()" placeholder="🔍 Pesquisar por lanche ou local (Centro, Pavilhão...)" 
+         style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+</div>
+
+  <div style="margin-top: 10px; margin-bottom: 30px; text-align: center;">
+  <%= link_to  "Anotar Novo Pedido", new_pedido_path, 
+      style: "background-color: #D71920; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.1em; display: inline-block; box-shadow: 0 4px 8px rgba(215, 25, 32, 0.3);" %>
+</div>
+
   <table>
     <thead>
       <tr>
@@ -21,14 +32,46 @@
           <td><%= number_to_currency(pedido.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %></td>
           <td><%= pedido.unidade %></td>
           <td style="text-align: center;">
-            <%= link_to "Detalhes", pedido, style: "color: var(--vermelho-quero); font-weight: bold;" %>
-          </td>
+          <%# Link "Detalhes" ou "Ver Receita" em azul sublinhado %>
+          <%= link_to 'Detalhes', pedido_path(pedido), 
+           style: "color: #0000FF; text-decoration: underline; margin-right: 10px; font-family: sans-serif;" %>
+
+          <% if current_funcionario.admin? %>
+          <%# Link "Editar" em azul sublinhado %>
+          <%= link_to 'Editar', edit_pedido_path(pedido), 
+           style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+       <% end %>
+        </td>
         </tr>
       <% end %>
     </tbody>
   </table>
-
-  <div style="margin-top: 30px;">
-    <%= link_to "ANOTAR NOVO PEDIDO", new_pedido_path, class: "btn-quero" %>
-  </div>
 </div>
+
+<script>
+function filtrarPedidos() {
+  var input = document.getElementById("buscaPedidos");
+  var filter = input.value.toUpperCase();
+  var table = document.querySelector("table"); // Seleciona a tabela de pedidos
+  var tr = table.getElementsByTagName("tr");
+
+  // Começa do 1 para pular o cabeçalho vermelho
+  for (var i = 1; i < tr.length; i++) {
+    // Busca tanto na coluna do Produto (coluna 1) quanto na do Local (coluna 4)
+    var tdProduto = tr[i].getElementsByTagName("td")[1];
+    var tdLocal = tr[i].getElementsByTagName("td")[4];
+    
+    if (tdProduto || tdLocal) {
+      var txtProduto = tdProduto ? (tdProduto.textContent || tdProduto.innerText) : "";
+      var txtLocal = tdLocal ? (tdLocal.textContent || tdLocal.innerText) : "";
+      
+      // Se o filtro bater com o lanche OU com o local, a linha continua aparecendo
+      if (txtProduto.toUpperCase().indexOf(filter) > -1 || txtLocal.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+</script>
