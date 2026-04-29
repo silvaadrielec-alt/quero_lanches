@@ -1,17 +1,38 @@
-<h1>Cardápio de Vendas</h1>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Lanche/Bebida</th>
-      <th>Preço</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @produtos.each do |produto| %>
-      <tr>
-        <td><%= produto.nome %></td>
-        <td><%= number_to_currency(produto.preco_venda) %></td>
+<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Cardápio de Vendas</h1>
+
+  <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden;">
+    <thead>
+      <tr style="background: #D71920; color: white;">
+        <th style="padding: 15px; text-align: left; padding-left: 30px;">LANCHE / BEBIDA</th>
+        <th style="padding: 15px; text-align: center;">PREÇO</th>
+        <% if current_funcionario.admin? %>
+          <th style="padding: 15px; text-align: center;">AÇÕES</th>
+        <% end %>
       </tr>
+    </thead>
+    <tbody>
+      <% @produtos.each do |produto| %>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 15px; text-align: left; padding-left: 30px;">
+            <strong><%= produto.nome %></strong>
+          </td>
+          <td style="padding: 15px; text-align: center; font-family: sans-serif; font-weight: normal;">
+            <%= number_to_currency(produto.preco_venda) %>
+          </td>
+          <% if current_funcionario.admin? %>
+            <td style="padding: 15px; text-align: center;">
+              <%= link_to "Editar", edit_produto_path(produto), style: "color: #007bff; text-decoration: underline; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 400;" %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 40px; margin-bottom: 20px;">
+    <% if current_funcionario.admin? %>
+      <%= link_to "CADASTRAR NOVO ITEM", novo_item_cardapio_path, class: "btn-quero", style: "padding: 15px 30px; text-decoration: none;" %>
     <% end %>
-  </tbody>
-</table>
+  </div>
+</div>

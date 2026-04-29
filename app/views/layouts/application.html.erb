@@ -41,7 +41,7 @@
   <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; align-items: center;">
   <% if funcionario_signed_in? %>
     <%# O Cardápio agora vai para a rota filtrada %>
-    <%= link_to "CARDÁPIO", cardapio_path, class: "nav-link-quero" %>
+    <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
 
     <% if current_funcionario.admin? %>
       <%# Botão exclusivo do Admin para gerenciar tudo %>

@@ -1,0 +1,25 @@
+<div class="card-principal" style="max-width: 800px; margin: 40px auto; padding: 40px; text-align: center;">
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Novo Item no Cardápio</h1>
+
+  <%= form_with(model: @produto, url: produtos_path, local: true) do |f| %>
+    <%= f.hidden_field :categoria, value: 'Venda' %>
+
+    <div style="margin-bottom: 25px; text-align: left;">
+      <%= f.label :nome, "Nome do Lanche/Bebida/Doce", style: "display: block; font-weight: bold; margin-bottom: 8px;" %>
+      <%= f.text_field :nome, class: "input-estilizado", style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc;", required: true, placeholder: "Ex: Suco de Laranja" %>
+    </div>
+
+    <div style="margin-bottom: 25px; text-align: left;">
+      <%= f.label :preco_venda, "Preço Final de Venda (R$)", style: "display: block; font-weight: bold; margin-bottom: 8px;" %>
+      <%= f.number_field :preco_venda, step: 0.01, class: "input-estilizado", style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc;", required: true, placeholder: "0,00" %>
+    </div>
+
+    <div style="margin-top: 35px;">
+      <%= f.submit "SALVAR NO CARDÁPIO", class: "btn-quero", style: "padding: 15px 40px; cursor: pointer; border: none;" %>
+      
+      <div style="margin-top: 20px;">
+        <%= link_to "CANCELAR", cardapio_path, style: "color: #007bff; text-decoration: underline; font-family: sans-serif; font-weight: 400; font-size: 16px;" %>
+      </div>
+    </div>
+  <% end %>
+</div>

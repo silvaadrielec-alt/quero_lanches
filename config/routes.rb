@@ -11,11 +11,14 @@ Rails.application.routes.draw do
 
   # 3. Gestão dos Recursos (Funcionários, Produtos, etc.)
   resources :funcionarios
- resources :produtos do
-  # Forçamos o nome da rota para 'composicoes'
+ 
+  resources :cardapio, only: [:index, :new, :create, :edit, :update, :destroy, :show]
+  
+  resources :produtos do
   resources :composicoes, as: 'composicoes', only: [:create]
 end
-resources :composicoes, only: [:destroy]
+
+  resources :composicoes, only: [:destroy]
   resources :pedidos
   resources :movimentacaos
 
@@ -23,7 +26,4 @@ resources :composicoes, only: [:destroy]
   get "painel", to: "home#painel", as: :painel
   get "faturamento", to: "home#faturamento", as: :faturamento # <--- Adicione esta linha
   get "relatorios/index", to: "relatorios#index", as: :relatorios
-
-  # Adicione esta linha aqui:
-  get '/cardapio', to: 'produtos#cardapio', as: 'cardapio'
-end
+ end

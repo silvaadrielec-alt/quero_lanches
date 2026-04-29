@@ -8,7 +8,8 @@
     <thead>
       <tr>
         <th>Produto</th>
-        <th>Preço / Medida</th>
+        <th>Valor de Custo</th> <%# Coluna 1: O que a cantina paga %>
+        <th>Preço de Venda</th> <%# Coluna 2: O que o aluno paga %>
         <th>Matriz</th>
         <th>Pav. Novo</th>
         <th>Pav. Antigo</th>
@@ -16,34 +17,37 @@
       </tr>
     </thead>
     <tbody>
-     <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
-  <tr>
-    <td style="text-align: left; padding-left: 20px;">
-      <strong><%= produto.nome %></strong>
-    </td>
+      <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
+        <tr>
+          <td style="text-align: left; padding-left: 20px;">
+            <strong><%= produto.nome %></strong>
+          </td>
 
-    <td>
-      <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %><br>
-      <small style="color: #666;">(por <%= produto.unidade_medida %>)</small>
-    </td>
+          <%# Exibe o Custo (Compra/Produção) %>
+          <td>
+            <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
+          </td>
 
-    <td><%= produto.estoque_centro.to_i %></td>
+          <%# Exibe o Preço de Venda (O valor que estava "sumido" nesta tabela) %>
+          <td style="font-weight: bold; color: #28a745;">
+            <%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %>
+            <br><small style="color: #666; font-weight: normal;">(por <%= produto.unidade_medida %>)</small>
+          </td>
 
-    <td><%= produto.estoque_pavilhao_novo.to_i %></td>
+          <td><%= produto.estoque_centro.to_i %></td>
+          <td><%= produto.estoque_pavilhao_novo.to_i %></td>
+          <td style="color: var(--vermelho-quero); font-weight: bold;">
+            <%= produto.estoque_pavilhao_antigo.to_i %>
+          </td>
 
-    <td style="color: var(--vermelho-quero); font-weight: bold;">
-      <%= produto.estoque_pavilhao_antigo.to_i %>
-    </td>
-
-    <td style="text-align: center;">
-     <%# Botão visível para todos os funcionários %>
-     <%= link_to 'Ver Receita', produto_path(produto), class: 'btn btn-info btn-sm' %>
-      <% if current_funcionario.admin? %>
-        <%= link_to 'Editar', edit_produto_path(produto), class: 'btn btn-warning btn-sm' %>
+          <td style="text-align: center;">
+            <%= link_to 'Ver Receita', produto_path(produto), class: 'btn btn-info btn-sm' %>
+            <% if current_funcionario.admin? %>
+              <%= link_to 'Editar', edit_produto_path(produto), class: 'btn btn-warning btn-sm' %>
+            <% end %>
+          </td>
+        </tr>
       <% end %>
-    </td>
-  </tr>
-<% end %>
     </tbody>
   </table>
 

@@ -34,6 +34,7 @@ end
 
     respond_to do |format|
       if @produto.save
+        # Volta sempre para o 'Mostrar Produto' do estoque
         format.html { redirect_to @produto, notice: "Produto cadastrado com sucesso!" }
         format.json { render :show, status: :created, location: @produto }
       else
@@ -43,33 +44,23 @@ end
     end
   end
 
-  # PATCH/PUT /produtos/1 or /produtos/1.json
-  def update
-    respond_to do |format|
-      if @produto.update(produto_params)
-        format.html { redirect_to @produto, notice: "Produto atualizado com sucesso!", status: :see_other }
-        format.json { render :show, status: :ok, location: @produto }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @produto.errors, status: :unprocessable_entity }
-      end
-    end
+   def update
+    if @produto.update(produto_params)
+    # Força o retorno para a lista de estoque, ignorando a tela de 'show' que está dando erro
+    redirect_to produtos_path, notice: "Produto atualizado com sucesso!"
+   else
+    render :edit, status: :unprocessable_entity
   end
+end
 
-  # DELETE /produtos/1 or /produtos/1.json
   def destroy
     @produto.destroy!
 
     respond_to do |format|
+      # Volta sempre para a lista geral de estoque
       format.html { redirect_to produtos_path, notice: "Produto excluído com sucesso!", status: :see_other }
       format.json { head :no_content }
     end
-  end
-
-  def cardapio
-    # Buscamos apenas os produtos marcados como 'Venda'
-    @produtos = Produto.where(categoria: 'Venda')
-    # O Rails vai carregar automaticamente o arquivo app/views/produtos/cardapio.html.erb
   end
 
 private

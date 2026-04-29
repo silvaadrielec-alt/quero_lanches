@@ -1,0 +1,36 @@
+<h1 style="text-align: center; color: #007bff;">Novo Item no Cardápio</h1>
+
+<div class="card-principal" style="max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px;">
+  <%= form_with(model: @produto, url: cardapio_index_path, local: true) do |form| %>
+    
+    <div style="margin-bottom: 20px;">
+      <%= form.label :nome, "Nome do Lanche", style: "display: block; font-weight: bold;" %>
+      <%= form.text_field :nome, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <%# CAMPO DE CUSTO - IMPORTANTE PARA O LUCRO %>
+    <div style="margin-bottom: 20px;">
+      <%= form.label :valor_unitario, "Custo de Produção (Compra ou Produção)", style: "display: block; font-weight: bold;" %>
+      <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <%= form.label :preco_venda, "Preço de Venda", style: "display: block; font-weight: bold;" %>
+      <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <%# UNIDADE DE MEDIDA - PARA NÃO CONFUNDIR KG COM UNIDADE %>
+    <div style="margin-bottom: 20px;">
+      <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold;" %>
+      <%= form.select :unidade_medida, ['unidade', 'fatia', 'kg', 'gramas', 'ml'], { selected: 'unidade' }, { style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <%= form.submit "SALVAR NO CARDÁPIO", style: "background-color: #ffc107; color: black; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%;" %>
+      
+      <div style="margin-top: 20px;">
+        <%= link_to "← VOLTAR PARA O CARDÁPIO", cardapio_index_path, style: "color: #007bff; text-decoration: underline;" %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -15,23 +15,24 @@
     <%= form.text_field :nome %>
   </div>
 
-  <div>
-    <%= form.label :valor_unitario, style: "display: block" %>
-    <%= form.text_field :valor_unitario %>
-  </div>
+  <%# Campo de Custo (O que você paga/gasta) %>
+<div style="margin-bottom: 20px;">
+  <%= form.label :valor_unitario, "Valor de Custo (Compra/Produção)" %>
+  <%= form.number_field :valor_unitario, step: 0.01, class: "form-control" %>
+</div>
 
-  <div class="field mb-3">
-    <%= form.label :preco_venda, "Preço de Venda" %>
-    <%= form.number_field :preco_venda, step: 0.01, class: "form-control", placeholder: "R$ 0,00" %>
-    <small class="text-muted">Deixe zerado se for apenas Insumo.</small>
-  </div>
+<%# Campo de Venda (O que o aluno paga) %>
+<div style="margin-bottom: 20px;">
+  <%= form.label :preco_venda, "Preço de Venda" %>
+  <%= form.number_field :preco_venda, step: 0.01, class: "form-control" %>
+</div>
 
  <div class="field" style="margin-bottom: 20px;">
   <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold;" %>
-  <%= form.select :categoria, ["Venda", "Insumo"], {}, class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
+  <%= form.select :categoria, ["Venda", "Insumo"], {}, id: "select-tipo-produto", class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
  </div>
 
- <div style="background: #fdf8f5; padding: 20px; border-radius: 12px; border: 1px solid #eeb989; margin-bottom: 25px;">
+ <div id="quadro-inventario" style="background: #fdf8f5; padding: 20px; border-radius: 12px; border: 1px solid #eeb989; margin-bottom: 25px;">
     <h5 style="margin-top: 0; color: #D71920; margin-bottom: 15px;">Controle de Inventário e Unidades</h5>
     
     <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
@@ -67,7 +68,36 @@
     </p>
   </div>
 
-  <div>
-    <%= form.submit "SALVAR ITEM NO ESTOQUE", class: "btn-quero", style: "width: 100%; margin-top: 20px;" %>
+ <div style="margin-top: 35px; text-align: center;">
+    <%= form.submit "SALVAR ITEM NO ESTOQUE", class: "btn-quero", style: "padding: 15px 40px; cursor: pointer; border: none; width: 100%; max-width: 400px;" %>
+    
+    <div style="margin-top: 25px;">
+      <%= link_to "← VOLTAR PARA O ESTOQUE", produtos_path, style: "color: #007bff; text-decoration: underline; font-weight: 400;" %>
+    </div>
   </div>
 <% end %>
+<script>
+  document.addEventListener('turbo:load', function() {
+    const selectTipo = document.getElementById('select-tipo-produto');
+    const campoVenda = document.getElementById('campo-preco-venda');
+    const quadroEstoque = document.getElementById('quadro-inventario');
+
+    if (!selectTipo) return; // Segurança caso o elemento não exista
+
+    function gerenciarCampos() {
+      if (selectTipo.value === 'Venda') {
+        campoVenda.style.display = 'block';   // Mostra Preço
+        quadroEstoque.style.display = 'none'; // Esconde Unidades
+      } else if (selectTipo.value === 'Insumo') {
+        campoVenda.style.display = 'none';    // Esconde Preço
+        quadroEstoque.style.display = 'block';// Mostra Unidades
+      } else {
+        campoVenda.style.display = 'none';
+        quadroEstoque.style.display = 'none';
+      }
+    }
+
+    selectTipo.addEventListener('change', gerenciarCampos);
+    gerenciarCampos(); // Executa ao abrir a tela (importante para edição)
+  });
+</script>

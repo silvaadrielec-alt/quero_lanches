@@ -20,21 +20,38 @@ class PedidosController < ApplicationController
   end
 
   # POST /pedidos or /pedidos.json
-  def create
-    @pedido = Pedido.new(pedido_params)
-    @pedido.funcionario = current_funcionario # Define automaticamente o dono da sessão
+ def create
+  @pedido = Pedido.new(pedido_params)
+  @pedido.funcionario = current_funcionario
   
-  
-    respond_to do |format|
-      if @pedido.save
-        format.html { redirect_to @pedido, notice: "Pedido cadastrado com sucesso!" }
-        format.json { render :show, status: :created, location: @pedido }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @pedido.errors, status: :unprocessable_entity }
+  # Buscamos o produto que está sendo vendido
+  @produto = Produto.find(@pedido.produto_id)
+
+  respond_to do |format|
+    if @pedido.save
+      # --- LÓGICA DE BAIXA DE ESTOQUE ---
+      # Verificamos qual unidade foi selecionada no formulário e subtraímos
+      case @pedido.unidade
+      when 'centro'
+        nova_qtd = (@produto.estoque_centro || 0) - @pedido.quantidade
+        @produto.update(estoque_centro: nova_qtd)
+      when 'pavilhao_novo'
+        nova_qtd = (@produto.estoque_pavilhao_novo || 0) - @pedido.quantidade
+        @produto.update(estoque_pavilhao_novo: nova_qtd)
+      when 'pavilhao_antigo'
+        nova_qtd = (@produto.estoque_pavilhao_antigo || 0) - @pedido.quantidade
+        @produto.update(estoque_pavilhao_antigo: nova_qtd)
       end
+      # ----------------------------------
+
+      format.html { redirect_to @pedido, notice: "Pedido realizado e estoque atualizado!" }
+      format.json { render :show, status: :created, location: @pedido }
+    else
+      format.html { render :new, status: :unprocessable_entity }
+      format.json { render json: @pedido.errors, status: :unprocessable_entity }
     end
   end
+end
 
   # PATCH/PUT /pedidos/1 or /pedidos/1.json
   def update

@@ -1,0 +1,22 @@
+<div class="card-principal" style="max-width: 700px; margin: 40px auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px; text-align: center;">
+  <h1 style="color: #D71920;"><%= @produto.nome %></h1>
+  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+  <div style="font-size: 18px; margin-bottom: 30px; text-align: left;">
+  <p><strong>Valor de Custo (Compra/Produção):</strong> <%= number_to_currency(@produto.valor_unitario) %></p>
+  <p><strong>Preço de Venda:</strong> <%= number_to_currency(@produto.preco_venda) %></p>
+  <hr>
+  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+  <p> Centro: <%= @produto.estoque_centro || 0 %> <%= @produto.unidade_medida %></p>
+  <p> Pavilhão Novo: <%= @produto.estoque_pavilhao_novo || 0 %> <%= @produto.unidade_medida %></p>
+  <p> Pavilhão Antigo: <%= @produto.estoque_pavilhao_antigo || 0 %> <%= @produto.unidade_medida %></p>
+</div>
+
+  <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+  <% if current_funcionario.admin? %>
+    <%= link_to 'EDITAR LANCHE', edit_cardapio_path(@produto), class: "btn-quero", style: "padding: 10px 25px; text-decoration: none; background-color: #ffc107; color: black; border-radius: 8px;" %>
+  <% end %>
+  
+  <%= link_to 'VOLTAR PARA O CARDÁPIO', cardapio_index_path, style: "padding: 10px 25px; color: #007bff; text-decoration: underline;" %>
+</div>
+</div>
