@@ -1,135 +1,93 @@
 <div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
-  
-  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Gestão de Estoque Geral</h1>
+  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Cadastro de Produtos e Insumos</h1>
 
-  <%# BARRA DE PESQUISA IDENTICA AO CARDÁPIO (BORDA AZUL) %>
-<div style="margin-bottom: 30px; text-align: center;">
-  <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
+  <div style="margin-bottom: 30px; text-align: center;">
+  <input type="text" id="buscaProdutos" onkeyup="filtrarProdutos()" placeholder="🔍 Pesquisar por nome..." 
          style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
 </div>
 
-<% if current_funcionario.admin? %>
-  <div style="margin-top: -10px; margin-bottom: 30px;">
-    <%= link_to "Cadastrar Novo Item no Estoque", new_produto_path, 
-        style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" %>
-  </div>
-<% end %>
-
-  <% if params[:query].present? %>
-    <p style="text-align: left; margin-left: 20px; color: #666;">
-      Resultados para: <strong>"<%= params[:query] %>"</strong> 
-      <%= link_to "(Limpar)", produtos_path, style: "margin-left: 10px; color: #D71920; font-size: 0.9em;" %>
-    </p>
+  <% if current_funcionario.admin? %>
+    <div style="margin-bottom: 30px;">
+      <%= link_to "Novo Produto/Insumo", new_produto_path, 
+          style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block;" %>
+    </div>
   <% end %>
+
+ <div class="card-principal">
+  <%# --- SEÇÃO 1: ITENS DE VENDA --- %>
+  <h2 style="text-align: left; margin-left: 20px; color: #D71920; border-bottom: 2px solid #D71920;">🛒 Produtos para Venda (Lanches e Bebidas)</h2>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+    <thead>
+      <tr style="background-color: #D71920; color: white;">
+        <th>Nome</th>
+        <th>Custo Base</th>
+        <th>Preço de Venda</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @produtos_venda.each do |produto| %>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="text-align: left; padding-left: 20px;"><strong><%= produto.nome %></strong></td>
+          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ") %></td>
+          <td><%= number_to_currency(produto.preco_venda, unit: "R$ ") %></td>
+          <td style="text-align: center;">
+            <%= link_to 'Ver Receita', produto_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
+            <% if current_funcionario.admin? %>
+              <%= link_to 'Editar', edit_produto_path(produto), style: "color: #0000FF; text-decoration: underline;" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%# --- SEÇÃO 2: INSUMOS --- %>
+  <h2 style="text-align: left; margin-left: 20px; color: #555; border-bottom: 2px solid #555;">📦 Insumos (Matéria-Prima)</h2>
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="background-color: #555; color: white;">
+        <th>Nome</th>
+        <th>Custo Unitário</th>
+        <th style="text-align: center;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @insumos.each do |insumo| %>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="text-align: left; padding-left: 20px;"><strong><%= insumo.nome %></strong></td>
+          <td><%= number_to_currency(insumo.valor_unitario, unit: "R$ ") %></td>
+          <td style="text-align: center;">
+            <% if current_funcionario.admin? %>
+              <%= link_to 'Editar', edit_produto_path(insumo), style: "color: #0000FF; text-decoration: underline;" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>
 
-  <%# --- TABELA DE PRODUTOS PARA VENDA --- %>
-  <h2 style="color: #555; text-align: left; margin-left: 20px;">Produtos p/ Venda (Lanches, Sucos, Açaí)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Produto</th>
-        <th>Valor de Custo</th> <%# Coluna 1: O que a cantina paga %>
-        <th>Preço de Venda</th> <%# Coluna 2: O que o aluno paga %>
-        <th>Matriz</th>
-        <th>Pav. Novo</th>
-        <th>Pav. Antigo</th>
-        <th style="text-align: center;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @produtos.where(categoria: ["Venda", nil]).each do |produto| %>
-        <tr>
-          <td style="text-align: left; padding-left: 20px;">
-            <strong><%= produto.nome %></strong>
-          </td>
-
-          <%# Exibe o Custo (Compra/Produção) %>
-          <td>
-            <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
-          </td>
-
-          <%# Exibe o Preço de Venda (O valor que estava "sumido" nesta tabela) %>
-          <td style="font-weight: bold; color: #28a745;">
-            <%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %>
-            <br><small style="color: #666; font-weight: normal;">(por <%= produto.unidade_medida %>)</small>
-          </td>
-
-          <td><%= produto.estoque_centro.to_i %></td>
-          <td><%= produto.estoque_pavilhao_novo.to_i %></td>
-          <td style="color: var(--vermelho-quero); font-weight: bold;">
-            <%= produto.estoque_pavilhao_antigo.to_i %>
-          </td>
-
-          <td style="text-align: center;">
-            <%= link_to 'Ver Receita', produto_path(produto), class: 'btn btn-info btn-sm' %>
-            <% if current_funcionario.admin? %>
-              <%= link_to 'Editar', edit_produto_path(produto), class: 'btn btn-warning btn-sm' %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-
-  <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
-
-  <%# --- TABELA DE INSUMOS (O QUE NÃO SAI DIRETO NA VENDA) --- %>
-  <h2 style="color: #555; text-align: left; margin-left: 20px;">Insumos e Matérias-primas (Queijo, Carne, Frutas)</h2>
-  <table style="border-left: 5px solid #666;">
-    <thead style="background-color: #666;"> <%# Cabeçalho cinza para diferenciar %>
-      <tr>
-        <th>Insumo</th>
-        <th>Medida</th>
-        <th>Matriz</th>
-        <th>Pav. Novo</th>
-        <th>Pav. Antigo</th>
-        <th style="text-align: center;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @produtos.where(categoria: "Insumo").each do |insumo| %>
-        <tr>
-          <td><strong><%= insumo.nome %></strong></td>
-          <td><%= insumo.unidade_medida %></td>
-          <td><%= insumo.estoque_centro %></td>
-          <td><%= insumo.estoque_pavilhao_novo %></td>
-          <td><%= insumo.estoque_pavilhao_antigo %></td>
-          <td style="text-align: center;">
-           <%# Botão visível para todos os funcionários %>
-           <%= link_to 'Ver Detalhes', produto_path(insumo), class: 'btn btn-info btn-sm' %>
-            <% if current_funcionario.admin? %>            
-              <%= link_to 'Editar', edit_produto_path(insumo), class: 'btn btn-warning btn-sm' %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-  
 <script>
-function filtrarEstoque() {
-  var input = document.getElementById("buscaEstoque");
+function filtrarProdutos() {
+  var input = document.getElementById("buscaProdutos");
   var filter = input.value.toUpperCase();
   
-  // Seleciona todas as tabelas da página
-  var tabelas = document.getElementsByTagName("table");
+  // Seleciona todas as linhas de corpo (tbody tr) das tabelas
+  var rows = document.querySelectorAll("tbody tr");
 
-  for (var t = 0; t < tabelas.length; t++) {
-    var tr = tabelas[t].getElementsByTagName("tr");
-
-    // Começa do 1 para pular o cabeçalho (thead)
-    for (var i = 1; i < tr.length; i++) {
-      var td = tr[i].getElementsByTagName("td")[0]; // Pega a primeira coluna (Nome)
-      if (td) {
-        var txtValue = td.textContent || td.innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-          tr[i].style.display = "";
-        } else {
-          tr[i].style.display = "none";
-        }
+  rows.forEach(function(row) {
+    // Pegamos o primeiro TD de cada linha (que é onde está o nome do produto)
+    var td = row.getElementsByTagName("td")[0];
+    if (td) {
+      var txtValue = td.textContent || td.innerText;
+      // Se o texto digitado estiver no nome, mostra a linha, senão esconde
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
       }
     }
-  }
+  });
 }
 </script>

@@ -5,30 +5,51 @@
   </div>
 
   <div>
-    <strong style="color: #555;">🍔 Produto:</strong> 
+    <strong style="color: #555;">Produto:</strong> 
     <span style="color: #333;"><%= pedido.produto.nome %></span>
   </div>
 
   <div>
-    <strong style="color: #555;">👤 Cliente:</strong> 
+    <strong style="color: #555;">Cliente:</strong> 
     <span style="color: #333;"><%= pedido.cliente_nome.presence || "Não identificado" %></span>
   </div>
 
   <div>
-    <strong style="color: #555;">👤 Atendido por:</strong> 
+    <strong style="color: #555;">Atendido por:</strong> 
     <span style="color: #333;"><%= pedido.funcionario.nome %></span>
   </div>
 
   <div>
-    <strong style="color: #555;">🔢 Quantidade:</strong> 
+    <strong style="color: #555;">Quantidade:</strong> 
     <span style="color: #333;"><%= pedido.quantidade %> <%= pedido.produto.unidade_medida %></span>
   </div>
 
+  <%# --- BLOCO DE DATA E HORA --- %>
+  <div style="margin-top: 5px;">
+    <strong style="color: #555;">Data:</strong> 
+    <span style="color: #333;"><%= pedido.created_at.strftime("%d/%m/%Y") %></span>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <strong style="color: #555;">Horário:</strong> 
+    <span style="color: #333;"><%= pedido.created_at.strftime("%H:%M") %></span>
+  </div>
+
   <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
-    <strong style="color: #D71920; font-size: 1.2em;">💰 Valor Total:</strong> 
+    <strong style="color: #D71920; font-size: 1.2em;">Valor Total:</strong> 
     <span style="color: #28a745; font-size: 1.2em; font-weight: bold;">
       <%= number_to_currency(pedido.valor_total, unit: "R$ ") %>
     </span>
   </div>
+
+  <%# --- BLOCO DE TROCO (Aparece apenas se houver troco a devolver) --- %>
+  <% if pedido.respond_to?(:calcular_troco) && pedido.calcular_troco > 0 %>
+    <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e9; border-radius: 8px; border-left: 5px solid #28a745;">
+      <strong style="color: #2e7d32;">Troco a devolver (Dinheiro):</strong> 
+      <span style="color: #1b5e20; font-weight: bold;">
+        <%= number_to_currency(pedido.calcular_troco, unit: "R$ ") %>
+      </span>
+    </div>
+  <% end %>
 
 </div>

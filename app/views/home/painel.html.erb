@@ -1,39 +1,35 @@
-<% if @estoque_critico.any? %>
-  <div style="background: #fff5f5; border: 2px solid #feb2b2; padding: 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); font-family: sans-serif;">
-    <h3 style="color: #c53030; margin-top: 0; display: flex; align-items: center; gap: 10px;">
-      ⚠️ ATENÇÃO: Reposição de Estoque Necessária
-    </h3>
-    <div style="overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 10px;">
-        <thead>
-          <tr style="background: #fed7d7; color: #9b2c2c; text-align: left;">
-            <th style="padding: 12px; border-radius: 10px 0 0 0;">Item</th>
-            <th style="padding: 12px;">Matriz</th>
-            <th style="padding: 12px;">Pav. Novo</th>
-            <th style="padding: 12px;">Pav. Antigo</th>
-            <th style="padding: 12px; border-radius: 0 10px 0 0; text-align: center;">Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @estoque_critico.each do |produto| %>
-            <tr style="border-bottom: 1px solid #eee;">
-              <td style="padding: 12px; font-weight: bold;"><%= produto.nome %></td>
-              <td style="padding: 12px; color: <%= produto.estoque_centro < 10 ? '#e53e3e' : '#2d3748' %>;">
-                <%= produto.estoque_centro %> <%= produto.unidade_medida %>
-              </td>
-              <td style="padding: 12px; color: <%= produto.estoque_pavilhao_novo < 10 ? '#e53e3e' : '#2d3748' %>;">
-                <%= produto.estoque_pavilhao_novo %> <%= produto.unidade_medida %>
-              </td>
-              <td style="padding: 12px; color: <%= produto.estoque_pavilhao_antigo < 10 ? '#e53e3e' : '#2d3748' %>;">
-                <%= produto.estoque_pavilhao_antigo %> <%= produto.unidade_medida %>
-              </td>
-              <td style="padding: 12px; text-align: center;">
-                <%= link_to "Abastecer", edit_produto_path(produto), style: "background: #c53030; color: white; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85em; font-weight: bold;" %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+<% if @produtos_criticos.any? %>
+  <div style="background-color: #F4EEFF; border: 2px solid #7D3C98; padding: 20px; margin: 20px auto; max-width: 1200px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #D2B4DE; padding-bottom: 10px;">
+      <span style="font-size: 1.8em;">⚠️</span>
+      <h3 style="color: #D71920; margin: 0; font-weight: 900; text-transform: uppercase; font-size: 1.3em;">
+        Produtos com Estoque Crítico
+      </h3>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <% @produtos_criticos.each do |p| %>
+        <%# Fundo alterado para branco para facilitar a leitura %>
+        <div style="background-color: #ffffff; border: 1px solid #D2B4DE; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          
+          <%# Nome do Produto em Roxo %>
+          <strong style="color: #7D3C98; font-size: 1.1em; min-width: 150px;"><%= p.nome %></strong>
+          
+          <%# Quantidades em linha em Vermelho %>
+          <div style="display: flex; gap: 20px; flex-grow: 1; justify-content: flex-end; color: #D71920; font-size: 0.95em;">
+            <% if p.estoque_centro_baixo? %>
+              <span>Matriz: <strong><%= p.estoque_centro %></strong></span>
+            <% end %>
+            <% if p.estoque_pavilhao_novo_baixo? %>
+              <span>Pav. Novo: <strong><%= p.estoque_pavilhao_novo %></strong></span>
+            <% end %>
+            <% if p.estoque_pavilhao_antigo_baixo? %>
+              <span>Pav. Antigo: <strong><%= p.estoque_pavilhao_antigo %></strong></span>
+            <% end %>
+          </div>
+          
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

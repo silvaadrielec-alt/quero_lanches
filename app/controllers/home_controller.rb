@@ -1,20 +1,20 @@
 class HomeController < ApplicationController
   layout "application", except: [:index]
 
-  def index
-    # Carregamos o estoque crítico aqui também para evitar o erro ao deslogar
-    @estoque_critico = Produto.where("estoque_centro < 10 OR estoque_pavilhao_novo < 10 OR estoque_pavilhao_antigo < 10")
-    
-    if funcionario_signed_in?
-      render :painel
-    else
-      render :index
-    end
+ def index
+  if funcionario_signed_in?
+    # Usamos a nova lógica inteligente que você criou no Model
+    @produtos_criticos = Produto.all.select(&:precisa_reposicao?)
+    render :painel
+  else
+    render :index
   end
+end
 
-  def painel
-    @estoque_critico = Produto.where("estoque_centro < 10 OR estoque_pavilhao_novo < 10 OR estoque_pavilhao_antigo < 10")
-  end
+def painel
+  # Também atualizamos aqui para manter a consistência
+  @produtos_criticos = Produto.all.select { |produto| produto.precisa_reposicao? }
+end
   
   # ... mantenha o seu método def faturamento aqui embaixo ...
 

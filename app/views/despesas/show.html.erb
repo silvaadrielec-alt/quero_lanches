@@ -1,0 +1,89 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+
+  <%# Título Centralizado %>
+  <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 20px;">Detalhes da Despesa</h1>
+
+  <%# Container com Borda Vermelha %>
+  <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
+    
+    <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="color: #333; margin: 0;"><%= @despesa.descricao %></h2>
+      <span style="background: #f8d7da; color: #721c24; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
+        <%= @despesa.categoria %>
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <p><strong style="color: #D71920;">Data:</strong><br> 
+        <%= @despesa.data_pagamento&.strftime("%d/%m/%Y") %></p>
+        
+        <p><strong style="color: #D71920;">Responsável:</strong><br> 
+        <%= @despesa.funcionario&.nome %></p>
+      </div>
+
+      <div>
+        <p><strong style="color: #D71920;">Unidade:</strong><br> 
+        <%= @despesa.unidade %></p>
+        
+        <p><strong style="color: #D71920;">Status:</strong><br>
+        <% if @despesa.pago %>
+          <span style="color: green; font-weight: bold;">✅ PAGO</span>
+        <% else %>
+          <span style="color: #D71920; font-weight: bold;">⏳ PENDENTE</span>
+        <% end %>
+        </p>
+      </div>
+    </div>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #D71920; text-align: right;">
+      <small style="color: #666;">Valor Total:</small>
+      <div style="font-size: 2.5em; font-weight: bold; color: #333;">
+        R$ <%= number_with_precision(@despesa.valor, precision: 2) %>
+      </div>
+    </div>
+
+  </div>
+
+  <%# Botões de Ação estilo Pílula %>
+  <div style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
+    <%= link_to "Editar", edit_despesa_path(@despesa), 
+        style: "background: #333; color: white; padding: 10px 30px; text-decoration: none; border-radius: 50px; font-weight: bold;" %>
+    
+    <%= link_to "Voltar", despesas_path, 
+        style: "background: #D71920; color: white; padding: 10px 30px; text-decoration: none; border-radius: 50px; font-weight: bold;" %>
+    
+    <button onclick="confirmarExclusaoDetalhe(<%= @despesa.id %>)" 
+        style="background: white; color: #D71920; border: 2px solid #D71920; padding: 8px 30px; border-radius: 50px; font-weight: bold; cursor: pointer;">
+      Excluir
+    </button>
+  </div>
+
+</div>
+
+<script>
+function confirmarExclusaoDetalhe(id) {
+  const ehAdmin = <%= current_funcionario.admin? %>;
+  const codigoOk = () => {
+    if (confirm("Deseja realmente apagar esta despesa?")) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/despesas/' + id;
+      form.innerHTML = `<input type="hidden" name="_method" value="delete"><input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">`;
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+
+  if (ehAdmin) {
+    codigoOk();
+  } else {
+    const codigo = prompt("AUTORIZAÇÃO DO GERENTE\nDigite o código:");
+    if (codigo === "1234") {
+      codigoOk();
+    } else if (codigo !== null) {
+      alert("Código inválido!");
+    }
+  }
+}
+</script>

@@ -1,36 +1,148 @@
-<div style="max-width: 900px; margin: 40px auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center;">
-  
-  <h1 style="color: #D71920; margin-bottom: 10px;">📊 Relatório de Faturamento</h1>
-  <p style="color: #666; margin-bottom: 30px;">Visão Geral da Cantina Quero Lanches</p>
+<style>
+  /* --- ESTILO PARA A TELA (Navegação) --- */
+  .conteudo-tela { text-align: center; padding: 50px; font-family: sans-serif; }
+  .documento-oficial { display: none; }
 
-  <div style="background: white; border-radius: 15px; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #eee; margin-bottom: 30px;">
-    <h2 style="color: #333; margin: 0; font-size: 1.2em; text-transform: uppercase;">Total Geral Vendido</h2>
-    <p style="font-size: 3em; font-weight: bold; color: #28a745; margin: 10px 0;">
-      <%= number_to_currency(@total_geral, unit: "R$ ", separator: ",", delimiter: ".") %>
-    </p>
-  </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+  /* --- ESTILO PARA O RELATÓRIO (Impressão/PDF) --- */
+  @media print {
+    header, nav, .navbar, .conteudo-tela, .no-print, button, a { display: none !important; }
     
-    <div style="background: #FFF3CD; padding: 25px; border-radius: 12px; border: 1px solid #ffeeba;">
-      <h3 style="margin: 0; font-size: 0.9em; color: #856404;">UNIDADE 1</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Matriz Centro</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #856404;"><%= number_to_currency(@vendas_matriz, unit: "R$ ") %></p>
-    </div>
+    .documento-oficial { 
+      display: block !important; 
+      font-family: "Courier New", Courier, monospace; 
+      color: black; 
+    }
 
-    <div style="background: #D1ECF1; padding: 25px; border-radius: 12px; border: 1px solid #bee5eb;">
-      <h3 style="margin: 0; font-size: 0.9em; color: #0c5460;">UNIDADE 2</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Pavilhão Novo</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #0c5460;"><%= number_to_currency(@vendas_pavilhao_novo, unit: "R$ ") %></p>
-    </div>
+    body { background: white !important; }
 
-    <div style="background: #E2E3E5; padding: 25px; border-radius: 12px; border: 1px solid #d6d8db;">
-      <h3 style="margin: 0; font-size: 0.9em; color: #383d41;">UNIDADE 3</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Pavilhão Antigo</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #383d41;"><%= number_to_currency(@vendas_pavilhao_antigo, unit: "R$ ") %></p>
-    </div>
+    /* Força as bordas a ficarem bem pretas e nítidas */
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 10px; 
+      margin-bottom: 30px;
+      border: 2px solid black !important; /* Borda externa forte */
+    }
 
+    th, td { 
+      border: 1.5px solid black !important; /* Borda interna nítida */
+      padding: 8px; 
+      text-align: left; 
+      font-size: 12px; 
+      color: black !important;
+    }
+
+    th { 
+      background-color: #ddd !important; 
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    h1 { font-size: 18px; border-bottom: 2px solid black; padding-bottom: 5px; margin-top: 20px; }
+    h2 { font-size: 16px; margin-top: 20px; text-decoration: underline; }
+
+    /* Quebra de página opcional entre unidades se a tabela for muito grande */
+    .quebra-pagina { page-break-before: always; }
+  }
+</style>
+
+<!-- O QUE APARECE NA TELA -->
+<div class="conteudo-tela">
+  <div style="background: #f8f9fa; padding: 40px; border-radius: 15px; border: 1px solid #ddd;">
+    <h2 style="color: #333;">Gerador de Relatórios Técnicos</h2>
+    <p style="color: #666;">Selecione a opção de impressão da <strong>Cantina Quero Lanches</strong>.</p>
+    
+    <button onclick="window.print()" style="background: #000; color: #fff; padding: 15px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 20px;">
+      📄 GERAR RELATÓRIO POR UNIDADES (PDF)
+    </button>
   </div>
 
-  <%= link_to "← VOLTAR AO PAINEL", root_path, style: "display: inline-block; margin-top: 40px; color: #D71920; text-decoration: none; font-weight: bold; font-size: 0.9em;" %>
+  <div style="margin-top: 20px;">
+    <%= link_to "← Voltar ao Painel", root_path, style: "color: #666; text-decoration: none;" %>
+  </div>
+</div>
+
+<!-- O QUE APARECE NO RELATÓRIO (Documento de Saída) -->
+<div class="documento-oficial">
+  <div style="text-align: center;">
+    <h1>RELATÓRIO TÉCNICO DE REPOSIÇÃO DE ESTOQUE</h1>
+    <p><strong>CANTINAS E LANCHONETE QUERO LANCHES</strong> - UNIDADES MATRIZ E IF BAIANO CATU</p>
+    <p>EMISSÃO: <%= Time.current.strftime("%d/%m/%Y - %H:%M") %></p>
+  </div>
+
+  <%# --- SEÇÃO MATRIZ --- %>
+  <% matriz_alerta = @produtos_para_comprar.select(&:estoque_centro_baixo?) %>
+  <% if matriz_alerta.any? %>
+    <h2>UNIDADE: MATRIZ CENTRO</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PRODUTO</th>
+          <th>ESTOQUE ATUAL</th>
+          <th>LIMITE MÍNIMO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% matriz_alerta.each do |p| %>
+          <tr>
+            <td><%= p.nome.upcase %></td>
+            <td><%= p.estoque_centro %></td>
+            <td><%= p.limite_centro %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <%# --- SEÇÃO PAVILHÃO NOVO --- %>
+  <% pav_novo_alerta = @produtos_para_comprar.select(&:estoque_pavilhao_novo_baixo?) %>
+  <% if pav_novo_alerta.any? %>
+    <h2>UNIDADE: PAVILHÃO NOVO</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PRODUTO</th>
+          <th>ESTOQUE ATUAL</th>
+          <th>LIMITE MÍNIMO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pav_novo_alerta.each do |p| %>
+          <tr>
+            <td><%= p.nome.upcase %></td>
+            <td><%= p.estoque_pavilhao_novo %></td>
+            <td><%= p.limite_pavilhao_novo %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <%# --- SEÇÃO PAVILHÃO ANTIGO --- %>
+  <% pav_antigo_alerta = @produtos_para_comprar.select(&:estoque_pavilhao_antigo_baixo?) %>
+  <% if pav_antigo_alerta.any? %>
+    <h2>UNIDADE: PAVILHÃO ANTIGO</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PRODUTO</th>
+          <th>ESTOQUE ATUAL</th>
+          <th>LIMITE MÍNIMO</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pav_antigo_alerta.each do |p| %>
+          <tr>
+            <td><%= p.nome.upcase %></td>
+            <td><%= p.estoque_pavilhao_antigo %></td>
+            <td><%= p.limite_pavilhao_antigo %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <div style="margin-top: 50px; border-top: 2px solid black; width: 350px; text-align: center; margin-left: auto; margin-right: auto;">
+    <p>Responsável pela Conferência</p>
+  </div>
 </div>

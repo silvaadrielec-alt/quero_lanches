@@ -10,75 +10,75 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-       <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.js"></script>
   </head>
 
- <nav class="navbar-quero">
-  <%# Logo centralizada com link para a home %>
-  <%= link_to root_path do %>
-    <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
-  <% end %>
+  <body>
+    <nav class="navbar-quero">
+      <%# Logo centralizada com link para a home %>
+      <%= link_to root_path do %>
+        <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
+      <% end %>
 
-  <%# Botão de Início adicionado aqui %>
-  <div style="margin-top: 10px;">
-    <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
-  </div>
-</nav>
-  
-  <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; align-items: center;">
-  <% if funcionario_signed_in? %>
-    <%# O Cardápio agora vai para a rota filtrada %>
-    <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
+      <%# Botão de Início %>
+      <div style="margin-top: 10px;">
+        <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
+      </div>
+    </nav>
+      
+    <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-items: center;">
+      <% if funcionario_signed_in? %>
+        
+        <%# --- SEÇÃO OPERACIONAL (Disponível para todos) --- %>
+        <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
+        <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
+        <%= link_to "DESPESAS", despesas_path, class: "nav-link-quero" %>
+        <%= link_to "ESTOQUE", estoques_path, class: "nav-link-quero" %>
 
-    <% if current_funcionario.admin? %>
-      <%# Botão exclusivo do Admin para gerenciar tudo %>
-      <%= link_to "ESTOQUE GERAL", produtos_path, class: "nav-link-quero" %>
-      <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
-    <% end %>
+        <% if current_funcionario.admin? %>
+          <%# Separador visual para o Admin %>
+          <span style="margin: 0 5px; color: #ccc;">|</span>
 
-    <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
+          <%# --- SEÇÃO ADMINISTRATIVA (Apenas Admin) --- %>
+          <%= link_to "CADASTRO", produtos_path, class: "nav-link-quero", title: "Produtos" %>
+          <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
+          <%= link_to "FATURAMENTO", faturamentos_path, class: "nav-link-quero" %>
+          <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
+          <%= link_to 'AUDITORIA', auditoria_path, class: "nav-link-quero" %>
+        <% end %>
 
-    <% if current_funcionario.admin? %>
-      <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
-      <%= link_to "FATURAMENTO", faturamento_path, class: "nav-link-quero" %>
-    <% end %>
+        <%# Botão de Sair %>
+        <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
+            style: "border: 2px solid #D71920; padding: 5px 15px; border-radius: 20px; font-size: 13px; margin-left: 10px;" %>
+      
+      <% else %>
+        <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>
+      <% end %>
+    </div>
 
-    <%# Botão de Sair %>
-    <%= link_to "SAIR", "/funcionarios/sign_out", class: "nav-link-quero", 
-        style: "border: 2px solid var(--vermelho-quero); padding: 5px 15px; border-radius: 20px; font-size: 13px;" %>
-  <% else %>
-    <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>
-  <% end %>
-</div>
-</nav>
+    <div style="padding: 20px;">
+      <% if notice %>
+        <p style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 10px; text-align: center; margin: 10px;">
+          <%= notice %>
+        </p>
+      <% end %>
 
-  <div style="padding: 20px;">
+      <% if alert %>
+        <p style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 10px; text-align: center; margin: 10px;">
+          <%= alert %>
+        </p>
+      <% end %>
 
-   <% if notice %>
-  <p style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 10px; text-align: center; margin: 10px;">
-    <%= notice %>
-  </p>
-<% end %>
-
-<% if alert %>
-  <p style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 10px; text-align: center; margin: 10px;">
-    <%= alert %>
-  </p>
-<% end %>
-
-    <%= yield %>
-  </div>
-</body>
+      <%= yield %>
+    </div>
+  </body>
+</html>

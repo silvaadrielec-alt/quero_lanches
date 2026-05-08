@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
@@ -26,8 +26,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
     t.datetime "updated_at", precision: nil, null: false
   end
 
+  create_table "despesas", force: :cascade do |t|
+    t.string "categoria"
+    t.datetime "created_at", null: false
+    t.date "data_pagamento"
+    t.string "descricao"
+    t.integer "funcionario_id", null: false
+    t.boolean "pago"
+    t.string "turno"
+    t.string "unidade"
+    t.datetime "updated_at", null: false
+    t.decimal "valor"
+    t.index ["funcionario_id"], name: "index_despesas_on_funcionario_id"
+  end
+
   create_table "funcionarios", force: :cascade do |t|
     t.boolean "admin", default: false
+    t.string "codigo_autorizacao"
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -58,7 +73,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
     t.integer "funcionario_id", null: false
     t.string "origem"
     t.integer "produto_id", null: false
-    t.integer "quantidade"
+    t.decimal "quantidade", precision: 10, scale: 3
+    t.string "tipo_movimentacao"
+    t.string "unidade"
     t.datetime "updated_at", null: false
     t.index ["funcionario_id"], name: "index_movimentacaos_on_funcionario_id"
     t.index ["produto_id"], name: "index_movimentacaos_on_produto_id"
@@ -70,8 +87,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
     t.datetime "created_at", null: false
     t.integer "funcionario_id", null: false
     t.string "identificador"
+    t.text "observacao"
+    t.decimal "pago_cartao_credito"
+    t.decimal "pago_cartao_debito"
+    t.decimal "pago_dinheiro"
+    t.decimal "pago_pix"
     t.integer "produto_id", null: false
     t.decimal "quantidade", precision: 10, scale: 3
+    t.string "tamanho"
+    t.string "turno"
     t.string "unidade"
     t.datetime "updated_at", null: false
     t.decimal "valor_total"
@@ -83,11 +107,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
   create_table "produtos", force: :cascade do |t|
     t.string "categoria"
     t.datetime "created_at", null: false
-    t.integer "estoque"
-    t.integer "estoque_centro"
-    t.integer "estoque_pavilhao_antigo"
-    t.integer "estoque_pavilhao_novo"
+    t.decimal "estoque", precision: 10, scale: 3, default: "0.0"
+    t.decimal "estoque_centro", precision: 10, scale: 3, default: "0.0"
+    t.integer "estoque_minimo"
+    t.decimal "estoque_pavilhao_antigo", precision: 10, scale: 3, default: "0.0"
+    t.decimal "estoque_pavilhao_novo", precision: 10, scale: 3, default: "0.0"
     t.boolean "insumo"
+    t.integer "limite_centro"
+    t.integer "limite_pavilhao_antigo"
+    t.integer "limite_pavilhao_novo"
+    t.decimal "media_unidades_kg", precision: 10, scale: 2, default: "1.0"
     t.string "nome"
     t.decimal "preco_venda"
     t.string "unidade_medida"
@@ -95,6 +124,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_205214) do
     t.decimal "valor_unitario"
   end
 
+  add_foreign_key "despesas", "funcionarios"
   add_foreign_key "item_pedidos", "pedidos"
   add_foreign_key "item_pedidos", "produtos"
   add_foreign_key "movimentacaos", "funcionarios"

@@ -1,12 +1,76 @@
-<p style="color: green"><%= notice %></p>
-
-<%= render @pedido %>
-
-<div style="margin-top: 20px;">
-  <%= link_to "Editar este pedido", edit_pedido_path(@pedido), style: "color: #D71920; text-decoration: none; margin-right: 15px;" %> |
-  <%= link_to "Voltar aos pedidos", pedidos_path, style: "color: #666; text-decoration: none; margin-left: 15px;" %>
-
-  <div style="margin-top: 30px;">
-    <%= button_to "Excluir este pedido", @pedido, method: :delete, class: "btn-perigo", data: { confirm: "Tem certeza que deseja cancelar este pedido?" } %>
-  </div>
+<div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+  <%= render @pedido %>
 </div>
+
+<div style="margin-top: 30px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+  
+  <%# 1. BOTÃO DE IMPRESSÃO (Sempre livre) %>
+  <%= link_to comprovante_pedido_path(@pedido), target: "_blank", 
+      style: "background-color: #333; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px;" do %>
+    <span>🖨️ Imprimir Cupom</span>
+  <% end %>
+
+  <%# 2. BOTÃO DE EDIÇÃO (Protegido) %>
+  <button onclick="autorizarAcao('editar')" 
+          style="background: none; border: none; color: #0000FF; text-decoration: underline; cursor: pointer; font-family: inherit; font-size: 1em;">
+    Editar este pedido
+  </button>
+
+  <%= link_to "Voltar aos pedidos", pedidos_path, style: "color: #0000FF; text-decoration: underline;" %>
+</div>
+
+<div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee;">
+  <%# 3. BOTÃO DE CANCELAMENTO (Protegido e discreto) %>
+  <button onclick="autorizarAcao('cancelar')" 
+          style="background: none; border: none; color: #d9534f; cursor: pointer; text-decoration: underline; font-size: 0.9em;">
+    🚫 Cancelar este pedido
+  </button>
+</div>
+
+<%# SCRIPT DE SEGURANÇA %>
+<script>
+function autorizarAcao(acao) {
+  // Verifica se o usuário logado é admin (Ruby injeta true/false aqui)
+  const ehAdmin = <%= current_funcionario.admin? %>;
+
+  if (ehAdmin) {
+    executarAcao(acao);
+  } else {
+    const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o código de segurança:");
+    
+    if (codigo === "1234") {
+      executarAcao(acao);
+    } else if (codigo !== null) {
+      alert("Código Inválido! Ação cancelada.");
+    }
+  }
+}
+
+function executarAcao(acao) {
+  if (acao === 'editar') {
+    window.location.href = "<%= edit_pedido_path(@pedido) %>";
+  } else if (acao === 'cancelar') {
+    if (confirm("Deseja realmente CANCELAR o Pedido #<%= @pedido.id %>?\nEsta ação não pode ser desfeita.")) {
+      // Criamos um formulário temporário para disparar o DELETE do Rails
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = "<%= pedido_path(@pedido) %>";
+      
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'delete';
+      
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = 'authenticity_token';
+      tokenInput.value = "<%= form_authenticity_token %>";
+      
+      form.appendChild(methodInput);
+      form.appendChild(tokenInput);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+}
+</script>

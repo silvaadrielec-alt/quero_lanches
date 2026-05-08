@@ -1,0 +1,21 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+
+  <%# Título Centralizado %>
+  <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 10px;">Editar Despesa</h1>
+  <p style="color: #666; margin-bottom: 30px;">Altere as informações abaixo para atualizar o registro.</p>
+
+  <%# Container com Borda Vermelha (Igual ao formulário de novo gasto) %>
+  <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
+    
+    <%# Renderiza o formulário que já ajustamos com a trava de segurança %>
+    <%= render "form", despesa: @despesa %>
+
+  </div>
+
+  <%# Botão Voltar estilo Pílula %>
+  <div style="margin-top: 20px;">
+    <%= link_to "Cancelar e Voltar", despesas_path, 
+        style: "color: #D71920; text-decoration: none; font-weight: bold; font-size: 0.9em;" %>
+  </div>
+
+</div>

@@ -1,89 +1,85 @@
 class PedidosController < ApplicationController
-  before_action :set_pedido, only: %i[ show edit update destroy ]
+  before_action :set_pedido, only: %i[ show edit update destroy comprovante ]
 
-  # GET /pedidos or /pedidos.json
   def index
     @pedidos = Pedido.all
   end
 
-  # GET /pedidos/1 or /pedidos/1.json
   def show
   end
 
-  # GET /pedidos/new
+  # NOVO MÉTODO: Gera o cupom sem o layout do site
+  def comprovante
+    render layout: false
+  end
+
   def new
     @pedido = Pedido.new
   end
 
-  # GET /pedidos/1/edit
   def edit
   end
 
-  # POST /pedidos or /pedidos.json
- def create
+  def create
   @pedido = Pedido.new(pedido_params)
   @pedido.funcionario = current_funcionario
-  
-  # Buscamos o produto que está sendo vendido
-  @produto = Produto.find(@pedido.produto_id)
+  @produto = Produto.find_by(id: pedido_params[:produto_id])
+
+  # Lógica do Fator de Tamanho
+  fator = case @pedido.tamanho
+          when "Copo 200ml" then 0.2
+          when "Copo 300ml" then 0.3
+          when "Copo 500ml" then 0.5
+          when "Jarra 1L"    then 1.0
+          else 1.0
+          end
+
+  if @produto
+    qtd_informada = pedido_params[:quantidade].to_f > 0 ? pedido_params[:quantidade].to_f : 1.0
+    preco_base = @produto.preco_venda.to_f 
+    
+    # Calculamos os valores antes de salvar
+    @pedido.quantidade = qtd_informada * fator
+    @pedido.valor_total = (preco_base * qtd_informada * fator).round(2)
+  end
 
   respond_to do |format|
     if @pedido.save
-      # --- LÓGICA DE BAIXA DE ESTOQUE ---
-      # Verificamos qual unidade foi selecionada no formulário e subtraímos
-      case @pedido.unidade
-      when 'centro'
-        nova_qtd = (@produto.estoque_centro || 0) - @pedido.quantidade
-        @produto.update(estoque_centro: nova_qtd)
-      when 'pavilhao_novo'
-        nova_qtd = (@produto.estoque_pavilhao_novo || 0) - @pedido.quantidade
-        @produto.update(estoque_pavilhao_novo: nova_qtd)
-      when 'pavilhao_antigo'
-        nova_qtd = (@produto.estoque_pavilhao_antigo || 0) - @pedido.quantidade
-        @produto.update(estoque_pavilhao_antigo: nova_qtd)
-      end
-      # ----------------------------------
-
-      format.html { redirect_to @pedido, notice: "Pedido realizado e estoque atualizado!" }
-      format.json { render :show, status: :created, location: @pedido }
+      # Não precisamos mais de update_columns aqui, pois já setamos os valores acima!
+      @pedido.baixar_estoque 
+      format.html { redirect_to @pedido, notice: "Pedido realizado com sucesso!" }
     else
       format.html { render :new, status: :unprocessable_entity }
-      format.json { render json: @pedido.errors, status: :unprocessable_entity }
     end
   end
 end
 
-  # PATCH/PUT /pedidos/1 or /pedidos/1.json
   def update
     respond_to do |format|
       if @pedido.update(pedido_params)
         format.html { redirect_to @pedido, notice: "Pedido atualizado com sucesso!", status: :see_other }
-        format.json { render :show, status: :ok, location: @pedido }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @pedido.errors, status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /pedidos/1 or /pedidos/1.json
   def destroy
     @pedido.destroy!
-
     respond_to do |format|
       format.html { redirect_to pedidos_path, notice: "Pedido excluído com sucesso!", status: :see_other }
-      format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_pedido
-      @pedido = Pedido.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def pedido_params
-      params.require(:pedido).permit(:produto_id, :cliente_nome, :quantidade, :unidade, :valor_total, ingredientes_removidos: [])
-    end
+  def set_pedido
+    # Removi o .expect que é de versões muito novas, usando o .find padrão
+    @pedido = Pedido.find(params[:id])
+  end
+
+  def pedido_params
+    # ADICIONADO :turno AQUI
+    params.require(:pedido).permit(:produto_id, :cliente_nome, :quantidade, :unidade, :turno, :tamanho, :valor_total, :pago_dinheiro, :pago_pix, :pago_cartao_debito, :pago_cartao_credito, :observacao, ingredientes_removidos: [])
+  end
 end

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Courier New', Courier, monospace; width: 75mm; margin: 0; padding: 10px; font-size: 12px; line-height: 1.2; }
+    .text-center { text-align: center; }
+    .linha { border-top: 1px dashed #000; margin: 5px 0; }
+    .flex { display: flex; justify-content: space-between; }
+    .total { font-weight: bold; font-size: 14px; margin-top: 5px; }
+    .obs-box { background: #f5f5f5; padding: 5px; margin: 10px 0; border: 1px solid #ddd; font-style: italic; }
+    @media print { .btn-print { display: none; } }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="text-center">
+    <h2 style="margin: 0; color: #000;">QUERO LANCHES</h2>
+    <p style="margin: 0;"><%= @pedido.unidade&.upcase %></p>
+    <p style="margin: 0;"><%= @pedido.created_at.strftime("%d/%m/%Y %H:%M") %></p>
+  </div>
+
+  <div class="linha"></div>
+  <div class="text-center"><strong>PEDIDO #<%= @pedido.id %></strong></div>
+  <div class="linha"></div>
+
+  <div style="margin: 10px 0;">
+    <strong>Cliente:</strong> <%= @pedido.cliente_nome.presence || "Não identificado" %>
+  </div>
+
+  <div class="flex">
+    <span>Item</span>
+    <span>Valor</span>
+  </div>
+  <div class="flex">
+    <span><%= @pedido.produto&.nome %> (x<%= @pedido.quantidade %>)</span>
+    <span>R$ <%= number_with_precision(@pedido.valor_total, precision: 2) %></span>
+  </div>
+
+  <% if @pedido.observacao.present? %>
+    <div class="obs-box">
+      <strong>Obs:</strong> <%= @pedido.observacao %>
+    </div>
+  <% end %>
+
+  <div class="linha"></div>
+  
+  <div class="flex total">
+    <span>TOTAL DO PEDIDO:</span>
+    <span>R$ <%= number_with_precision(@pedido.valor_total, precision: 2) %></span>
+  </div>
+
+  <div style="margin-top: 8px; font-size: 11px;">
+    <strong>Pagamento efetuado:</strong><br>
+    
+    <% d = @pedido.pago_dinheiro.to_f %>
+    <% p = @pedido.pago_pix.to_f %>
+    <% deb = @pedido.pago_cartao_debito.to_f %>
+    <% cre = @pedido.pago_cartao_credito.to_f %>
+    <% total_recebido = d + p + deb + cre %>
+
+    <% if d > 0 %> <div class="flex"><span>- Dinheiro:</span><span>R$ <%= number_with_precision(d, precision: 2) %></span></div> <% end %>
+    <% if p > 0 %> <div class="flex"><span>- Pix:</span><span>R$ <%= number_with_precision(p, precision: 2) %></span></div> <% end %>
+    <% if deb > 0 %> <div class="flex"><span>- Débito:</span><span>R$ <%= number_with_precision(deb, precision: 2) %></span></div> <% end %>
+    <% if cre > 0 %> <div class="flex"><span>- Crédito:</span><span>R$ <%= number_with_precision(cre, precision: 2) %></span></div> <% end %>
+  </div>
+
+  <% if total_recebido > @pedido.valor_total %>
+    <div class="flex" style="margin-top: 5px; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 5px;">
+      <span>TROCO:</span>
+      <span>R$ <%= number_with_precision(total_recebido - @pedido.valor_total, precision: 2) %></span>
+    </div>
+  <% end %>
+
+  <div class="linha"></div>
+
+  <div class="text-center" style="margin-top: 15px; font-size: 10px;">
+    Atendente: <%= @pedido.funcionario&.nome %><br>
+    Turno: <%= @pedido.turno&.titleize || "Geral" %><br>
+    --- OBRIGADO E VOLTE SEMPRE ---
+  </div>
+
+  <div class="text-center btn-print" style="margin-top: 20px;">
+    <button onclick="window.close()" style="padding: 10px; cursor: pointer; border-radius: 5px;">Fechar Janela</button>
+  </div>
+</body>
+</html>

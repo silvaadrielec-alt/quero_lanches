@@ -1,0 +1,28 @@
+<div class="card-principal" style="max-width: 600px; margin: 40px auto; font-family: sans-serif; text-align: center;">
+  <h1 style="color: #333;">Atualizar Quantidades</h1>
+  <h3 style="color: #D71920;"><%= @produto.nome %></h3>
+
+  <%= form_with(model: @produto, url: estoque_path(@produto), method: :patch, local: true) do |f| %>
+    
+    <div style="margin-bottom: 20px; text-align: left;">
+      <%= f.label :quantidade_centro, "Quantidade no Centro:", style: "display: block; font-weight: bold;" %>
+      <%= f.number_field :estoque_centro, class: "form-control", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div style="margin-bottom: 20px; text-align: left;">
+      <%= f.label :quantidade_pavilhao_novo, "Quantidade Pavilhão Novo:", style: "display: block; font-weight: bold;" %>
+      <%= f.number_field :estoque_pavilhao_novo, class: "form-control", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div style="margin-bottom: 30px; text-align: left;">
+      <%= f.label :quantidade_pavilhao_antigo, "Quantidade Pavilhão Antigo:", style: "display: block; font-weight: bold;" %>
+      <%= f.number_field :estoque_pavilhao_antigo, class: "form-control", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: center;">
+      <%= f.submit "SALVAR ESTOQUE", style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;" %>
+      <%= link_to "CANCELAR", estoques_path, style: "color: #0000FF; text-decoration: underline; padding-top: 10px;" %>
+    </div>
+    
+  <% end %>
+</div>

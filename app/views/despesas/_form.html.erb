@@ -1,0 +1,69 @@
+<%= form_with(model: despesa, id: "form-despesa") do |form| %>
+  <% if despesa.errors.any? %>
+    <div style="color: white; background: #D71920; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+      <h2 style="font-size: 1.1em;"><%= despesa.errors.count %> erro(s) ao salvar despesa:</h2>
+      <ul>
+        <% despesa.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :descricao, "Descrição da Despesa", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.text_field :descricao, placeholder: "Ex: Conta de Luz Maio", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :categoria, "Categoria", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.select :categoria, 
+        ["Água/Luz/Internet", "Pagamento Funcionário", "Compra de Mercadoria", "Produtos de Limpeza", "Serviços de Limpeza", "Outros"], 
+        { prompt: "Selecione o tipo de gasto" }, 
+        { style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :valor, "Valor (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.number_field :valor, step: 0.01, placeholder: "0,00", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :data_pagamento, "Data do Pagamento/Vencimento", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.date_field :data_pagamento, value: (despesa.data_pagamento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+    <%= form.check_box :pago, style: "width: 20px; height: 20px; cursor: pointer;" %>
+    <%= form.label :pago, "Esta despesa já foi paga?", style: "font-weight: bold; color: #333; cursor: pointer;" %>
+  </div>
+
+  <div style="text-align: center;">
+    <%# Botão personalizado que chama a função de validação %>
+    <button type="button" onclick="validarAcessoDespesa()" style="width: 100%; padding: 15px; background-color: #D71920; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+      SALVAR DESPESA
+    </button>
+  </div>
+<% end %>
+
+<script>
+function validarAcessoDespesa() {
+  // Verifica se o usuário logado é admin
+  const ehAdmin = <%= current_funcionario.admin? %>;
+  const formulario = document.getElementById('form-despesa');
+
+  if (ehAdmin) {
+    // Se for o Davi, salva direto
+    formulario.submit();
+  } else {
+    // Se for funcionário comum, pede o código
+    const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o código de segurança para registrar a despesa:");
+    
+    if (codigo === "1234") {
+      formulario.submit();
+    } else if (codigo !== null) {
+      alert("Código Inválido! Registro cancelado.");
+    }
+  }
+}
+</script>

@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  descricao: MyString
+  categoria: MyString
+  valor: 9.99
+  data_pagamento: 2026-05-07
+  pago: false
+
+two:
+  descricao: MyString
+  categoria: MyString
+  valor: 9.99
+  data_pagamento: 2026-05-07
+  pago: false

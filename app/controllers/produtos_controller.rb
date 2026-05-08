@@ -6,12 +6,15 @@ class ProdutosController < ApplicationController
   # GET /produtos or /produtos.json
   def index
   if params[:query].present?
-    # Busca o termo em todos os produtos, independente de ser Venda ou Insumo
     termo = "%#{params[:query].downcase}%"
-    @produtos = Produto.where("lower(nome) LIKE ?", termo)
+    base = Produto.where("lower(nome) LIKE ?", termo)
   else
-    @produtos = Produto.all
+    base = Produto.all
   end
+
+  # Agora dividimos o resultado da busca (ou a lista completa) em dois
+  @produtos_venda = base.where(categoria: "Venda")
+  @insumos = base.where(categoria: "Insumo")
 end
 
   # GET /produtos/1 or /produtos/1.json
@@ -76,7 +79,7 @@ private
   end
 
   def produto_params
-    params.require(:produto).permit(:nome, :valor_unitario, :preco_venda, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo, :categoria, :unidade_medida)
+    params.require(:produto).permit(:nome, :valor_unitario, :preco_venda, :categoria, :unidade_medida, :media_unidades_kg, :estoque_minimo, :limite_centro, :limite_pavilhao_novo, :limite_pavilhao_antigo)
   end
 
   # Adicione o método aqui, antes do último 'end'

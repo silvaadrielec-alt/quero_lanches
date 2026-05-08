@@ -1,7 +1,7 @@
 <%= form_with(model: produto) do |form| %>
   <% if produto.errors.any? %>
-    <div style="color: red">
-      <h2><%= produto.errors.count %> <%= produto.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este produto:</h2>
+    <div style="color: red; margin-bottom: 20px; font-family: sans-serif;">
+      <h2><%= produto.errors.count %> <%= produto.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar:</h2>
       <ul>
         <% produto.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -10,94 +10,100 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :nome, style: "display: block" %>
-    <%= form.text_field :nome %>
+  <%# 1. NOME %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :nome, "Nome do Produto/Insumo", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.text_field :nome, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
   </div>
 
-  <%# Campo de Custo (O que você paga/gasta) %>
-<div style="margin-bottom: 20px;">
-  <%= form.label :valor_unitario, "Valor de Custo (Compra/Produção)" %>
-  <%= form.number_field :valor_unitario, step: 0.01, class: "form-control" %>
-</div>
-
-<%# Campo de Venda (O que o aluno paga) %>
-<div style="margin-bottom: 20px;">
-  <%= form.label :preco_venda, "Preço de Venda" %>
-  <%= form.number_field :preco_venda, step: 0.01, class: "form-control" %>
-</div>
-
- <div class="field" style="margin-bottom: 20px;">
-  <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold;" %>
-  <%= form.select :categoria, ["Venda", "Insumo"], {}, id: "select-tipo-produto", class: "input-estilizado", style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc;" %>
- </div>
-
- <div id="quadro-inventario" style="background: #fdf8f5; padding: 20px; border-radius: 12px; border: 1px solid #eeb989; margin-bottom: 25px;">
-    <h5 style="margin-top: 0; color: #D71920; margin-bottom: 15px;">Controle de Inventário e Unidades</h5>
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-      <div style="flex: 2; min-width: 200px;">
-        <%= form.label :unidade_medida, "Como você conta este item?", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
-        <%= form.select :unidade_medida, 
-            ['unidade', 'fatia', 'folha', 'rodela', 'kg', 'litro', 'gramas', 'ml'], 
-            { prompt: 'Selecione a unidade' }, 
-            { style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" } %>
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 140px;">
-        <%= form.label :estoque_centro, "Qtd. Matriz", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
-        <%= form.number_field :estoque_centro, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 50" %>
-      </div>
-
-      <div style="flex: 1; min-width: 140px;">
-        <%= form.label :estoque_pavilhao_novo, "Qtd. Pav. Novo", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
-        <%= form.number_field :estoque_pavilhao_novo, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 30" %>
-      </div>
-
-      <div style="flex: 1; min-width: 140px;">
-        <%= form.label :estoque_pavilhao_antigo, "Qtd. Pav. Antigo", style: "font-weight: bold; display: block; margin-bottom: 5px;" %>
-        <%= form.number_field :estoque_pavilhao_antigo, step: :any, style: "width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;", placeholder: "Ex: 20" %>
-      </div>
-    </div>
-
-    <p style="margin-top: 15px; font-size: 0.85em; color: #666; line-height: 1.4;">
-      <strong>💡 Dica de Ouro:</strong> Para facilitar, converta o que comprou para a unidade de uso. <br>
-      <em>Exemplo: Se comprou 1kg de queijo e ele rende 50 fatias, registre "50" na unidade correspondente.</em>
-    </p>
+  <%# 2. CATEGORIA - Adicionado ID para o JavaScript %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.select :categoria, ["Venda", "Insumo"], { prompt: "Selecione o tipo" }, { id: "select-categoria", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
   </div>
 
- <div style="margin-top: 35px; text-align: center;">
-    <%= form.submit "SALVAR ITEM NO ESTOQUE", class: "btn-quero", style: "padding: 15px 40px; cursor: pointer; border: none; width: 100%; max-width: 400px;" %>
+  <%# 3. UNIDADE DE MEDIDA %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.select :unidade_medida, 
+        ['unidade', 'fatia', 'folha', 'rodela', 'kg', 'litro', 'gramas', 'ml'], 
+        { prompt: 'Como este item é contado?' }, 
+        { style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
+  </div>
+
+  <%# NOVO CAMPO: MÉDIA POR KG - Adicionado ID e display inicial none %>
+  <div id="bloco-media" style="margin-bottom: 20px; background-color: #fcf3cf; padding: 10px; border-radius: 8px; border: 1px dashed #f39c12; display: none;">
+    <%= form.label :media_unidades_kg, "Média do item por kg ou litro(Tradução)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.number_field :media_unidades_kg, step: 0.01, placeholder: "Ex: 4.5 para laranjas ou 50 para fatias", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    <small style="color: #666;">Preencha apenas se o item for comprado em KG mas usado em unidade/fatia/rodela.</small>
+  </div>
+
+  <%# 4. VALOR DE CUSTO %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :valor_unitario, "Valor de Custo (Compra/Produção)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+  </div>
+
+  <%# 5. PREÇO DE VENDA %>
+  <div style="margin-bottom: 30px;">
+    <%= form.label :preco_venda, "Preço de Venda (Para o Cliente)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+  </div>
+
+  <%# LIMITES %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #D2B4DE; padding-bottom: 15px;">
+    <div>
+      <%= form.label :limite_centro, "Mínimo Matriz", style: "color: #7D3C98; font-weight: bold;" %>
+      <%= form.number_field :limite_centro, class: "form-control" %>
+    </div>
+    <div>
+      <%= form.label :limite_pavilhao_novo, "Mínimo Pav. Novo", style: "color: #7D3C98; font-weight: bold;" %>
+      <%= form.number_field :limite_pavilhao_novo, class: "form-control" %>
+    </div>
+    <div>
+      <%= form.label :limite_pavilhao_antigo, "Mínimo Pav. Antigo", style: "color: #7D3C98; font-weight: bold;" %>
+      <%= form.number_field :limite_pavilhao_antigo, class: "form-control" %>
+    </div>
+  </div>
+
+  <%# BOTÃO DE SALVAR %>
+  <div style="text-align: center;">
+    <%= form.submit "SALVAR DADOS DO PRODUTO", class: "btn-quero", style: "padding: 15px 40px; cursor: pointer; border: none; width: 100%; max-width: 400px; font-weight: bold;" %>
     
     <div style="margin-top: 25px;">
-      <%= link_to "← VOLTAR PARA O ESTOQUE", produtos_path, style: "color: #007bff; text-decoration: underline; font-weight: 400;" %>
+      <%= link_to "← VOLTAR PARA O CADASTRO", produtos_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
     </div>
   </div>
 <% end %>
+
 <script>
-  document.addEventListener('turbo:load', function() {
-    const selectTipo = document.getElementById('select-tipo-produto');
-    const campoVenda = document.getElementById('campo-preco-venda');
-    const quadroEstoque = document.getElementById('quadro-inventario');
+  // Esta função contém a lógica de esconder/mostrar
+  function gerenciarCampoMedia() {
+    const selectCategoria = document.getElementById("select-categoria");
+    const blocoMedia = document.getElementById("bloco-media");
 
-    if (!selectTipo) return; // Segurança caso o elemento não exista
-
-    function gerenciarCampos() {
-      if (selectTipo.value === 'Venda') {
-        campoVenda.style.display = 'block';   // Mostra Preço
-        quadroEstoque.style.display = 'none'; // Esconde Unidades
-      } else if (selectTipo.value === 'Insumo') {
-        campoVenda.style.display = 'none';    // Esconde Preço
-        quadroEstoque.style.display = 'block';// Mostra Unidades
+    if (selectCategoria && blocoMedia) {
+      if (selectCategoria.value === "Insumo") {
+        blocoMedia.style.display = "block";
       } else {
-        campoVenda.style.display = 'none';
-        quadroEstoque.style.display = 'none';
+        blocoMedia.style.display = "none";
       }
     }
+  }
 
-    selectTipo.addEventListener('change', gerenciarCampos);
-    gerenciarCampos(); // Executa ao abrir a tela (importante para edição)
+  // O "turbo:load" é o segredo! Ele avisa o JS que a página mudou, mesmo com o Turbo ativo
+  document.addEventListener("turbo:load", function() {
+    const selectCategoria = document.getElementById("select-categoria");
+    
+    if (selectCategoria) {
+      // 1. Executa assim que a página carrega
+      gerenciarCampoMedia();
+
+      // 2. Executa toda vez que o usuário mudar a seleção
+      selectCategoria.addEventListener("change", gerenciarCampoMedia);
+    }
   });
+
+  // Garante que funcione também em navegadores ou versões sem Turbo
+  document.addEventListener("DOMContentLoaded", gerenciarCampoMedia);
 </script>

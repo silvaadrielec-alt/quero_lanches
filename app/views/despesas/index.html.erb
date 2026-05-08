@@ -1,0 +1,100 @@
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center;">
+  
+  <%# Título Centralizado em Vermelho (Igual ao Histórico de Pedidos) %>
+  <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 20px;">
+  Gestão de Despesas <%= "(#{session[:unidade_atual]})" if session[:unidade_atual].present? %>
+</h1>
+
+  <%# Botão Estilo Pílula Vermelha %>
+  <div style="margin-bottom: 30px;">
+    <%= link_to "+ Registrar Novo Gasto", new_despesa_path, 
+        style: "background: #D71920; color: white; padding: 12px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 1.1em; display: inline-block; box-shadow: 0 4px 15px rgba(215, 25, 32, 0.3);" %>
+  </div>
+
+  <%# Container com Borda Vermelha Fina %>
+  <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
+    
+    <%# Resumo de Saídas alinhado à direita %>
+    <div style="text-align: right; margin-bottom: 20px;">
+        <span style="color: #D71920; font-weight: bold;">Total de Saídas:</span>
+        <strong style="font-size: 2.2em; display: block; color: #333;">
+          R$ <%= number_with_precision(@total_despesas, precision: 2) %>
+        </strong>
+        <hr style="border: 0; border-top: 1px solid #D71920; margin-top: 10px;">
+    </div>
+
+    <%# Tabela com cabeçalho vermelho sólido arredondado %>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+        <thead>
+          <tr style="background-color: #D71920; color: white;">
+            <th style="padding: 15px; text-align: left; border-radius: 10px 0 0 10px; font-size: 0.9em;">DATA</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em;">DESCRIÇÃO</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em;">CATEGORIA</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em;">RESPONSÁVEL</th>
+            <th style="padding: 15px; text-align: right; font-size: 0.9em;">VALOR</th>
+            <th style="padding: 15px; text-align: center; border-radius: 0 10px 10px 0; font-size: 0.9em;">AÇÕES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @despesas.each do |despesa| %>
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0;"><%= despesa.data_pagamento&.strftime("%d/%m/%Y") %></td>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0;"><strong><%= despesa.descricao %></strong></td>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0;">
+                <span style="color: #666; font-size: 0.9em;"><%= despesa.categoria %></span>
+              </td>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; color: #666;"><%= despesa.funcionario&.nome %></td>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: right; font-weight: bold;">
+                R$ <%= number_with_precision(despesa.valor, precision: 2) %>
+              </td>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center;">
+                <%= link_to "Detalhes", despesa, style: "color: #0000FF; text-decoration: underline; margin-right: 10px; font-size: 0.9em;" %>
+                <button onclick="confirmarExclusaoDespesa(<%= despesa.id %>)" style="background: none; border: none; color: #0000FF; text-decoration: underline; cursor: pointer; font-size: 0.9em;">Excluir</button>
+              </td>
+            </tr>
+          <% end %>
+
+          <% if @despesas.empty? %>
+            <tr>
+              <td colspan="6" style="padding: 60px; text-align: center; color: #999; font-style: italic;">
+                Nenhuma despesa registrada para esta unidade.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%# Scripts de segurança (mantidos iguais) %>
+<script>
+function confirmarExclusaoDespesa(id) {
+  const ehAdmin = <%= current_funcionario.admin? %>;
+  if (ehAdmin) {
+    processarExclusao(id);
+  } else {
+    const codigo = prompt("AUTORIZAÇÃO NECESSÁRIA\nDigite o código de gerente:");
+    if (codigo === "1234") {
+      processarExclusao(id);
+    } else if (codigo !== null) {
+      alert("Código incorreto!");
+    }
+  }
+}
+
+function processarExclusao(id) {
+  if (confirm("Deseja realmente apagar esta despesa?")) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/despesas/' + id;
+    form.innerHTML = `
+      <input type="hidden" name="_method" value="delete">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script>

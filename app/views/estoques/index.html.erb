@@ -1,0 +1,35 @@
+<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
+  <h1 style="color: #D71920; margin-bottom: 30px; font-family: sans-serif; font-weight: bold;">
+    Gestão de Quantidades (Estoque)
+  </h1>
+
+  <div style="margin-bottom: 30px; text-align: center;">
+  <%# Padronizando com ID e função de estoque, mas com o visual azul largo %>
+  <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
+         style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+</div>
+
+  <%# --- SEÇÃO DE PRODUTOS PARA VENDA --- %>
+  <h2 style="color: #D71920; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 5px;">Itens de Venda</h2>
+  <%= render 'tabela_estoque', colecao: @produtos_venda %>
+
+  <div style="margin: 60px 0;"></div>
+
+  <%# --- SEÇÃO DE INSUMOS --- %>
+  <h2 style="color: #D71920; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 5px;">Matéria-Prima (Insumos)</h2>
+  <%= render 'tabela_estoque', colecao: @insumos %>
+
+</div>
+
+<script>
+  // Função de filtro atualizada para funcionar com as duas tabelas
+  function filtrarEstoque() {
+    var input = document.getElementById("buscaEstoque");
+    var filter = input.value.toUpperCase();
+    var rows = document.querySelectorAll(".linha-estoque");
+    rows.forEach(row => {
+      var text = row.querySelector("td").textContent.toUpperCase();
+      row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+    });
+  }
+</script>

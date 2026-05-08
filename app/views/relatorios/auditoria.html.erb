@@ -1,0 +1,67 @@
+<style>
+  .status-entrada { color: #28a745; font-weight: bold; } /* Verde para reposição/estorno */
+  .status-saida { color: #d71920; font-weight: bold; }   /* Vermelho para vendas */
+  .tabela-auditoria { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+  .tabela-auditoria th { background: #333; color: white; padding: 12px; text-align: left; text-transform: uppercase; font-size: 0.85em; }
+  .tabela-auditoria td { padding: 12px; border-bottom: 1px solid #eee; font-family: sans-serif; }
+  .tabela-auditoria tr:hover { background: #fff9f9; }
+  .badge-unidade { background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; color: #555; }
+</style>
+
+<div style="padding: 30px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #D71920; padding-bottom: 10px; margin-bottom: 20px;">
+    <h2 style="color: #7D3C98; margin: 0;">
+       Painel de Auditoria e Rastreabilidade
+    </h2>
+    <span style="background: #D71920; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold;">
+      ESTOQUE EM TEMPO REAL
+    </span>
+  </div>
+  
+  <p style="color: #666;">Este log registra todas as baixas automáticas de vendas (Saídas) e reposições manuais ou estornos (Entradas).</p>
+
+  <table class="tabela-auditoria">
+    <thead>
+      <tr>
+        <th>Data/Hora</th>
+        <th>Responsável</th>
+        <th>Unidade</th>
+        <th>Item / Insumo</th>
+        <th>Ação</th>
+        <th>Qtd</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @movimentacoes.each do |log| %>
+        <tr>
+          <td style="color: #888; font-size: 0.9em;"><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
+          
+          <%# Responsável: Tenta pegar o nome do funcionário ou mostra 'Sistema' %>
+          <td><strong><%= log.funcionario&.nome || "Sistema" %></strong></td>
+          
+          <td><span class="badge-unidade"><%= log.unidade&.upcase %></span></td>
+          
+          <%# Item: Tenta pegar o nome do produto associado %>
+          <td><%= log.produto&.nome || "Item removido" %></td>
+          
+          <%# Ação: Lógica de cores baseada em 'tipo_movimentacao' %>
+          <% status_classe = log.tipo_movimentacao.to_s.upcase.include?('ENTRADA') ? 'status-entrada' : 'status-saida' %>
+          <td class="<%= status_classe %>">
+            <%= log.tipo_movimentacao.to_s.upcase %>
+          </td>
+          
+          <td style="font-weight: bold;">
+            <%= log.quantidade %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  
+  <div style="margin-top: 25px; display: flex; gap: 10px;">
+    <%= link_to exportar_auditoria_path(format: :csv), class: "btn-exportar", style: "background: #1D6F42; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;" do %>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Exportar Excel (.CSV)
+    <% end %>
+  </div>
+</div>

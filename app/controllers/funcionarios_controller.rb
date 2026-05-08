@@ -1,11 +1,37 @@
 class FuncionariosController < ApplicationController
   before_action :authenticate_funcionario!
-  before_action :verificar_admin, except: [:new, :create]
+  # Liberamos o checkin e o confirmar_checkin para todos os funcionários!
+  before_action :verificar_admin, except: [:new, :create, :checkin, :confirmar_checkin]
   before_action :set_funcionario, only: %i[ show edit update destroy ]
 
   def index
     @funcionarios = Funcionario.all
   end
+
+  # --- MÉTODOS DE CHECK-IN ---
+
+  def checkin
+    # Apenas renderiza a view app/views/funcionarios/checkin.html.erb
+  end
+
+  def confirmar_checkin
+    unidade = params[:unidade]
+    turno = params[:turno]
+    codigo = params[:codigo_gerente]
+
+    # Validação: Se a unidade for diferente da habitual, exige o código 1234
+    if unidade != current_funcionario.unidade && codigo != "1234"
+      redirect_to checkin_path, alert: "Código de autorização inválido para troca de unidade!"
+    else
+      # Salva na sessão do navegador (fica guardado enquanto o usuário estiver logado)
+      session[:unidade_atual] = unidade
+      session[:turno_atual] = turno
+      
+      redirect_to root_path, notice: "Entrada confirmada! Bom trabalho, #{current_funcionario.nome}."
+    end
+  end
+
+  # --- FIM DOS MÉTODOS DE CHECK-IN ---
 
   def show
   end
@@ -19,23 +45,14 @@ class FuncionariosController < ApplicationController
 
   def create
     @funcionario = Funcionario.new(funcionario_params)
-
     if @funcionario.save
       redirect_to funcionarios_path, notice: "Funcionário cadastrado com sucesso!"
     else
-      # Isso ajuda a ver o erro caso falte algo (ex: senha curta)
       render :new, status: :unprocessable_entity
     end
   end
 
-  # --- ADICIONE DAQUI PARA BAIXO ---
-
-  def edit
-    # Apenas abre o formulário de edição
-  end
-
   def update
-    # Se você não quiser exigir a senha na hora de mudar apenas o e-mail:
     params_para_atualizar = funcionario_params
     if params_para_atualizar[:password].blank?
       params_para_atualizar.delete(:password)
@@ -61,12 +78,11 @@ class FuncionariosController < ApplicationController
   end
 
   def funcionario_params
-    # Usando require/permit que é o mais seguro para evitar conflitos
-    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin)
+    # Adicionamos :unidade aqui para permitir o cadastro/edição da unidade base
+    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade)
   end
 
   def verificar_admin
-    # Forma mais simples e que não gera erro de sintaxe
     if current_funcionario.nil? || current_funcionario.admin != true
       redirect_to root_path, alert: "Acesso restrito apenas para administradores!"
     end

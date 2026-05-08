@@ -1,9 +1,8 @@
 <%= form_with(model: pedido) do |form| %>
   <% if pedido.errors.any? %>
-    <div style="color: red">
-      <h2><%= pedido.errors.count %> <%= pedido.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar este pedido:</h2>
-
-      <ul>
+    <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+      <h2 style="font-size: 1.1em;"><%= pedido.errors.count %> <%= pedido.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar:</h2>
+      <ul style="font-size: 0.9em;">
         <% pedido.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -13,73 +12,175 @@
 
   <div style="margin-bottom: 15px;">
     <%= form.label :produto_id, "Selecione o Lanche", style: "display: block; font-weight: bold; color: #D71920;" %>
-    <%# Aqui injetamos o preço no atributo data-price de cada opção %>
     <%= form.select :produto_id, Produto.where(categoria: ["Venda", nil]).map { |p| [p.nome, p.id, { 'data-price': p.preco_venda }] }, { prompt: "Escolha um produto" }, { id: "select-produto", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px;" } %>
   </div>
 
-  <div id="ingredientes-checkout" style="margin-top: 15px; padding: 10px; border: 1px dashed #ccc; display: none;">
-   <strong>Deseja remover algum item?</strong>
-   <div id="lista-ingredientes">
-    </div>
-</div>
+  <div id="ingredientes-checkout" style="margin-top: 15px; padding: 10px; border: 1px dashed #ccc; display: none; background: #fff;">
+    <strong>Deseja remover algum item?</strong>
+    <div id="lista-ingredientes" style="margin-top: 5px;"></div>
+  </div>
 
- <div class="field" style="margin-bottom: 15px;">
-  <%= form.label :cliente_nome, "Identificação (Nome ou Nº do Pedido)", style: "display: block; font-weight: bold; color: var(--vermelho-quero);" %>
-  <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Cliente", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-</div>
+  <div class="field" style="margin-bottom: 15px;">
+    <%= form.label :cliente_nome, "Identificação (Nome ou Nº do Pedido)", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Cliente", class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
 
   <div class="field" style="margin-bottom: 15px; opacity: 0.8;">
-  <label style="color: #D71920; font-weight: bold;">Atendente:</label>
-  <p style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-    <%= current_funcionario.nome %>
-  </p>
-</div>
-
-  <div style="margin-bottom: 15px;">
-  <%= form.label :quantidade, "Quantidade / Peso", style: "display: block; font-weight: bold; color: #D71920;" %>
-  <%= form.number_field :quantidade, id: "input-quantidade", step: :any, value: 1, min: 0.01, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-</div>
-
-<div>
-  <%= form.label :unidade, "Unidade da Venda", style: "display: block; font-weight: bold;" %>
-  <%= form.select :unidade, 
-      [["Matriz Centro", "centro"], ["Pavilhão Novo", "pavilhao_novo"], ["Pavilhão Antigo", "pavilhao_antigo"]], 
-      { prompt: "Selecione a Unidade" }, 
-      { style: "width: 100%; padding: 8px; border-radius: 10px; border: 1px solid #ccc; margin-bottom: 15px;" } %>
-</div>
-
-  <div style="margin-bottom: 15px;">
-    <%= form.label :valor_total, "Valor Total (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
-    <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; background-color: #eee;", placeholder: "0,00" %>
-    <small style="color: #666;">Cálculo automático baseado no preço de venda.</small>
+    <label style="color: #D71920; font-weight: bold;">Atendente:</label>
+    <p style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin: 5px 0;">
+      <%= current_funcionario.nome %>
+    </p>
   </div>
+
+  <%# --- CAMPO DINÂMICO DE TAMANHO --- %>
+  <div id="campo-tamanho" style="margin-bottom: 15px; display: none;">
+    <%= form.label :tamanho, "Tamanho / Volume", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.select :tamanho, 
+        [["Copo 200ml", "Copo 200ml"], ["Copo 300ml", "Copo 300ml"], ["Copo 500ml", "Copo 500ml"], ["Jarra 1L", "Jarra 1L"]], 
+        { prompt: "Selecione o tamanho" }, 
+        { class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :quantidade, "Quantidade de Itens", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.number_field :quantidade, id: "input-quantidade", step: 1, value: 1, min: 1, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px; border-left: 6px solid #28a745; display: flex; align-items: center; justify-content: space-between;">
+  <div>
+    <p style="margin: 0; color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">📍 Posto de Atendimento Ativo</p>
+    <h4 style="margin: 5px 0; color: #333; font-family: sans-serif;">
+      <%= unidade_trabalho_atual&.gsub('_', ' ')&.upcase %> 
+      <span style="color: #ccc; margin: 0 10px;">|</span> 
+      <span style="color: #28a745;">Turno: <%= turno_trabalho_atual&.gsub('_', ' ')&.titleize %></span>
+    </h4>
+  </div>
+  
+  <div style="text-align: right;">
+    <span style="background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold;">
+      ✓ Autenticado
+    </span>
+  </div>
+
+  <%# Campos ocultos: garantem que o Rails salve a unidade e o turno no banco de dados %>
+  <%= form.hidden_field :unidade, value: unidade_trabalho_atual %>
+  <%= form.hidden_field :turno, value: turno_trabalho_atual %>
+</div>
+
+  <div style="margin-bottom: 15px; background: #fff5f5; padding: 15px; border-radius: 10px; border: 1px solid #ffcccc;">
+    <%= form.label :valor_total, "VALOR TOTAL DO PEDIDO", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; font-size: 1.5em; font-weight: bold; color: #28a745; background: none; border: none;", placeholder: "0,00" %>
+  </div>
+
+  <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #ddd;">
+    <h4 style="margin: 0 0 15px 0; color: #333;">Formas de Pagamento (Grupo)</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <div>
+        <label style="font-size: 0.9em; font-weight: bold;">Dinheiro</label>
+        <%= form.number_field :pago_dinheiro, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+      </div>
+      <div>
+        <label style="font-size: 0.9em; font-weight: bold;">Pix</label>
+        <%= form.number_field :pago_pix, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+      </div>
+      <div>
+        <label style="font-size: 0.9em; font-weight: bold;">Débito</label>
+        <%= form.number_field :pago_cartao_debito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+      </div>
+      <div>
+        <label style="font-size: 0.9em; font-weight: bold;">Crédito</label>
+        <%= form.number_field :pago_cartao_credito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" %>
+      </div>
+    </div>
+
+    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; text-align: right;">
+      <strong style="color: #555;">Troco (Dinheiro):</strong>
+      <span id="label-troco" style="font-size: 1.2em; font-weight: bold; color: #2e7d32; margin-left: 10px;">R$ 0,00</span>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 20px;">
+  <%= form.label :observacao, "Observações do Pedido", style: "display: block; font-weight: bold; color: #333;" %>
+  <%= form.text_area :observacao, rows: 3, placeholder: "Ex: Sem açúcar, troco para R$ 50, retirar no balcão...", 
+      style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-family: sans-serif;" %>
+</div>
 
   <div style="margin-top: 20px; text-align: center;">
-   <%= form.submit "FINALIZAR PEDIDO", class: "btn-quero", style: "width: 100%;" %>
+    <%= form.submit "FINALIZAR PEDIDO", class: "btn-quero", style: "width: 100%; padding: 15px; font-weight: bold;" %>
   </div>
 <% end %>
+
 <script>
   document.addEventListener("turbo:load", function() {
     const selectProduto = document.getElementById("select-produto");
     const inputQuantidade = document.getElementById("input-quantidade");
     const inputTotal = document.getElementById("input-total");
+    const inputsPagamento = document.querySelectorAll(".input-pagamento");
+    const labelTroco = document.getElementById("label-troco");
+    const campoTamanho = document.getElementById("campo-tamanho");
+    const selectTamanho = campoTamanho ? campoTamanho.querySelector("select") : null;
 
-    function calcularTotal() {
+    function gerenciarInterfaceEPagamento() {
+      if (!selectProduto) return;
+
       const selectedOption = selectProduto.options[selectProduto.selectedIndex];
-      const preco = parseFloat(selectedOption.getAttribute("data-price") || 0);
+      const nomeProduto = (selectedOption.text || "").toLowerCase();
+      
+      const precisaTamanho = nomeProduto.includes("suco") || 
+                             nomeProduto.includes("vitamina") || 
+                             nomeProduto.includes("açaí") || 
+                             nomeProduto.includes("copo") ||
+                             nomeProduto.includes("jarra") ||
+                             nomeProduto.includes(" ml") ||
+                             nomeProduto.includes(" kg");
+
+      let fator = 1.0;
+
+      if (campoTamanho) {
+        if (precisaTamanho) {
+          campoTamanho.style.display = "block";
+          const tamanhoSelecionado = selectTamanho ? selectTamanho.value : "";
+          if (tamanhoSelecionado === "Copo 200ml") fator = 0.2;
+          else if (tamanhoSelecionado === "Copo 300ml") fator = 0.3;
+          else if (tamanhoSelecionado === "Copo 500ml") fator = 0.5;
+          else if (tamanhoSelecionado === "Jarra 1L")   fator = 1.0;
+        } else {
+          campoTamanho.style.display = "none";
+          if (selectTamanho) selectTamanho.value = ""; 
+        }
+      }
+
+      const precoBase = parseFloat(selectedOption.getAttribute("data-price") || 0);
       const quantidade = parseFloat(inputQuantidade.value || 0);
       
-      const total = preco * quantidade;
+      const total = (precoBase * fator) * quantidade;
       inputTotal.value = total.toFixed(2);
+
+      let somatorioPago = 0;
+      inputsPagamento.forEach(input => {
+        somatorioPago += parseFloat(input.value || 0);
+      });
+
+      const troco = somatorioPago - total;
+      if (troco > 0) {
+        labelTroco.innerText = "R$ " + troco.toFixed(2).replace('.', ',');
+        labelTroco.style.color = "#2e7d32";
+      } else {
+        labelTroco.innerText = "R$ 0,00";
+        labelTroco.style.color = "#666";
+      }
     }
 
     if (selectProduto && inputQuantidade) {
-      selectProduto.addEventListener("change", calcularTotal);
-      inputQuantidade.addEventListener("input", calcularTotal);
+      selectProduto.addEventListener("change", gerenciarInterfaceEPagamento);
+      inputQuantidade.addEventListener("input", gerenciarInterfaceEPagamento);
+      if (selectTamanho) selectTamanho.addEventListener("change", gerenciarInterfaceEPagamento);
+      inputsPagamento.forEach(input => input.addEventListener("input", gerenciarInterfaceEPagamento));
+      gerenciarInterfaceEPagamento();
     }
   });
-</script>
-<script>
+
+  // Script dos ingredientes (Ajax) - AGORA DENTRO DA TAG CORRETA
   document.addEventListener("change", function(event) {
     if (event.target && event.target.id === "select-produto") {
       const produtoId = event.target.value;
@@ -87,27 +188,26 @@
       const lista = document.getElementById("lista-ingredientes");
 
       if (produtoId) {
-        // Busca os ingredientes do produto via JSON
         fetch(`/produtos/${produtoId}.json`)
           .then(response => response.json())
           .then(data => {
-            lista.innerHTML = "";
+            if (lista) lista.innerHTML = "";
             if (data.composicoes && data.composicoes.length > 0) {
-              container.style.display = "block";
+              if (container) container.style.display = "block";
               data.composicoes.forEach(comp => {
                 lista.innerHTML += `
                   <div style="margin: 5px 0;">
-                    <input type="checkbox" name="pedido[ingredientes_removidos][]" value="${comp.insumo_id}" checked>
-                    <label>${comp.insumo.nome} (${comp.quantidade} ${comp.unidade_medida_uso})</label>
+                    <input type="checkbox" name="pedido[ingredientes_removidos][]" value="${comp.insumo_id}">
+                    <label style="font-weight: normal;">Remover ${comp.insumo.nome}</label>
                   </div>
                 `;
               });
             } else {
-              container.style.display = "none";
+              if (container) container.style.display = "none";
             }
           });
       } else {
-        container.style.display = "none";
+        if (container) container.style.display = "none";
       }
     }
   });
