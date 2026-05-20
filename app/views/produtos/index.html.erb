@@ -2,9 +2,9 @@
   <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Cadastro de Produtos e Insumos</h1>
 
   <div style="margin-bottom: 30px; text-align: center;">
-  <input type="text" id="buscaProdutos" onkeyup="filtrarProdutos()" placeholder="🔍 Pesquisar por nome..." 
-         style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
-</div>
+    <input type="text" id="buscaProdutos" onkeyup="filtrarProdutos()" placeholder="🔍 Pesquisar por código ou nome..." 
+           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+  </div>
 
   <% if current_funcionario.admin? %>
     <div style="margin-bottom: 30px;">
@@ -15,24 +15,30 @@
 
  <div class="card-principal">
   <%# --- SEÇÃO 1: ITENS DE VENDA --- %>
-  <h2 style="text-align: left; margin-left: 20px; color: #D71920; border-bottom: 2px solid #D71920;">🛒 Produtos para Venda (Lanches e Bebidas)</h2>
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+  <h2 style="text-align: left; margin-left: 20px; color: #D71920; border-bottom: 2px solid #D71920;">Produtos para Venda (Lanches e Bebidas)</h2>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;" id="tabelaVendas">
     <thead>
       <tr style="background-color: #D71920; color: white;">
-        <th>Nome</th>
-        <th>Custo Base</th>
-        <th>Preço de Venda</th>
-        <th style="text-align: center;">Ações</th>
+        <th style="padding: 10px; text-align: left; padding-left: 20px;">Código</th>
+        <th style="padding: 10px; text-align: left;">Nome</th>
+        <th style="padding: 10px;">Custo Base</th>
+        <th style="padding: 10px;">Preço de Venda</th>
+        <th style="padding: 10px; text-align: center;">Ações</th>
       </tr>
     </thead>
     <tbody>
       <% @produtos_venda.each do |produto| %>
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="text-align: left; padding-left: 20px;"><strong><%= produto.nome %></strong></td>
+          <td style="text-align: left; padding-left: 20px; font-family: monospace; font-weight: bold; color: #555;">
+            <%= produto.codigo.present? ? produto.codigo : "---" %>
+          </td>
+          <td style="text-align: left;"><strong><%= produto.nome %></strong></td>
           <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ") %></td>
           <td><%= number_to_currency(produto.preco_venda, unit: "R$ ") %></td>
-          <td style="text-align: center;">
-            <%= link_to 'Ver Receita', produto_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
+          <td style="text-align: center; padding: 10px;">
+            <%# Mantemos apenas o link Detalhes unificado %>
+            <%= link_to 'Detalhes', produto_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
+            
             <% if current_funcionario.admin? %>
               <%= link_to 'Editar', edit_produto_path(produto), style: "color: #0000FF; text-decoration: underline;" %>
             <% end %>
@@ -43,21 +49,28 @@
   </table>
 
   <%# --- SEÇÃO 2: INSUMOS --- %>
-  <h2 style="text-align: left; margin-left: 20px; color: #555; border-bottom: 2px solid #555;">📦 Insumos (Matéria-Prima)</h2>
-  <table style="width: 100%; border-collapse: collapse;">
+  <h2 style="text-align: left; margin-left: 20px; color: #555; border-bottom: 2px solid #555;">Insumos (Matéria-Prima)</h2>
+  <table style="width: 100%; border-collapse: collapse;" id="tabelaInsumos">
     <thead>
       <tr style="background-color: #555; color: white;">
-        <th>Nome</th>
-        <th>Custo Unitário</th>
-        <th style="text-align: center;">Ações</th>
+        <th style="padding: 10px; text-align: left; padding-left: 20px;">Código</th>
+        <th style="padding: 10px; text-align: left;">Nome</th>
+        <th style="padding: 10px;">Custo Unitário</th>
+        <th style="padding: 10px; text-align: center;">Ações</th>
       </tr>
     </thead>
     <tbody>
       <% @insumos.each do |insumo| %>
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="text-align: left; padding-left: 20px;"><strong><%= insumo.nome %></strong></td>
+          <td style="text-align: left; padding-left: 20px; font-family: monospace; font-weight: bold; color: #555;">
+            <%= insumo.codigo.present? ? insumo.codigo : "---" %>
+          </td>
+          <td style="text-align: left;"><strong><%= insumo.nome %></strong></td>
           <td><%= number_to_currency(insumo.valor_unitario, unit: "R$ ") %></td>
-          <td style="text-align: center;">
+          <td style="text-align: center; padding: 10px;">
+            <%# Link Detalhes unificado para os Insumos %>
+            <%= link_to 'Detalhes', produto_path(insumo), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
+
             <% if current_funcionario.admin? %>
               <%= link_to 'Editar', edit_produto_path(insumo), style: "color: #0000FF; text-decoration: underline;" %>
             <% end %>
@@ -67,22 +80,23 @@
     </tbody>
   </table>
 </div>
+</div>
 
 <script>
 function filtrarProdutos() {
   var input = document.getElementById("buscaProdutos");
   var filter = input.value.toUpperCase();
-  
-  // Seleciona todas as linhas de corpo (tbody tr) das tabelas
   var rows = document.querySelectorAll("tbody tr");
 
   rows.forEach(function(row) {
-    // Pegamos o primeiro TD de cada linha (que é onde está o nome do produto)
-    var td = row.getElementsByTagName("td")[0];
-    if (td) {
-      var txtValue = td.textContent || td.innerText;
-      // Se o texto digitado estiver no nome, mostra a linha, senão esconde
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+    var tdCodigo = row.getElementsByTagName("td")[0];
+    var tdNome = row.getElementsByTagName("td")[1];
+    
+    if (tdCodigo && tdNome) {
+      var codigoTxt = tdCodigo.textContent || tdCodigo.innerText;
+      var nomeTxt = tdNome.textContent || tdNome.innerText;
+      
+      if (codigoTxt.toUpperCase().indexOf(filter) > -1 || nomeTxt.toUpperCase().indexOf(filter) > -1) {
         row.style.display = "";
       } else {
         row.style.display = "none";

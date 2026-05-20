@@ -1,16 +1,29 @@
-<h2>Forgot your password?</h2>
+<div class="card-principal" style="max-width: 450px; margin: 60px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0px 4px 20px rgba(0,0,0,0.08); font-family: sans-serif; text-align: left;">
+  
+  <h2 style="color: #333; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #D71920; padding-bottom: 10px;">
+     Esqueceu sua senha?
+  </h2>
+  
+  <p style="color: #666; font-size: 0.9em; margin-bottom: 25px;">
+    Insira o seu e-mail cadastrado abaixo para receber as instruções de redefinição de senha.
+  </p>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "funcionarios/shared/error_messages", resource: resource %>
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
+    <%= render "funcionarios/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+    <div style="margin-bottom: 20px;">
+      <%= f.label :email, "E-mail cadastrado", style: "display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 0.95em;" %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "exemplo@querolanches.com",
+          style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; outline: none; transition: border 0.2s;" %>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <%= f.submit "Enviar instruções de redefinição", 
+          style: "width: 100%; background: #D71920; color: white; border: none; padding: 14px; border-radius: 25px; font-size: 1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(215,25,32,0.15); font-family: sans-serif;" %>
+    </div>
+  <% end %>
+
+  <div style="text-align: center; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+    <%= render "funcionarios/shared/links" %>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Send me password reset instructions" %>
-  </div>
-<% end %>
-
-<%= render "funcionarios/shared/links" %>
+</div>

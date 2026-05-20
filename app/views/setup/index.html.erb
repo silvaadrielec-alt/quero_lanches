@@ -1,0 +1,53 @@
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #fdf8f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <div style="background: white; padding: 40px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 480px; border-top: 8px solid #D71920; text-align: center;">
+    
+    <div style="margin-bottom: 30px;">
+      <h2 style="color: #D71920; font-weight: bold; margin-bottom: 10px;">CONFIGURAÇÃO INICIAL</h2>
+      <p style="color: #666; font-size: 0.95em;">
+        Bem-vindo ao sistema! Identificamos que este é o <strong>primeiro acesso</strong>.<br>
+        Cadastre o Administrador Geral para começar a gerenciar a Quero Lanches.
+      </p>
+    </div>
+
+    <%= form_with model: Funcionario.new, url: criar_primeiro_admin_path, local: true do |f| %>
+      
+      <%# Exibição de erros caso o cadastro falhe (senha curta, etc) %>
+      <% if f.object.errors.any? %>
+        <div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9em; text-align: left;">
+          <strong>Ops! Verifique os erros abaixo:</strong>
+          <ul style="margin: 5px 0 0 20px; padding: 0;">
+            <% f.object.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div style="text-align: left; margin-bottom: 20px;">
+        <%= f.label :nome, "Nome do Administrador", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
+        <%= f.text_field :nome, placeholder: "Ex: Davi Quero Lanches", required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
+      </div>
+
+      <div style="text-align: left; margin-bottom: 20px;">
+        <%= f.label :email, "E-mail de Login", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
+        <%= f.email_field :email, placeholder: "admin@querolanches.com", required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
+      </div>
+
+      <div style="text-align: left; margin-bottom: 20px;">
+        <%= f.label :password, "Defina uma Senha", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
+        <%= f.password_field :password, required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
+      </div>
+
+      <div style="text-align: left; margin-bottom: 30px;">
+        <%= f.label :password_confirmation, "Confirme a Senha", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
+        <%= f.password_field :password_confirmation, required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
+      </div>
+
+      <%= f.submit "FINALIZAR E ENTRAR", style: "width: 100%; background: #28a745; color: white; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s;" %>
+    <% end %>
+
+    <p style="margin-top: 25px; font-size: 0.8em; color: #999;">
+      Este acesso é único. Após o primeiro cadastro, esta tela será desativada permanentemente por questões de segurança.
+    </p>
+  </div>
+</div>

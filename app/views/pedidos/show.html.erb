@@ -7,7 +7,7 @@
   <%# 1. BOTÃO DE IMPRESSÃO (Sempre livre) %>
   <%= link_to comprovante_pedido_path(@pedido), target: "_blank", 
       style: "background-color: #333; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px;" do %>
-    <span>🖨️ Imprimir Cupom</span>
+    <span> Imprimir Cupom</span>
   <% end %>
 
   <%# 2. BOTÃO DE EDIÇÃO (Protegido) %>
@@ -23,7 +23,7 @@
   <%# 3. BOTÃO DE CANCELAMENTO (Protegido e discreto) %>
   <button onclick="autorizarAcao('cancelar')" 
           style="background: none; border: none; color: #d9534f; cursor: pointer; text-decoration: underline; font-size: 0.9em;">
-    🚫 Cancelar este pedido
+     Cancelar este pedido
   </button>
 </div>
 
@@ -31,7 +31,7 @@
 <script>
 function autorizarAcao(acao) {
   // Verifica se o usuário logado é admin (Ruby injeta true/false aqui)
-  const ehAdmin = <%= current_funcionario.admin? %>;
+  const ehAdmin = <%= current_funcionario&.admin? || false %>;
 
   if (ehAdmin) {
     executarAcao(acao);

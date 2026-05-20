@@ -40,7 +40,26 @@
         Funcionario::UNIDADES, 
         { include_blank: "Selecione a Unidade Padrão" }, 
         { style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
-    <p style="font-size: 12px; color: #666; margin-top: 5px;">* Define em qual unidade este funcionário trabalha normalmente.</p>
+  </div>
+
+  <%# --- TURNO --- %>
+  <div style="margin-bottom: 20px;">
+    <%= f.label :turno, "Turno de Trabalho", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= f.select :turno, 
+        ["Manhã/Tarde", "Tarde/Noite", "Integral"], 
+        { include_blank: "Selecione o Turno" }, 
+        { style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
+    <p style="font-size: 12px; color: #666; margin-top: 5px;">* Define o horário de atuação do funcionário.</p>
+  </div>
+
+  <%# --- INTEGRADO: NOVO CAMPO CARGO / FUNÇÃO --- %>
+  <div style="margin-bottom: 20px;">
+    <%= f.label :cargo, "Cargo / Função", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= f.select :cargo, 
+        ["Gerente", "Caixa", "Atendente", "Auxiliar de Cozinha", "Serviços Gerais"], 
+        { include_blank: "Selecione o Cargo" }, 
+        { style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
+    <p style="font-size: 12px; color: #666; margin-top: 5px;">* Determina a função principal desempenhada na cantina.</p>
   </div>
 
   <div style="margin-bottom: 20px; padding: 10px; border: 1px dashed #D71920; border-radius: 8px; background-color: #fff;">
@@ -52,7 +71,7 @@
   </div>
 
   <div style="margin-top: 30px;">
-    <%= f.submit "SALVAR ALTERAÇÕES", class: "btn-quero", style: "width: 100%;" %>
+    <%= f.submit @funcionario.persisted? ? "SALVAR ALTERAÇÕES" : "CADASTRAR FUNCIONÁRIO", class: "btn-quero", style: "width: 100%;" %>
   </div>
 
 <% end %>

@@ -6,7 +6,8 @@
       <tr>
         <th>Nome do Colaborador</th>
         <th>E-mail</th>
-        <th>Cargo</th>
+        <th>Cargo / Função</th>
+        <th style="text-align: center;">Nível</th>
         <th style="text-align: center;">Ações</th>
       </tr>
     </thead>
@@ -15,12 +16,24 @@
         <tr>
           <td><strong><%= funcionario.nome %></strong></td>
           <td><%= funcionario.email %></td>
-          <td><%= funcionario.admin? ? "Administrador" : "Funcionário" %></td>
+          
+          <% # EXIBE O CARGO REAL SALVO NO BANCO %>
+          <td>
+            <strong style="color: #333;"><%= funcionario.cargo.present? ? funcionario.cargo.upcase : "NÃO DEFINIDO" %></strong>
+          </td>
+          
+          <% # ADICIONA UMA COLUNA DE NÍVEL DE ACESSO COM BADGES %>
           <td style="text-align: center;">
-          <%# Aplicando o azul padrão de navegação da Cantina Adri Lanches %>
-          <%= link_to 'Perfil', funcionario_path(funcionario), 
-          style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
-        </td>
+            <span style="background: <%= funcionario.admin? ? '#FFF0F0' : '#EFFFF0' %>; color: <%= funcionario.admin? ? '#D71920' : '#28a745' %>; padding: 4px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; border: 1px solid <%= funcionario.admin? ? '#FFDCDC' : '#D1F2D9' %>;">
+              <%= funcionario.admin? ? "GERÊNCIA" : "OPERACIONAL" %>
+            </span>
+          </td>
+
+          <td style="text-align: center;">
+            <%# Aplicando o azul padrão de navegação da Cantina Quero Lanches %>
+            <%= link_to 'Perfil', funcionario_path(funcionario), 
+                style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+          </td>
         </tr>
       <% end %>
     </tbody>

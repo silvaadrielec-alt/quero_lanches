@@ -17,10 +17,12 @@
 
       <div style="margin-bottom: 20px; text-align: left;">
         <%= f.label :turno, "Turno de Trabalho", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #444;" %>
-        <%= f.select :turno, [["Manhã/Tarde", "manha_tarde"], ["Tarde/Noite", "tarde_noite"]], {}, 
+        <%# Adicionado o turno Integral e padronizado os nomes %>
+        <%= f.select :turno, ["Manhã/Tarde", "Tarde/Noite", "Integral"], { selected: current_funcionario.turno }, 
             { style: "width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;" } %>
       </div>
 
+      <%# Esta div só aparece via JS para funcionários comuns fora do seu posto %>
       <div id="area-autorizacao" style="display: none; background: #fff3cd; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ffeeba;">
         <p style="color: #856404; font-size: 0.9em; margin-bottom: 10px;">⚠️ <strong>Atenção:</strong> Você está fora do seu posto padrão. Insira o Código do Gerente:</p>
         <%= f.password_field :codigo_gerente, placeholder: "Código de Autorização", id: "input-codigo", style: "width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" %>
@@ -33,14 +35,21 @@
 </div>
 
 <script>
-  // Capturamos a unidade original. Se for nula, tratamos como texto vazio.
   const unidadeOriginal = "<%= current_funcionario.unidade %>".trim();
+  const isAdmin = <%= current_funcionario.admin? %>; // Verifica se é admin diretamente do Rails
   const select = document.getElementById('unidade-select');
   const area = document.getElementById('area-autorizacao');
   const inputCodigo = document.getElementById('input-codigo');
 
   function validarUnidade() {
-    // Se o funcionário não tem unidade vinculada OU selecionou uma diferente da dele
+    // Se for Admin, a área nunca deve aparecer
+    if (isAdmin) {
+      area.style.display = "none";
+      inputCodigo.required = false;
+      return; 
+    }
+
+    // Lógica para funcionários comuns
     if (unidadeOriginal === "" || select.value !== unidadeOriginal) {
       area.style.display = "block";
       inputCodigo.required = true;
@@ -50,9 +59,6 @@
     }
   }
 
-  // Executa ao mudar o select
   select.addEventListener('change', validarUnidade);
-
-  // Executa assim que a página carrega (Caso ele já comece sem unidade)
   window.onload = validarUnidade;
 </script>

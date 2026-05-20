@@ -10,36 +10,46 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 15px;">
-    <%= form.label :descricao, "Descrição da Despesa", style: "display: block; font-weight: bold; color: #D71920;" %>
-    <%= form.text_field :descricao, placeholder: "Ex: Conta de Luz Maio", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-  </div>
-
+  <%# 1. CAMPO DE CATEGORIA %>
   <div style="margin-bottom: 15px;">
     <%= form.label :categoria, "Categoria", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.select :categoria, 
         ["Água/Luz/Internet", "Pagamento Funcionário", "Compra de Mercadoria", "Produtos de Limpeza", "Serviços de Limpeza", "Outros"], 
         { prompt: "Selecione o tipo de gasto" }, 
-        { style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+        { id: "select-categoria", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
   </div>
 
+  <%# 2. BLOCO DA DESCRIÇÃO DINÂMICA %>
+  <div style="margin-bottom: 15px; display: none;" id="bloco-descricao">
+    <%= form.label :descricao, "Especifique a Despesa (Descrição)", id: "label-descricao", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.text_field :descricao, id: "input-descricao", placeholder: "Ex: Conta de Luz Maio", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+  </div>
+
+  <%# 3. CAMPO DE VALOR %>
   <div style="margin-bottom: 15px;">
     <%= form.label :valor, "Valor (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.number_field :valor, step: 0.01, placeholder: "0,00", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
   </div>
 
-  <div style="margin-bottom: 15px;">
-    <%= form.label :data_pagamento, "Data do Pagamento/Vencimento", style: "display: block; font-weight: bold; color: #D71920;" %>
-    <%= form.date_field :data_pagamento, value: (despesa.data_pagamento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-  </div>
-
+  <%# 4. STATUS: JÁ FOI PAGA? (Movido para cima das datas para ditar a lógica visual) %>
   <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-    <%= form.check_box :pago, style: "width: 20px; height: 20px; cursor: pointer;" %>
+    <%= form.check_box :pago, id: "check-pago", style: "width: 20px; height: 20px; cursor: pointer;" %>
     <%= form.label :pago, "Esta despesa já foi paga?", style: "font-weight: bold; color: #333; cursor: pointer;" %>
   </div>
 
-  <div style="text-align: center;">
-    <%# Botão personalizado que chama a função de validação %>
+  <%# 5. CAMPO DINÂMICO: DATA DE PAGAMENTO (Só aparece se PAGO for TRUE) %>
+  <div style="margin-bottom: 15px; display: none;" id="bloco-data-pagamento">
+    <%= form.label :data_pagamento, "Data em que foi Paga", style: "display: block; font-weight: bold; color: #28a745;" %>
+    <%= form.date_field :data_pagamento, value: (despesa.data_pagamento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #28a745;" %>
+  </div>
+
+  <%# 6. CAMPO DINÂMICO: DATA DE VENCIMENTO (Só aparece se PAGO for FALSE) %>
+  <div style="margin-bottom: 15px; display: none;" id="bloco-data-vencimento">
+    <%= form.label :data_vencimento, "Data de Vencimento (Prazo Limite)", style: "display: block; font-weight: bold; color: #D71920;" %>
+    <%= form.date_field :data_vencimento, value: (despesa.data_vencimento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #D71920;" %>
+  </div>
+
+  <div style="text-align: center; margin-top: 25px;">
     <button type="button" onclick="validarAcessoDespesa()" style="width: 100%; padding: 15px; background-color: #D71920; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
       SALVAR DESPESA
     </button>
@@ -47,16 +57,74 @@
 <% end %>
 
 <script>
+// 1. GERENCIAR EXIBIÇÃO DE DESCRIÇÃO POR CATEGORIA
+function gerenciarCampos() {
+  const selectCategoria = document.getElementById("select-categoria");
+  const blocoDescricao = document.getElementById("bloco-descricao");
+  const labelDescricao = document.getElementById("label-descricao");
+  const inputDescricao = document.getElementById("input-descricao");
+
+  if (!selectCategoria || !blocoDescricao) return;
+
+  const valorSelecionado = selectCategoria.value;
+
+  if (valorSelecionado === "") {
+    blocoDescricao.style.display = "none";
+  } else if (valorSelecionado === "Outros") {
+    blocoDescricao.style.display = "block";
+    labelDescricao.innerText = "Descreva detalhadamente este Gasto Extra:";
+    inputDescricao.placeholder = "Ex: Conserto do liquidificador da copa";
+  } else {
+    blocoDescricao.style.display = "block";
+    labelDescricao.innerText = "Descrição da Despesa";
+    inputDescricao.placeholder = "Ex: Referente ao mês atual";
+  }
+}
+
+// 2. GERENCIAR EXIBIÇÃO FLUIDA DE VENCIMENTO VS PAGAMENTO
+function gerenciarDatas() {
+  const checkPago = document.getElementById("check-pago");
+  const blocoPagamento = document.getElementById("bloco-data-pagamento");
+  const blocoVencimento = document.getElementById("bloco-data-vencimento");
+
+  if (!checkPago || !blocoPagamento || !blocoVencimento) return;
+
+  if (checkPago.checked) {
+    blocoPagamento.style.display = "block";
+    blocoVencimento.style.display = "none";
+  } else {
+    blocoPagamento.style.display = "none";
+    blocoVencimento.style.display = "block";
+  }
+}
+
+// Vincula os escopos de escuta de eventos (Turbo e DOM padrão)
+function inicializarEventosForm() {
+  const selectCategoria = document.getElementById("select-categoria");
+  const checkPago = document.getElementById("check-pago");
+  
+  if (selectCategoria) {
+    selectCategoria.addEventListener("change", gerenciarCampos);
+  }
+  if (checkPago) {
+    checkPago.addEventListener("change", gerenciarDatas);
+  }
+
+  // Executa imediatamente no carregamento da view
+  gerenciarCampos();
+  gerenciarDatas();
+}
+
+document.addEventListener("turbo:load", inicializarEventosForm);
+document.addEventListener("DOMContentLoaded", inicializarEventosForm);
+
 function validarAcessoDespesa() {
-  // Verifica se o usuário logado é admin
   const ehAdmin = <%= current_funcionario.admin? %>;
   const formulario = document.getElementById('form-despesa');
 
   if (ehAdmin) {
-    // Se for o Davi, salva direto
     formulario.submit();
   } else {
-    // Se for funcionário comum, pede o código
     const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o código de segurança para registrar a despesa:");
     
     if (codigo === "1234") {

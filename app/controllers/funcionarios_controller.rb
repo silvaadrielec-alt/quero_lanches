@@ -54,18 +54,28 @@ class FuncionariosController < ApplicationController
 
   def update
     params_para_atualizar = funcionario_params
+    
+    # Se a senha foi deixada em branco, remove os campos para não resetar a senha do usuário
     if params_para_atualizar[:password].blank?
       params_para_atualizar.delete(:password)
       params_para_atualizar.delete(:password_confirmation)
     end
 
-    if @funcionario.update(params_para_atualizar)
+    # FORÇA O SALVAMENTO: O 'update' normal pode falhar por causa das restrições do Devise.
+    # Se não houver senha nova, usamos 'update_without_password' para salvar os dados cadastrais.
+    if params_para_atualizar[:password].nil?
+      sucesso = @funcionario.update_without_password(params_para_atualizar)
+    else
+      sucesso = @funcionario.update(params_para_atualizar)
+    end
+
+    if sucesso
       redirect_to funcionarios_path, notice: "Informações atualizadas com sucesso!"
     else
       render :edit, status: :unprocessable_entity
     end
   end
-
+  
   def destroy
     @funcionario.destroy
     redirect_to funcionarios_path, notice: "Funcionário excluído com sucesso!"
@@ -79,7 +89,7 @@ class FuncionariosController < ApplicationController
 
   def funcionario_params
     # Adicionamos :unidade aqui para permitir o cadastro/edição da unidade base
-    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade)
+    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade, :turno, :cargo)
   end
 
   def verificar_admin

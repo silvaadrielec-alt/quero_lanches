@@ -1,13 +1,19 @@
 <div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
-  <h1 style="color: #D71920; margin-bottom: 30px; font-family: sans-serif; font-weight: bold;">
+  <h1 style="color: #D71920; margin-bottom: 20px; font-family: sans-serif; font-weight: bold;">
     Gestão de Quantidades (Estoque)
   </h1>
 
+  <%# CORREÇÃO: Botão mudado de #7D3C98 para o Vermelho Padrão #D71920 %>
+  <div style="margin-bottom: 25px; text-align: center;">
+    <%= link_to "Dar Entrada por Lote (Fornecedores)", lote_estoques_path, 
+        style: "background: #D71920; color: white; text-decoration: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; font-size: 0.95em; display: inline-block; box-shadow: 0 4px 10px rgba(215,25,32,0.2); transition: background 0.2s;" %>
+  </div>
+
   <div style="margin-bottom: 30px; text-align: center;">
-  <%# Padronizando com ID e função de estoque, mas com o visual azul largo %>
-  <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
-         style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
-</div>
+    <%# Padronizando com ID e função de estoque, mas com o visual azul largo %>
+    <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
+           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+  </div>
 
   <%# --- SEÇÃO DE PRODUTOS PARA VENDA --- %>
   <h2 style="color: #D71920; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 5px;">Itens de Venda</h2>

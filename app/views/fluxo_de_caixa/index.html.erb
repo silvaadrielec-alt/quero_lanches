@@ -1,0 +1,146 @@
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 10px;">Demonstrativo de Fluxo de Caixa</h1>
+    <p style="color: #666; font-size: 1.1em;">Acompanhamento de entradas, saídas e saúde financeira da Cantina Quero Lanches</p>
+  </div>
+
+  <%# 1. ABAS DE SELEÇÃO DE PERÍODO (Mantém o filtro da unidade ao clicar) %>
+  <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+    <% ['diario', 'semanal', 'mensal', 'anual'].each do |p| %>
+      <%= link_to p.upcase, fluxo_de_caixa_path(periodo: p, unidade: @unidade), 
+          style: "text-decoration: none; padding: 10px 25px; border-radius: 50px; font-weight: bold; font-size: 0.9em; transition: 0.2s; " + 
+          (@periodo == p ? "background: #D71920; color: white; box-shadow: 0 4px 10px rgba(215,25,32,0.25);" : "background: #f4f4f4; color: #555; border: 1px solid #ddd;") %>
+    <% end %>
+  </div>
+
+  <%# 2. SELEÇÃO DE UNIDADE (Sugestão do Professor) %>
+  <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 35px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
+    <%# Link Geral (Sem unidade específica) %>
+    <%= link_to "GERAL (TODAS)", fluxo_de_caixa_path(periodo: @periodo, unidade: nil),
+        style: "text-decoration: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.85em; " +
+        (@unidade.nil? ? "background: #7D3C98; color: white;" : "background: #eef; color: #555;") %>
+
+    <%# Mapeia as unidades comerciais existentes no seu banco %>
+    <% ['centro', 'pavilhao_novo', 'pavilhao_antigo'].each do |u| %>
+      <%= link_to u.upcase.gsub('_', ' '), fluxo_de_caixa_path(periodo: @periodo, unidade: u), 
+          style: "text-decoration: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.85em; transition: 0.2s; " + 
+          (@unidade == u ? "background: #7D3C98; color: white; box-shadow: 0 3px 6px rgba(125,60,152,0.2);" : "background: #f4f4f4; color: #555; border: 1px solid #ddd;") %>
+    <% end %>
+  </div>
+
+  <%# TÍTULO INDICADOR DA VISÃO ATUAL %>
+  <div style="text-align: center; margin-bottom: 25px;">
+    <span style="background: #333; color: white; padding: 6px 18px; border-radius: 4px; font-weight: bold; font-size: 0.9em; text-transform: uppercase;">
+      Visão Atual: <%= @unidade.present? ? @unidade.gsub('_', ' ') : "Consolidado Geral" %> (<%= @periodo %>)
+    </span>
+  </div>
+
+  <%# CARDS RESUMO FINANCEIRO %>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 45px;">
+    <div style="background: white; border: 2px solid #28a745; border-radius: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <span style="color: #28a745; font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 8px;">(+) ENTRADAS (VENDAS NO PERÍODO)</span>
+      <strong style="font-size: 2.2em; color: #333; display: block; margin-bottom: 5px;">
+        R$ <%= number_with_precision(@total_entradas, precision: 2, separator: ',', delimiter: '.') %>
+      </strong>
+      <span style="font-size: 0.85em; color: #888;">Faturamento bruto acumulado</span>
+    </div>
+
+    <div style="background: white; border: 2px solid #D71920; border-radius: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <span style="color: #D71920; font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 8px;">(-) SAÍDAS (DESPESAS NO PERÍODO)</span>
+      <strong style="font-size: 2.2em; color: #333; display: block; margin-bottom: 5px;">
+        R$ <%= number_with_precision(@total_saidas, precision: 2, separator: ',', delimiter: '.') %>
+      </strong>
+      <span style="font-size: 0.85em; color: #888;">Custos operacionais e pagamentos</span>
+    </div>
+
+    <div style="background: <%= @saldo_liquido >= 0 ? '#EFFFF0' : '#FFF0F0' %>; border: 2px solid <%= @saldo_liquido >= 0 ? '#28a745' : '#D71920' %>; border-radius: 20px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <span style="color: <%= @saldo_liquido >= 0 ? '#28a745' : '#D71920' %>; font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 8px;">(=) SALDO LÍQUIDO REAL</span>
+      <strong style="font-size: 2.2em; color: <%= @saldo_liquido >= 0 ? '#28a745' : '#D71920' %>; display: block; margin-bottom: 5px;">
+        R$ <%= number_with_precision(@saldo_liquido, precision: 2, separator: ',', delimiter: '.') %>
+      </strong>
+      <span style="font-size: 0.85em; font-weight: bold; color: <%= @saldo_liquido >= 0 ? '#28a745' : '#D71920' %>;">
+        <%= @saldo_liquido >= 0 ? "Operação com Lucro" : "Operação em Déficit" %>
+      </span>
+    </div>
+  </div>
+
+  <%# DETALHAMENTO DOS LANÇAMENTOS %>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px;">
+    
+    <%# COLUNA DE ENTRADAS %>
+    <div style="background: white; border: 1px solid #ddd; border-radius: 20px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+      <h3 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 10px; margin-bottom: 15px;">Últimas Entradas (Vendas)</h3>
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+        <thead>
+          <tr style="color: #666; border-bottom: 2px solid #eee;">
+            <th style="padding: 10px 5px;">DATA</th>
+            <th style="padding: 10px 5px;">ID PEDIDO</th>
+            <th style="padding: 10px 5px; text-align: right;">VALOR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @pedidos_detalhados.any? %>
+            <% @pedidos_detalhados.each do |pedido| %>
+              <tr style="border-bottom: 1px solid #f9f9f9;">
+                <td style="padding: 10px 5px; color: #666; line-height: 1.4;">
+                  <strong><%= pedido.created_at.to_time.strftime("%d/%m/%Y") %></strong>
+                  <br>
+                  <small style="color: #888; font-size: 0.85em;">às <%= pedido.created_at.to_time.strftime("%H:%M") %></small>
+                </td>
+                <td style="padding: 10px 5px; vertical-align: middle;"><strong>#<%= pedido.id %></strong></td>
+                <td style="padding: 10px 5px; text-align: right; color: #28a745; font-weight: bold; vertical-align: middle;">R$ <%= number_with_precision(pedido.valor_total, precision: 2, separator: ',', delimiter: '.') %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr><td colspan="3" style="padding: 20px; text-align: center; color: #999;">Nenhuma venda registrada no período.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <%# COLUNA DE SAÍDAS %>
+    <div style="background: white; border: 1px solid #ddd; border-radius: 20px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+      <h3 style="color: #D71920; border-bottom: 2px solid #D71920; padding-bottom: 10px; margin-bottom: 15px;">Últimas Saídas (Despesas)</h3>
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em;">
+        <thead>
+          <tr style="color: #666; border-bottom: 2px solid #eee;">
+            <th style="padding: 10px 5px;">DATA</th>
+            <th style="padding: 10px 5px;">DESCRIÇÃO</th>
+            <th style="padding: 10px 5px; text-align: right;">VALOR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @despesas_detalhadas.any? %>
+            <% @despesas_detalhadas.each do |despesa| %>
+              <tr style="border-bottom: 1px solid #f9f9f9;">
+                <td style="padding: 10px 5px; color: #666; line-height: 1.4;">
+                  <% obj_data = despesa.pago? ? (despesa.data_pagamento || despesa.created_at) : despesa.data_vencimento %>
+                  <% if obj_data.present? %>
+                    <strong><%= obj_data.strftime("%d/%m/%Y") %></strong>
+                    <br>
+                    <small style="color: #888; font-size: 0.85em;">
+                      às <%= obj_data.strftime("%H:%M") %>
+                    </small>
+                  <% else %>
+                    <span style="color: #999;">N/A</span>
+                  <% end %>
+                </td>
+                <td style="padding: 10px 5px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"><strong><%= despesa.descricao %></strong></td>
+                <td style="padding: 10px 5px; text-align: right; color: #D71920; font-weight: bold; vertical-align: middle;">R$ <%= number_with_precision(despesa.valor, precision: 2, separator: ',', delimiter: '.') %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr><td colspan="3" style="padding: 20px; text-align: center; color: #999;">Nenhuma despesa registrada no período.</td></tr>
+          <% end %>
+        </tbody>        
+      </table>
+    </div>
+
+  </div>
+
+  <div style="text-align: center; margin-top: 40px;">
+    <%= link_to "← Voltar ao Painel Geral", root_path, style: "color: #0000FF; font-weight: bold; text-decoration: underline;" %>
+  </div>
+
+</div>

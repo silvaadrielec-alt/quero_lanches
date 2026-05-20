@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
@@ -29,7 +29,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
   create_table "despesas", force: :cascade do |t|
     t.string "categoria"
     t.datetime "created_at", null: false
-    t.date "data_pagamento"
+    t.datetime "data_pagamento"
+    t.datetime "data_vencimento"
     t.string "descricao"
     t.integer "funcionario_id", null: false
     t.boolean "pago"
@@ -42,6 +43,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
 
   create_table "funcionarios", force: :cascade do |t|
     t.boolean "admin", default: false
+    t.string "cargo"
     t.string "codigo_autorizacao"
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -51,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.string "role"
+    t.string "turno"
     t.string "unidade"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_funcionarios_on_email", unique: true
@@ -106,6 +109,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_152134) do
 
   create_table "produtos", force: :cascade do |t|
     t.string "categoria"
+    t.string "codigo"
     t.datetime "created_at", null: false
     t.decimal "estoque", precision: 10, scale: 3, default: "0.0"
     t.decimal "estoque_centro", precision: 10, scale: 3, default: "0.0"

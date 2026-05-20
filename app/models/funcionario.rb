@@ -5,6 +5,8 @@ class Funcionario < ApplicationRecord
   has_many :pedidos
   validates :nome, presence: { message: "não pode ficar em branco" }
 
+  validates :cargo, presence: { message: "não pode ficar em branco" }
+
   # Definimos as unidades oficiais aqui (em minúsculo para o banco de dados)
   UNIDADES = [
     ["Matriz Centro", "centro"],

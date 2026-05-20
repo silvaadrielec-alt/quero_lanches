@@ -1,6 +1,6 @@
 <p style="color: green"><%= notice %></p>
 
-<% content_for :title, "Movimentacaos" %>
+<% content_for :title, "Movimentacões" %>
 
 <h1>Movimentacaos</h1>
 
@@ -8,9 +8,9 @@
   <% @movimentacaos.each do |movimentacao| %>
     <%= render movimentacao %>
     <p>
-      <%= link_to "Show this movimentacao", movimentacao %>
+      <%= link_to "Mostrar movimentação", movimentacao %>
     </p>
   <% end %>
 </div>
 
-<%= link_to "New movimentacao", new_movimentacao_path %>
+<%= link_to "Nova movimentação", new_movimentacao_path %>

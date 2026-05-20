@@ -30,9 +30,10 @@ body {
   border: none;
   text-transform: uppercase;
 }
+
 /* Estilo da Barra de Navegação - Quero Lanches */
 .navbar-quero {
-  background-color: var(--bege-fundo); /* Usa o bege que você definiu */
+  background-color: transparent !important; /* Remove o bege antigo e assume o creme do fundo do body */
   padding: 20px;
   text-align: center;
   border-bottom: 4px solid var(--vermelho-quero); /* Linha vermelha grossinha embaixo */
@@ -51,6 +52,7 @@ body {
   color: #b5151b; /* Um vermelho um pouco mais escuro ao passar o mouse */
   text-decoration: underline;
 }
+
 /* Botão Padrão Quero Lanches */
 .btn-quero {
   background-color: var(--vermelho-quero);
@@ -75,6 +77,7 @@ body {
 .btn-quero:active {
   transform: translateY(0);
 }
+
 /* Estilo para as Tabelas da Cantina */
 table {
   width: 100%;
@@ -108,6 +111,7 @@ tr:last-child td {
 tr:hover {
   background-color: #fffcf5; /* Um leve realce ao passar o mouse na linha */
 }
+
 /* Botão de Excluir / Perigo */
 .btn-perigo {
   background-color: #ff4d4d;
@@ -125,4 +129,16 @@ tr:hover {
 .btn-perigo:hover {
   background-color: #d32f2f;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* --- TAMANHO E EFEITOS DA LOGO NOVA --- */
+.logo-sistema {
+  width: 100px;      /* Tamanho ideal para a barra */
+  height: 100px;     /* Mantém a proporção do círculo perfeita */
+  object-fit: contain;
+  transition: transform 0.2s;
+}
+
+.logo-sistema:hover {
+  transform: scale(1.05); /* Efeito sutil de zoom ao passar o mouse */
 }

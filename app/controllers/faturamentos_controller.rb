@@ -5,29 +5,34 @@ class FaturamentosController < ApplicationController
   before_action :verificar_admin
 
   def index
-    # Define o período e o tipo de agrupamento com base no parâmetro da URL
+    # Define o período com base no parâmetro da URL
     @periodo = params[:periodo] || 'semanal'
     
     case @periodo
     when 'diario'
       @range = Time.current.beginning_of_day..Time.current
-      @agrupamento = :group_by_hour # Mostra a evolução por hora se for só hoje
+      # Agrupamento nativo por hora formatada (ex: "14:00")
+      @formato_data = "strftime('%H:00', created_at)"
     when 'semanal'
       @range = 7.days.ago.beginning_of_day..Time.current
-      @agrupamento = :group_by_day
+      # Agrupamento nativo por data pura (ex: "19/05/2026")
+      @formato_data = "strftime('%d/%m/%Y', created_at)"
     when 'mensal'
       @range = 30.days.ago.beginning_of_day..Time.current
-      @agrupamento = :group_by_day
+      @formato_data = "strftime('%d/%m/%Y', created_at)"
     when 'anual'
       @range = 1.year.ago.beginning_of_day..Time.current
-      @agrupamento = :group_by_month # Agrupa por mês para o gráfico anual ficar limpo
+      # Agrupamento nativo por mês (ex: "05/2026")
+      @formato_data = "strftime('%m/%Y', created_at)"
     else
       @range = 7.days.ago.beginning_of_day..Time.current
-      @agrupamento = :group_by_day
+      @formato_data = "strftime('%d/%m/%Y', created_at)"
     end
 
-    # 1. Evolução Geral (Respeitando o filtro selecionado)
-    @vendas_geral_diaria = Pedido.where(created_at: @range).send(@agrupamento, :created_at).sum(:valor_total)
+    # 1. Evolução Geral (Calculado de forma pura pelo SQLite, sem Groupdate)
+    @vendas_geral_diaria = Pedido.where(created_at: @range)
+                                 .group(@formato_data)
+                                 .sum(:valor_total)
 
     # 2. Vendas por Unidade (Totais do período selecionado)
     @vendas_por_unidade = {
@@ -36,73 +41,71 @@ class FaturamentosController < ApplicationController
       "Pavilhão Antigo" => Pedido.where(unidade: 'pavilhao_antigo', created_at: @range).sum(:valor_total)
     }
 
-    # 3. Evolução Comparativa entre Unidades
+    # 3. Evolução Comparativa entre Unidades (Nativo)
     @vendas_unidades_comparativo = [
-      { name: "Matriz", data: Pedido.where(unidade: 'centro', created_at: @range).send(@agrupamento, :created_at).sum(:valor_total) },
-      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo', created_at: @range).send(@agrupamento, :created_at).sum(:valor_total) },
-      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo', created_at: @range).send(@agrupamento, :created_at).sum(:valor_total) }
+      { name: "Matriz", data: Pedido.where(unidade: 'centro', created_at: @range).group(@formato_data).sum(:valor_total) },
+      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo', created_at: @range).group(@formato_data).sum(:valor_total) },
+      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo', created_at: @range).group(@formato_data).sum(:valor_total) }
     ]
     
-     # Garante que os dados para o gráfico de desempenho mensal (Anual) sempre existam
-     @vendas_unidades_mensal = [
-      { name: "Matriz", data: Pedido.where(unidade: 'centro').group_by_month(:created_at, last: 12).sum(:valor_total) },
-      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo').group_by_month(:created_at, last: 12).sum(:valor_total) },
-      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo').group_by_month(:created_at, last: 12).sum(:valor_total) }
+    # 4. Desempenho Mensal (Nativo por mês nos últimos 12 meses)
+    formato_mensal = "strftime('%m/%Y', created_at)"
+    @vendas_unidades_mensal = [
+      { name: "Matriz", data: Pedido.where(unidade: 'centro').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) },
+      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) },
+      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) }
     ]
 
-      # No FaturamentosController, substitua o bloco do Top 5 (linhas 53 a 59) por este:
+    # CORRIGIDO AQUI: Top 5 Itens mais vendidos usando a coluna real :quantidade
+    @itens_mais_vendidos = Pedido.where(created_at: @range)
+                                 .joins(:produto)
+                                 .group('produtos.nome')
+                                 .sum(:quantidade)
+                                 .sort_by { |_nome, qtd| -qtd }
+                                 .first(5)
 
-      @itens_mais_vendidos = Pedido.where(created_at: @range)
-                             .joins(:produto) # Garante que temos acesso ao nome do produto
-                             .group('produtos.nome') # Agrupa pelo nome real do item
-                             .sum(:quantidade) # Soma as quantidades vendidas
-                             .sort_by { |_nome, qtd| -qtd } # Ordena do maior para o menor
-                             .first(5) # Pega os 5 melhores
-
-    # Variáveis para os Cards de valor (Cantina Quero Lanches)
+    # Variáveis para os Cards de valor
     @total_geral = @vendas_por_unidade.values.sum
     @vendas_matriz = @vendas_por_unidade["Matriz Centro"]
     @vendas_pavilhao_novo = @vendas_por_unidade["Pavilhão Novo"]
     @vendas_pavilhao_antigo = @vendas_por_unidade["Pavilhão Antigo"]
   end
 
-def exportar
-  @periodo = params[:periodo] || 'mensal'
-  
-  data_inicial = case @periodo
-                 when 'diario'  then Time.current.beginning_of_day
-                 when 'semanal' then 7.days.ago.beginning_of_day
-                 when 'mensal'  then 30.days.ago.beginning_of_day
-                 when 'anual'   then 1.year.ago.beginning_of_day
-                 else 30.days.ago.beginning_of_day
-                 end
+  def exportar
+    @periodo = params[:periodo] || 'mensal'
+    
+    data_inicial = case @periodo
+                   when 'diario'  then Time.current.beginning_of_day
+                   when 'semanal' then 7.days.ago.beginning_of_day
+                   when 'mensal'  then 30.days.ago.beginning_of_day
+                   when 'anual'   then 1.year.ago.beginning_of_day
+                   else 30.days.ago.beginning_of_day
+                   end
 
-  @pedidos = Pedido.where("created_at >= ?", data_inicial).order(created_at: :desc)
+    @pedidos = Pedido.where("created_at >= ?", data_inicial).order(created_at: :desc)
 
-  respond_to do |format|
-    format.csv do
-      filename = "QueroLanches_Faturamento_#{@periodo}_#{Date.today}.csv"
-      
-      csv_data = CSV.generate(col_sep: ';', force_quotes: true) do |csv|
-        csv << ["ID Pedido", "Data e Hora", "Unidade", "Total (R$)", "Funcionario"]
+    respond_to do |format|
+      format.csv do
+        filename = "QueroLanches_Faturamento_#{@periodo}_#{Date.today}.csv"
         
-        @pedidos.each do |pedido|
-           csv << [
-             pedido.id,
-            # Adicionamos um espaço no início para o Excel não formatar automaticamente
-            " " + pedido.created_at.strftime("%d/%m/%y %H:%M"), 
-             pedido.unidade&.upcase,
-            format("%.2f", pedido.valor_total).gsub('.', ','),
-            pedido.funcionario&.nome || "Sistema"
-            ]
+        csv_data = CSV.generate(col_sep: ';', force_quotes: true) do |csv|
+          csv << ["ID Pedido", "Data e Hora", "Unidade", "Total (R$)", "Funcionario"]
+          
+          @pedidos.each do |pedido|
+             csv << [
+               pedido.id,
+               " " + pedido.created_at.strftime("%d/%m/%y %H:%M"), 
+               pedido.unidade&.upcase,
+               format("%.2f", pedido.valor_total).gsub('.', ','),
+               pedido.funcionario&.nome || "Sistema"
+             ]
+          end
         end
-      end
 
-      # O \xEF\xBB\xBF é o "segredo" para o Excel abrir com a codificação certa
-      send_data "\xEF\xBB\xBF" + csv_data, filename: filename, type: 'text/csv; charset=utf-8'
+        send_data "\xEF\xBB\xBF" + csv_data, filename: filename, type: 'text/csv; charset=utf-8'
+      end
     end
   end
-end
 
   private
 

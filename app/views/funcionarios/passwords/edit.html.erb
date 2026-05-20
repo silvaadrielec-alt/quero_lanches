@@ -1,25 +1,44 @@
-<h2>Change your password</h2>
+<div class="card-principal" style="max-width: 450px; margin: 60px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0px 4px 20px rgba(0,0,0,0.08); font-family: sans-serif; text-align: left;">
+  
+  <h2 style="color: #333; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #D71920; padding-bottom: 10px;">
+    Definir Nova Senha
+  </h2>
+  
+  <p style="color: #666; font-size: 0.9em; margin-bottom: 25px;">
+    Digite e confirme sua nova senha de acesso abaixo para atualizar suas credenciais.
+  </p>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "funcionarios/shared/error_messages", resource: resource %>
-  <%= f.hidden_field :reset_password_token %>
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+    <%= render "funcionarios/shared/error_messages", resource: resource %>
+    <%= f.hidden_field :reset_password_token %>
 
-  <div class="field">
-    <p><%= f.label :password, "New password" %></p>
-    <% if @minimum_password_length %>
-      <p><em>(<%= @minimum_password_length %> characters minimum)</em></p>
-    <% end %>
-    <p><%= f.password_field :password, autofocus: true, autocomplete: "new-password" %></p>
+    <%# --- CAMPO: NOVA SENHA --- %>
+    <div style="margin-bottom: 20px;">
+      <%= f.label :password, "Nova Senha", style: "display: block; font-weight: bold; color: #333; margin-bottom: 6px; font-size: 0.95em;" %>
+      <% if @minimum_password_length %>
+        <span style="color: #666; font-size: 0.8em; display: block; margin-bottom: 6px;">
+          *(mínimo de <%= @minimum_password_length %> caracteres)
+        </span>
+      <% end %>
+      <%= f.password_field :password, autofocus: true, autocomplete: "new-password", placeholder: "Digite a nova senha",
+          style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; outline: none;" %>
+    </div>
+
+    <%# --- CAMPO: CONFIRMAR NOVA SENHA --- %>
+    <div style="margin-bottom: 25px;">
+      <%= f.label :password_confirmation, "Confirmar Nova Senha", style: "display: block; font-weight: bold; color: #333; margin-bottom: 8px; font-size: 0.95em;" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder: "Digite a senha novamente",
+          style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; outline: none;" %>
+    </div>
+
+    <%# --- BOTÃO DE CONFIRMAÇÃO --- %>
+    <div style="margin-bottom: 20px;">
+      <%= f.submit "Alterar minha senha", 
+          style: "width: 100%; background: #D71920; color: white; border: none; padding: 14px; border-radius: 25px; font-size: 1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(215,25,32,0.15);" %>
+    </div>
+  <% end %>
+
+  <div style="text-align: center; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+    <%= render "funcionarios/shared/links" %>
   </div>
-
-  <div class="field">
-    <p><%= f.label :password_confirmation, "Confirm new password" %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Change my password" %>
-  </div>
-<% end %>
-
-<%= render "funcionarios/shared/links" %>
+</div>

@@ -50,8 +50,32 @@
             <%= log.tipo_movimentacao.to_s.upcase %>
           </td>
           
+          <%# COLUNA QTD: PADRÃO BRASILEIRO COM PLURAL INTELLIGENT %>
           <td style="font-weight: bold;">
-            <%= log.quantidade %>
+            <% 
+              qtd_numerica = log.quantidade
+              
+              # 1. Formata o número retirando o .0 de inteiros e aplicando a vírgula comercial
+              qtd_formatada = qtd_numerica.to_f == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
+              
+              # 2. Resgata a unidade de medida do banco de dados
+              unidade_medida = log.produto&.respond_to?(:unidade_medida) ? log.produto.unidade_medida.to_s.downcase : "unidade"
+              
+              # 3. Lógica de Pluralização para Língua Portuguesa (Adiciona 's' apenas se a quantidade for maior que 1)
+              # Insumos fracionados (como 0,02 kg) mantêm a palavra no singular por padrão de mercado.
+              if qtd_numerica > 1
+                unidade_medida = case unidade_medida
+                                 when "unidade" then "unidades"
+                                 when "litro"   then "litros"
+                                 when "quilo"   then "quilos"
+                                 when "un"      then "un" # Abreviações comerciais fixas geralmente não variam
+                                 when "kg"      then "kg"
+                                 else 
+                                   unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
+                                 end
+              end
+            %>
+            <%= "#{qtd_formatada} #{unidade_medida}" %>
           </td>
         </tr>
       <% end %>

@@ -3,16 +3,40 @@ class RelatoriosController < ApplicationController
   require 'csv'
 
   def index
-    @produtos_para_comprar = Produto.all.select(&:precisa_reposicao?)
+    # Aplica o sistema de permissões baseado no nível de acesso
+    if current_funcionario.admin?
+      base_produtos = Produto.all
+      base_pedidos = Pedido.all
+      base_despesas = Despesa.all
+      base_movimentacoes = Movimentacao.all
+    else
+      # Funcionário comum fica restrito à sua respectiva unidade
+      base_produtos = Produto.all # Estoque geralmente é global ou filtrado se tiver campo unidade
+      base_pedidos = Pedido.where(unidade: current_funcionario.unidade)
+      base_despesas = Despesa.where(unidade: current_funcionario.unidade)
+      base_movimentacoes = Movimentacao.where(unidade: current_funcionario.unidade)
+    end
+
+    # 1. Dados de Reposição de Estoque
+    @produtos_para_comprar = base_produtos.select(&:precisa_reposicao?)
     
-    # Resumo Financeiro
-    @total_vendas = Pedido.sum(:valor_total)
-    @total_despesas = Despesa.where(pago: true).sum(:valor)
+    # 2. Dados do Resumo Financeiro / Faturamento (Escopados)
+    @total_vendas = base_pedidos.sum(:valor_total)
+    @total_despesas = base_despesas.where(pago: true).sum(:valor)
     @lucro_liquido = @total_vendas - @total_despesas
+    
+    # 3. Despesas a Pagar (Controle de contas pendentes)
+    @despesas_a_pagar = base_despesas.where(pago: false).order(data_vencimento: :asc)
+    
+    # 4. Fluxo de Caixa Recente (Alinhado com as permissões)
+    @pedidos_recentes = base_pedidos.order(created_at: :desc).limit(50)
+    @despesas_pagas_detalhado = base_despesas.where(pago: true).order(data_pagamento: :desc).limit(50)
+    
+    # 5. Auditoria do Sistema
+    @movimentacoes = base_movimentacoes.order(created_at: :desc).limit(100)
   end
 
   def auditoria
-    # Agora usando o nome correto do seu arquivo: Movimentacao
     @movimentacoes = Movimentacao.all.order(created_at: :desc)
   end
 

@@ -1,12 +1,72 @@
-<p style="color: green"><%= notice %></p>
+<p style="color: green; text-align: center;"><%= notice %></p>
 
-<%= render @funcionario %>
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  
+  <%# Link de Voltar no topo ajustado para o azul %>
+  <div style="margin-bottom: 20px; text-align: left;">
+    <%= link_to "← Voltar para Funcionários", funcionarios_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold; font-size: 0.9em;" %>
+  </div>
 
-<div style="margin-top: 20px;">
-  <%= link_to "Editar este funcionário", edit_funcionario_path(@funcionario), style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %> |
-  <%= link_to "Voltar aos funcionários", funcionarios_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  <%# Cartão de Perfil %>
+  <div style="background: white; border: 2px solid #D71920; border-radius: 25px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
+    
+    <%# Detalhe decorativo no topo do card %>
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: #D71920;"></div>
 
-  <div style="margin-top: 30px;">
-    <%= button_to "Excluir este funcionário", @funcionario, method: :delete, data: { confirm: "Tem certeza?" }, style: "background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;" %>
+    <%# Cabeçalho do Perfil com Avatar Inicial %>
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+      <div style="background: #FFF0F0; color: #D71920; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: bold; border: 2px solid #D71920;">
+        <%= @funcionario.nome.to_s.first&.upcase %>
+      </div>
+      <div style="text-align: left;">
+        <h2 style="margin: 0; color: #333; font-size: 1.6em;"><%= @funcionario.nome %></h2>
+        <span style="display: inline-block; background: <%= @funcionario.admin? ? '#D71920' : '#28a745' %>; color: white; padding: 3px 12px; border-radius: 50px; font-size: 0.8em; font-weight: bold; margin-top: 5px;">
+          <%= @funcionario.admin? ? "ADMINISTRADOR" : "FUNCIONÁRIO" %>
+        </span>
+      </div>
+    </div>
+
+    <%# Grid de Informações do Cadastro %>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 20px; text-align: left;">
+      
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">E-MAIL DE ACESSO</label>
+        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.email %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">UNIDADE PADRÃO</label>
+        <span style="display: inline-block; background: #FFF0F0; color: #D71920; padding: 4px 10px; border-radius: 6px; font-size: 0.95em; font-weight: bold; border: 1px solid #FFDCDC;">
+          <%= @funcionario.unidade.present? ? @funcionario.unidade.to_s.humanize.upcase : "NÃO VINCULADA" %>
+        </span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">TURNO PADRÃO</label>
+        <span style="font-size: 1.1em; color: #333; font-weight: 500; background: #f4f4f4; padding: 4px 10px; border-radius: 6px; font-weight: bold;">
+          <%= @funcionario.turno.present? ? @funcionario.turno.upcase : "NÃO DEFINIDO" %>
+        </span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CONTA CRIADA EM</label>
+        <span style="font-size: 1em; color: #666;"><%= @funcionario.created_at&.strftime("%d/%m/%Y às %H:%M") %></span>
+      </div>
+
+    </div>
+
+    <%# Ações no rodapé do Cartão (Editar e Excluir) %>
+    <div style="margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+      
+      <%# Botão de Excluir Destacado %>
+      <%= button_to "Excluir Conta", @funcionario, method: :delete, 
+                    data: { confirm: "Tem certeza absoluta que deseja apagar o cadastro de #{@funcionario.nome}?" }, 
+                    style: "background: none; border: none; color: #ff4444; text-decoration: underline; cursor: pointer; font-weight: bold; font-size: 0.9em;" %>
+
+      <%# Botão de Editar Estilizado %>
+      <%= link_to "Editar Cadastro", edit_funcionario_path(@funcionario), 
+                  style: "background: #D71920; color: white; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9em; box-shadow: 0 4px 12px rgba(215, 25, 32, 0.2);" %>
+    </div>
+
   </div>
 </div>

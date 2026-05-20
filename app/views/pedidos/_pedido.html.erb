@@ -35,6 +35,30 @@
     <span style="color: #333;"><%= pedido.created_at.strftime("%H:%M") %></span>
   </div>
 
+  <%# --- LOGICA DA FORMA DE PAGAMENTO DINÂMICA --- %>
+  <div>
+    <strong style="color: #555;">Forma de Pagamento:</strong> 
+    <span style="color: #333;">
+      <%
+        formas = []
+        formas << "Dinheiro" if pedido.pago_dinheiro.to_f > 0
+        formas << "Pix" if pedido.pago_pix.to_f > 0
+        formas << "Débito" if pedido.pago_cartao_debito.to_f > 0
+        formas << "Crédito" if pedido.pago_cartao_credito.to_f > 0
+      %>
+      <%= formas.any? ? formas.join(" + ") : "Não informada" %>
+    </span>
+  </div>
+
+  <%# --- AJUSTADO PARA O SINGULAR DO SEU BANCO: observacao --- %>
+  <% if pedido.observacao.present? %>
+    <div>
+      <strong style="color: #555;">Observações:</strong> 
+      <span style="color: #333; font-style: italic;"><%= pedido.observacao %></span>
+    </div>
+  <% end %>
+
+  <%# --- VALOR TOTAL --- %>
   <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
     <strong style="color: #D71920; font-size: 1.2em;">Valor Total:</strong> 
     <span style="color: #28a745; font-size: 1.2em; font-weight: bold;">

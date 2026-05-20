@@ -1,11 +1,26 @@
 <style>
   /* --- ESTILO PARA A TELA (Navegação) --- */
   .conteudo-tela { text-align: center; padding: 50px; font-family: sans-serif; }
-  .documento-oficial { display: none; }
+  .documento-oficial, .secao-relatorio { display: none; }
+
+  /* Elementos de estilização da interface web */
+  .seletor-relatorio {
+    padding: 12px 20px;
+    font-size: 15px;
+    border: 2px solid #D71920;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #333;
+    background-color: white;
+    outline: none;
+    cursor: pointer;
+    margin-right: 10px;
+    min-width: 280px;
+  }
 
   /* --- ESTILO PARA O RELATÓRIO (Impressão/PDF) --- */
   @media print {
-    header, nav, .navbar, .conteudo-tela, .no-print, button, a { display: none !important; }
+    header, nav, .navbar, .conteudo-tela, .no-print, button, a, select { display: none !important; }
     
     .documento-oficial { 
       display: block !important; 
@@ -13,23 +28,42 @@
       color: black; 
     }
 
+    /* O JavaScript vai adicionar a classe 'ativo-print' na seção selecionada */
+    .secao-relatorio.ativo-print {
+      display: block !important;
+    }
+
     body { background: white !important; }
 
-    /* Força as bordas a ficarem bem pretas e nítidas */
+    /* CORREÇÃO DAS BORDAS APAGADAS AQUI */
     table { 
       width: 100%; 
-      border-collapse: collapse; 
-      margin-top: 10px; 
+      border-collapse: separate; 
+      border-spacing: 0; 
+      margin-top: 15px; 
       margin-bottom: 30px;
-      border: 2px solid black !important; /* Borda externa forte */
+      border: 2px solid #000000 !important; 
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact;
     }
 
     th, td { 
-      border: 1.5px solid black !important; /* Borda interna nítida */
+      border-bottom: 1px solid #000000 !important; 
+      border-right: 1px solid #000000 !important; 
       padding: 8px; 
       text-align: left; 
       font-size: 12px; 
       color: black !important;
+    }
+
+    /* Remove a borda direita da última coluna para não cortar o traço da tabela */
+    th:last-child, td:last-child {
+      border-right: none !important;
+    }
+
+    /* Remove a borda inferior da última linha para o fechamento ficar perfeito */
+    tr:last-child td {
+      border-bottom: none !important;
     }
 
     th { 
@@ -38,111 +72,293 @@
       font-weight: bold;
     }
     
-    h1 { font-size: 18px; border-bottom: 2px solid black; padding-bottom: 5px; margin-top: 20px; }
-    h2 { font-size: 16px; margin-top: 20px; text-decoration: underline; }
-
-    /* Quebra de página opcional entre unidades se a tabela for muito grande */
-    .quebra-pagina { page-break-before: always; }
+    h1 { font-size: 18px; border-bottom: 2px solid black; padding-bottom: 5px; margin-top: 20px; text-align: center; }
+    h2 { font-size: 15px; margin-top: 20px; text-decoration: underline; text-transform: uppercase; }
+    .resumo-bloco { border: 1.5px dashed black; padding: 15px; margin-bottom: 20px; font-size: 13px; }
   }
 </style>
 
-<!-- O QUE APARECE NA TELA -->
 <div class="conteudo-tela">
-  <div style="background: #f8f9fa; padding: 40px; border-radius: 15px; border: 1px solid #ddd;">
-    <h2 style="color: #333;">Gerador de Relatórios Técnicos</h2>
-    <p style="color: #666;">Selecione a opção de impressão da <strong>Cantina Quero Lanches</strong>.</p>
+  <div style="background: #f8f9fa; padding: 40px; border-radius: 15px; border: 1px solid #ddd; max-width: 700px; margin: 0 auto;">
+    <h2 style="color: #333; text-decoration: none;">Gerador Central de Relatórios Oficiais</h2>
+    <p style="color: #666; margin-bottom: 25px;">Selecione o tipo de relatório que deseja exportar em formato técnico (PDF).</p>
     
-    <button onclick="window.print()" style="background: #000; color: #fff; padding: 15px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 20px;">
-      📄 GERAR RELATÓRIO POR UNIDADES (PDF)
-    </button>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <select id="tipoRelatorio" class="seletor-relatorio">
+        <option value="estoque">Reposição de Estoque</option>
+        <option value="fluxo_caixa">Fluxo de Caixa Detalhado</option>
+        <option value="despesas">Despesas a Pagar (Pendentes)</option>
+        <option value="faturamento">Resumo do Faturamento Total</option>
+        <option value="auditoria">Auditoria e Histórico de Ações</option>
+      </select>
+
+      <button onclick="dispararImpressao()" style="background: #D71920; color: #fff; padding: 13px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
+         GERAR PDF
+      </button>
+    </div>
   </div>
 
-  <div style="margin-top: 20px;">
-    <%= link_to "← Voltar ao Painel", root_path, style: "color: #666; text-decoration: none;" %>
+  <div style="margin-top: 30px; text-align: center;">
+  <%= link_to "← Voltar ao Painel", root_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold; font-size: 0.9em;" %>
   </div>
 </div>
 
-<!-- O QUE APARECE NO RELATÓRIO (Documento de Saída) -->
 <div class="documento-oficial">
-  <div style="text-align: center;">
-    <h1>RELATÓRIO TÉCNICO DE REPOSIÇÃO DE ESTOQUE</h1>
+  
+  <div style="text-align: center; margin-bottom: 20px;">
     <p><strong>CANTINAS E LANCHONETE QUERO LANCHES</strong> - UNIDADES MATRIZ E IF BAIANO CATU</p>
     <p>EMISSÃO: <%= Time.current.strftime("%d/%m/%Y - %H:%M") %></p>
   </div>
 
-  <%# --- SEÇÃO MATRIZ --- %>
-  <% matriz_alerta = @produtos_para_comprar.select(&:estoque_centro_baixo?) %>
-  <% if matriz_alerta.any? %>
-    <h2>UNIDADE: MATRIZ CENTRO</h2>
+  <%# ==================== 1. RELATÓRIO DE ESTOQUE ==================== %>
+  <div id="relatorio-estoque" class="secao-relatorio">
+    <h1>RELATÓRIO TÉCNICO DE REPOSIÇÃO DE ESTOQUE</h1>
+    
+    <% matriz_alerta = @produtos_para_comprar.select(&:estoque_centro_baixo?) %>
+    <% if matriz_alerta.any? %>
+      <h2>UNIDADE: MATRIZ CENTRO</h2>
+      <table>
+        <thead>
+          <tr><th>PRODUTO</th><th>ESTOQUE ATUAL</th><th>LIMITE MÍNIMO</th></tr>
+        </thead>
+        <tbody>
+          <% matriz_alerta.each do |p| %>
+            <tr><td><%= p.nome.upcase %></td><td><%= p.estoque_centro %></td><td><%= p.limite_centro %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <% pav_novo_alerta = @produtos_para_comprar.select(&:estoque_pavilhao_novo_baixo?) %>
+    <% if pav_novo_alerta.any? %>
+      <h2>UNIDADE: PAVILHÃO NOVO</h2>
+      <table>
+        <thead>
+          <tr><th>PRODUTO</th><th>ESTOQUE ATUAL</th><th>LIMITE MÍNIMO</th></tr>
+        </thead>
+        <tbody>
+          <% pav_novo_alerta.each do |p| %>
+            <tr><td><%= p.nome.upcase %></td><td><%= p.estoque_pavilhao_novo %></td><td><%= p.limite_pavilhao_novo %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+  <%# ==================== 2. RELATÓRIO DE FLUXO DE CAIXA ==================== %>
+  <div id="relatorio-fluxo_caixa" class="secao-relatorio">
+    <h1>RELATÓRIO DETALHADO DO FLUXO DE CAIXA</h1>
+    
+    <div class="resumo-bloco">
+      <strong>EXTRATO CONSOLIDADO ATUAL:</strong><br>
+      (+) Total Entrada (Vendas): <span style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas) %></span><br>
+      (-) Total Saída (Despesas Pagas): <span style="color: red !important; font-weight: bold;"><%= number_to_currency(@total_despesas) %></span><br>
+      
+      <%# CORES ALTERNADAS: AZUL PARA POSITIVO, VERMELHO PARA NEGATIVO %>
+      <strong>
+        (=) Saldo de Caixa Líquido: 
+        <% if @lucro_liquido >= 0 %>
+          <span style="color: #0000FF !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido) %></span>
+        <% else %>
+          <span style="color: #D71920 !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido) %></span>
+        <% end %>
+      </strong>
+    </div>
+
+    <h2>ÚLTIMAS ENTRADAS REGISTRADAS (VENDAS)</h2>
     <table>
       <thead>
         <tr>
-          <th>PRODUTO</th>
-          <th>ESTOQUE ATUAL</th>
-          <th>LIMITE MÍNIMO</th>
+          <th>DATA/HORA</th>
+          <th>PEDIDO ID</th>
+          <th>UNIDADE</th>
+          <th>STATUS</th>
+          <th>VALOR TOTAL</th>
         </tr>
       </thead>
       <tbody>
-        <% matriz_alerta.each do |p| %>
+        <% @pedidos_recentes.each do |p| %>
           <tr>
-            <td><%= p.nome.upcase %></td>
-            <td><%= p.estoque_centro %></td>
-            <td><%= p.limite_centro %></td>
+            <td><%= p.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td>#<%= p.id %></td>
+            <td><%= p.unidade&.upcase %></td> <%# Unidade agora em preto padrão %>
+            <td><%= p.respond_to?(:metodo_pagamento) ? p.metodo_pagamento&.upcase : "CONCLUÍDO" %></td>
+            <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total) %></td> <%# Valor da Entrada em VERDE %>
           </tr>
         <% end %>
       </tbody>
     </table>
-  <% end %>
 
-  <%# --- SEÇÃO PAVILHÃO NOVO --- %>
-  <% pav_novo_alerta = @produtos_para_comprar.select(&:estoque_pavilhao_novo_baixo?) %>
-  <% if pav_novo_alerta.any? %>
-    <h2>UNIDADE: PAVILHÃO NOVO</h2>
+    <h2>ÚLTIMAS SAÍDAS REGISTRADAS (DESPESAS PAGAS)</h2>
     <table>
       <thead>
         <tr>
-          <th>PRODUTO</th>
-          <th>ESTOQUE ATUAL</th>
-          <th>LIMITE MÍNIMO</th>
+          <th>DATA PAGAMENTO</th>
+          <th>DESCRIÇÃO/FORNECEDOR</th>
+          <th>CATEGORIA</th>
+          <th>UNIDADE</th>
+          <th>VALOR SAÍDA</th>
         </tr>
       </thead>
       <tbody>
-        <% pav_novo_alerta.each do |p| %>
+        <% if @despesas_pagas_detalhado.any? %>
+          <% @despesas_pagas_detalhado.each do |d| %>
+            <tr>
+              <td><%= d.data_pagamento&.strftime("%d/%m/%Y") || d.updated_at.strftime("%d/%m/%Y") %></td>
+              <td><%= d.descricao.upcase %></td>
+              <td><%= d.categoria&.upcase %></td>
+              <td><%= d.unidade&.upcase %></td> <%# Unidade agora em preto padrão %>
+              <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor) %></td> <%# Valor da Saída em VERMELHO %>
+            </tr>
+          <% end %>
+        <% else %>
           <tr>
-            <td><%= p.nome.upcase %></td>
-            <td><%= p.estoque_pavilhao_novo %></td>
-            <td><%= p.limite_pavilhao_novo %></td>
+            <td colspan="5" style="text-align: center;">Nenhuma despesa paga registrada no período.</td>
           </tr>
         <% end %>
       </tbody>
     </table>
-  <% end %>
+  </div>
 
-  <%# --- SEÇÃO PAVILHÃO ANTIGO --- %>
-  <% pav_antigo_alerta = @produtos_para_comprar.select(&:estoque_pavilhao_antigo_baixo?) %>
-  <% if pav_antigo_alerta.any? %>
-    <h2>UNIDADE: PAVILHÃO ANTIGO</h2>
-    <table>
+  <%# ==================== 3. RELATÓRIO DE DESPESAS A PAGAR ==================== %>
+  <div id="relatorio-despesas" class="secao-relatorio">
+    <h1>RELATÓRIO DE DESPESAS ACUMULADAS A PAGAR</h1>
+    
+    <% if @despesas_a_pagar.any? %>
+      <table>
+        <thead>
+          <tr><th>VENCIMENTO</th><th>DESCRIÇÃO/FORNECEDOR</th><th>CATEGORIA</th><th>VALOR</th></tr>
+        </thead>
+        <tbody>
+          <% @despesas_a_pagar.each do |d| %>
+            <tr>
+              <td><%= d.data_vencimento&.strftime("%d/%m/%Y") || "N/A" %></td>
+              <td><%= d.descricao.upcase %></td>
+              <td><%= d.categoria.present? ? d.categoria.upcase : "GERAL" %></td>
+              <td><%= number_to_currency(d.valor) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="text-align: center; margin-top: 30px;">Nenhuma despesa pendente registrada até o momento.</p>
+    <% end %>
+  </div>
+
+  <%# ==================== 4. RELATÓRIO DE FATURAMENTO ==================== %>
+  <div id="relatorio-faturamento" class="secao-relatorio">
+    <h1>RELATÓRIO CONSOLIDADO DE FATURAMENTO</h1>
+    
+    <table style="margin-top: 30px;">
       <thead>
-        <tr>
-          <th>PRODUTO</th>
-          <th>ESTOQUE ATUAL</th>
-          <th>LIMITE MÍNIMO</th>
-        </tr>
+        <tr><th style="width: 70%;">INDICADOR FINANCEIRO PERÍODO TOTAL</th><th>VALOR</th></tr>
       </thead>
       <tbody>
-        <% pav_antigo_alerta.each do |p| %>
-          <tr>
-            <td><%= p.nome.upcase %></td>
-            <td><%= p.estoque_pavilhao_antigo %></td>
-            <td><%= p.limite_pavilhao_antigo %></td>
-          </tr>
-        <% end %>
+        <tr>
+          <td><strong>FATURAMENTO BRUTO (+)</strong> (Total bruto arrecadado em vendas de lanches)</td>
+          <td style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas) %></td>
+        </tr>
+        <tr>
+          <td><strong>DESPESAS OPERACIONAIS (-)</strong> (Custos pagos com insumos e infraestrutura)</td>
+          <td style="color: red !important;"><%= number_to_currency(@total_despesas) %></td>
+        </tr>
+        <tr style="background-color: #eee !important;">
+          <td><strong>LUCRO LÍQUIDO CONSOLIDADO (=)</strong></td>
+          <%# APLICAÇÃO DA REGRA DE CORES DINÂMICAS TAMBÉM NO FATURAMENTO %>
+          <td style="font-weight: bold;">
+            <% if @lucro_liquido >= 0 %>
+              <span style="color: #0000FF !important;"><%= number_to_currency(@lucro_liquido) %></span>
+            <% else %>
+              <span style="color: #D71920 !important;"><%= number_to_currency(@lucro_liquido) %></span>
+            <% end %>
+          </td>
+        </tr>
       </tbody>
     </table>
-  <% end %>
+  </div>
 
-  <div style="margin-top: 50px; border-top: 2px solid black; width: 350px; text-align: center; margin-left: auto; margin-right: auto;">
+  <%# ==================== 5. RELATÓRIO DE AUDITORIA ==================== %>
+<div id="relatorio-auditoria" class="secao-relatorio">
+  <h1>RELATÓRIO DE AUDITORIA E MOVIMENTAÇÕES DE ESTOQUE</h1>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>DATA/HORA</th>
+        <th>RESPONSÁVEL</th>
+        <th>UNIDADE</th>
+        <th>ITEM</th>
+        <th>AÇÃO</th>
+        <th>QTD</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @movimentacoes.each do |log| %>
+        <tr>
+          <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
+          <td><%= log.respond_to?(:responsavel) ? log.responsavel : log.funcionario&.nome %></td>
+          <td><%= log.unidade&.upcase %></td>
+          <td><%= log.respond_to?(:produto_nome) ? log.produto_nome : log.produto&.nome %></td>
+          <td><%= log.respond_to?(:acao) ? log.acao : log.tipo_movimentacao %></td>
+          
+          <%# --- LINHA DA QTD MODIFICADA AQUI --- %>
+          <td style="font-weight: bold;">
+            <% 
+              # Descobre se o banco usa .qtd ou .quantidade
+              qtd_numerica = log.respond_to?(:qtd) ? log.qtd : log.quantidade
+              
+              # 1. Troca o ponto pela vírgula e limpa o .0
+              qtd_formatada = qtd_numerica.to_f == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
+              
+              # 2. Pega a unidade de medida do produto
+              unidade_medida = log.produto&.respond_to?(:unidade_medida) ? log.produto.unidade_medida.to_s.downcase : "unidade"
+              
+              # 3. Coloca no plural se for maior que 1
+              if qtd_numerica > 1
+                unidade_medida = case unidade_medida
+                                 when "unidade" then "unidades"
+                                 when "litro"   then "litros"
+                                 when "quilo"   then "quilos"
+                                 when "un"      then "un"
+                                 when "kg"      then "kg"
+                                 else 
+                                   unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
+                                 end
+              end
+            %>
+            <%= "#{qtd_formatada} #{unidade_medida}" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+  <div style="margin-top: 60px; border-top: 2px solid black; width: 350px; text-align: center; margin-left: auto; margin-right: auto;">
     <p>Responsável pela Conferência</p>
+    <p style="font-size: 10px;">Sistema Cantina Quero Lanches - Catu/BA</p>
   </div>
 </div>
+
+<script>
+  function dispararImpressao() {
+    // 1. Obtém o valor selecionado no select do HTML
+    var seletor = document.getElementById("tipoRelatorio");
+    var tipoSelecionado = seletor.value;
+    
+    // 2. Remove a classe de impressão de todas as seções para limpar o cache visual
+    var secoes = document.getElementsByClassName("secao-relatorio");
+    for (var i = 0; i < secoes.length; i++) {
+      secoes[i].classList.remove("ativo-print");
+    }
+    
+    // 3. Identifica a seção correta pelo ID e aplica a classe ativa de impressão
+    var secaoAlvo = document.getElementById("relatorio-" + tipoSelecionado);
+    if (secaoAlvo) {
+      secaoAlvo.classList.add("ativo-print");
+      
+      // 4. Executa a chamada do driver de impressão do navegador (PDF nativo)
+      window.print();
+    }
+  }
+</script>

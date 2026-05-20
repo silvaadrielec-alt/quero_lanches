@@ -20,38 +20,117 @@
     <%= javascript_importmap_tags %>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.js"></script>
+
+    <%# --- ESTILIZAÇÃO DO MENU SUSPENSO (DROPDOWN) --- %>
+    <style>
+      .dropdown-quero {
+        position: relative;
+        display: inline-block;
+        /* Base invisível para o mouse descer sem perder o contato */
+        padding-bottom: 15px; 
+        margin-bottom: -15px;
+      }
+
+      .dropdown-conteudo {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 220px;
+        box-shadow: 0px 8px 24px rgba(0,0,0,0.15);
+        border: 2px solid #D71920;
+        border-radius: 15px;
+        z-index: 1000;
+        
+        margin-top: 0px; 
+        padding-top: 5px; 
+        
+        left: 50%;
+        transform: translateX(-50%);
+        overflow: hidden;
+      }
+
+      .dropdown-conteudo a {
+        color: #333 !important;
+        padding: 12px 20px;
+        text-decoration: none;
+        display: block;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+      }
+
+      .dropdown-conteudo a:last-child {
+        border-bottom: none;
+      }
+
+      .dropdown-conteudo a:hover {
+        background-color: #fcebeb;
+        color: #D71920 !important;
+      }
+
+      /* Exibe o menu ao passar o mouse */
+      .dropdown-quero:hover .dropdown-conteudo {
+        display: block;
+      }
+      
+      /* Mantém o botão destacado enquanto o menu está aberto */
+      .dropdown-quero:hover .nav-link-quero {
+        background: #D71920;
+        color: white !important;
+      }
+    </style>
   </head>
 
   <body>
     <nav class="navbar-quero">
-      <%# Logo centralizada com link para a home %>
-      <%= link_to root_path do %>
-        <%= image_tag "logo.png", size: "100x100", alt: "Logo Quero Lanches" %>
-      <% end %>
+  <%# Logo centralizada com link para a home %>
+  <%= link_to root_path do %>
+    <%= image_tag "logo.png", alt: "Logo Quero Lanches", class: "logo-sistema" %>
+  <% end %>
 
-      <%# Botão de Início %>
-      <div style="margin-top: 10px;">
-        <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
-      </div>
-    </nav>
+  <%# Botão de Início %>
+  <div style="margin-top: 10px;">
+    <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
+  </div>
+</nav>
       
     <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-items: center;">
       <% if funcionario_signed_in? %>
         
-        <%# --- SEÇÃO OPERACIONAL (Disponível para todos) --- %>
-        <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
+        <%# --- LINKS COMUNS (Visíveis para TODOS os níveis de acesso) --- %>
         <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
-        <%= link_to "DESPESAS", despesas_path, class: "nav-link-quero" %>
-        <%= link_to "ESTOQUE", estoques_path, class: "nav-link-quero" %>
-
+        
         <% if current_funcionario.admin? %>
-          <%# Separador visual para o Admin %>
-          <span style="margin: 0 5px; color: #ccc;">|</span>
+          <%# --- VISÃO DO ADMIN: Mantém o menu agrupado e completo --- %>
+          <div class="dropdown-quero">
+            <%# AJUSTE 1: Adicionada a classe no-print para ocultar a palavra "CADASTROS" no PDF %>
+            <span class="nav-link-quero no-print" style="cursor: pointer; padding-right: 15px;">
+              CADASTROS ▼
+            </span>
+            <div class="dropdown-conteudo">
+              <%= link_to "Cardápio", cardapio_index_path %>
+              <%= link_to "Produtos e Insumos", produtos_path %>
+              <%= link_to "Despesas", despesas_path %>
+              <%= link_to "Movimentar Estoque", estoques_path %>
+              <%= link_to "Funcionários", funcionarios_path %>
+            </div>
+          </div>
+        <% else %>
+          <%# --- VISÃO DO FUNCIONÁRIO COMUM: Links diretos e sem submenus escondidos --- %>
+          <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
+          <%= link_to "DESPESAS", despesas_path, class: "nav-link-quero" %>
+        <% end %>
+        
+        <% if current_funcionario.admin? %>
+          <%# AJUSTE 2: Adicionada a classe no-print no span para ocultar o caractere "|" no PDF %>
+          <span class="no-print" style="margin: 0 5px; color: #ccc;">|</span>
 
-          <%# --- SEÇÃO ADMINISTRATIVA (Apenas Admin) --- %>
-          <%= link_to "CADASTRO", produtos_path, class: "nav-link-quero", title: "Produtos" %>
-          <%= link_to "FUNCIONÁRIOS", funcionarios_path, class: "nav-link-quero" %>
+          <%# --- SEÇÃO ADMINISTRATIVA EXCLUSIVA --- %>
           <%= link_to "FATURAMENTO", faturamentos_path, class: "nav-link-quero" %>
+          <%= link_to "FLUXO DE CAIXA", fluxo_de_caixa_path, class: "nav-link-quero" %>
           <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
           <%= link_to 'AUDITORIA', auditoria_path, class: "nav-link-quero" %>
         <% end %>
