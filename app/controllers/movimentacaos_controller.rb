@@ -1,4 +1,4 @@
-class MovimentacaosController < ApplicationRecord
+class MovimentacaosController < ApplicationController
   before_action :set_movimentacao, only: %i[ show edit update destroy ]
 
   def index
