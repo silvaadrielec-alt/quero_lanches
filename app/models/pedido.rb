@@ -41,9 +41,9 @@ class Pedido < ApplicationRecord
       # CALCULA O FATOR PARA LÍQUIDOS E PESADOS
       fator = descobrir_fator_proporcao(p, item_do_carrinho)
       
-      # Se a unidade do cadastro for Litro ou KG, a quantidade gravada vira a fração proporcional
+      # CORRIGIDO: Variável unificada com 'e' (unidade_prod) para evitar quebra no Zeitwerk
       unidade_prod = p.respond_to?(:unidade_medida) ? p.unidade_medida.to_s.downcase.strip : ""
-      if unidad_prod == 'litro' || unidade_prod == 'kg' || unidade_prod == 'quilo'
+      if unidade_prod == 'litro' || unidade_prod == 'kg' || unidade_prod == 'quilo'
         qtd_principal_ajustada = fator * qtd_vendida
       else
         qtd_principal_ajustada = qtd_vendida
@@ -187,9 +187,9 @@ class Pedido < ApplicationRecord
                           fator_banco
                         else
                           case u
-                          when 'fatia'   then 40.0  
-                          when 'rodela'  then 50.0  
-                          when 'folha'   then 100.0 
+                          when 'fatia'   then 40.0   
+                          when 'rodela'  then 50.0   
+                          when 'folha'   then 100.0  
                           else 1.0
                           end
                         end
