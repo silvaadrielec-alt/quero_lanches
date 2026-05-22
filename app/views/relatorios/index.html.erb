@@ -93,7 +93,7 @@
       </select>
 
       <button onclick="dispararImpressao()" style="background: #D71920; color: #fff; padding: 13px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
-         GERAR PDF
+           GERAR PDF
       </button>
     </div>
   </div>
@@ -181,9 +181,9 @@
           <tr>
             <td><%= p.created_at.strftime("%d/%m/%Y %H:%M") %></td>
             <td>#<%= p.id %></td>
-            <td><%= p.unidade&.upcase %></td> <%# Unidade agora em preto padrão %>
+            <td><%= p.unidade&.upcase %></td>
             <td><%= p.respond_to?(:metodo_pagamento) ? p.metodo_pagamento&.upcase : "CONCLUÍDO" %></td>
-            <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total) %></td> <%# Valor da Entrada em VERDE %>
+            <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -207,8 +207,8 @@
               <td><%= d.data_pagamento&.strftime("%d/%m/%Y") || d.updated_at.strftime("%d/%m/%Y") %></td>
               <td><%= d.descricao.upcase %></td>
               <td><%= d.categoria&.upcase %></td>
-              <td><%= d.unidade&.upcase %></td> <%# Unidade agora em preto padrão %>
-              <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor) %></td> <%# Valor da Saída em VERMELHO %>
+              <td><%= d.unidade&.upcase %></td>
+              <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor) %></td>
             </tr>
           <% end %>
         <% else %>
@@ -264,7 +264,6 @@
         </tr>
         <tr style="background-color: #eee !important;">
           <td><strong>LUCRO LÍQUIDO CONSOLIDADO (=)</strong></td>
-          <%# APLICAÇÃO DA REGRA DE CORES DINÂMICAS TAMBÉM NO FATURAMENTO %>
           <td style="font-weight: bold;">
             <% if @lucro_liquido >= 0 %>
               <span style="color: #0000FF !important;"><%= number_to_currency(@lucro_liquido) %></span>
@@ -277,62 +276,78 @@
     </table>
   </div>
 
-  <%# ==================== 5. RELATÓRIO DE AUDITORIA ==================== %>
-<div id="relatorio-auditoria" class="secao-relatorio">
-  <h1>RELATÓRIO DE AUDITORIA E MOVIMENTAÇÕES DE ESTOQUE</h1>
-  
-  <table>
-    <thead>
-      <tr>
-        <th>DATA/HORA</th>
-        <th>RESPONSÁVEL</th>
-        <th>UNIDADE</th>
-        <th>ITEM</th>
-        <th>AÇÃO</th>
-        <th>QTD</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @movimentacoes.each do |log| %>
+  <%# ==================== 5. RELATÓRIO DE AUDITORIA (ATUALIZADO COM AS REGRAS DE HOJE) ==================== %>
+  <div id="relatorio-auditoria" class="secao-relatorio">
+    <h1>RELATÓRIO DE AUDITORIA E MOVIMENTAÇÕES DE ESTOQUE</h1>
+    
+    <table>
+      <thead>
         <tr>
-          <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
-          <td><%= log.respond_to?(:responsavel) ? log.responsavel : log.funcionario&.nome %></td>
-          <td><%= log.unidade&.upcase %></td>
-          <td><%= log.respond_to?(:produto_nome) ? log.produto_nome : log.produto&.nome %></td>
-          <td><%= log.respond_to?(:acao) ? log.acao : log.tipo_movimentacao %></td>
-          
-          <%# --- LINHA DA QTD MODIFICADA AQUI --- %>
-          <td style="font-weight: bold;">
-            <% 
-              # Descobre se o banco usa .qtd ou .quantidade
-              qtd_numerica = log.respond_to?(:qtd) ? log.qtd : log.quantidade
-              
-              # 1. Troca o ponto pela vírgula e limpa o .0
-              qtd_formatada = qtd_numerica.to_f == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
-              
-              # 2. Pega a unidade de medida do produto
-              unidade_medida = log.produto&.respond_to?(:unidade_medida) ? log.produto.unidade_medida.to_s.downcase : "unidade"
-              
-              # 3. Coloca no plural se for maior que 1
-              if qtd_numerica > 1
-                unidade_medida = case unidade_medida
-                                 when "unidade" then "unidades"
-                                 when "litro"   then "litros"
-                                 when "quilo"   then "quilos"
-                                 when "un"      then "un"
-                                 when "kg"      then "kg"
-                                 else 
-                                   unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
-                                 end
-              end
-            %>
-            <%= "#{qtd_formatada} #{unidade_medida}" %>
-          </td>
+          <th>DATA/HORA</th>
+          <th>RESPONSÁVEL</th>
+          <th>UNIDADE</th>
+          <th>ITEM</th>
+          <th>AÇÃO</th>
+          <th>QTD</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+      </thead>
+      <tbody>
+        <% @movimentacoes.each do |log| %>
+          <tr>
+            <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
+            <td><%= log.respond_to?(:responsavel) ? log.responsavel : (log.funcionario&.nome || "Sistema") %></td>
+            <td><%= log.unidade&.upcase %></td>
+            <td><%= log.respond_to?(:produto_nome) ? log.produto_nome : log.produto&.nome %></td>
+            <td><%= log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase %></td>
+            
+            <td style="font-weight: bold;">
+              <% 
+                qtd_numerica = log.respond_to?(:qtd) ? log.qtd.to_f : log.quantidade.to_f
+                produto_log = log.produto
+                unidade_medida = produto_log&.respond_to?(:unidade_medida) ? produto_log.unidade_medida.to_s.downcase.strip : "unidade"
+                nome_prod = produto_log&.nome.to_s.downcase
+                tipo_mov = log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase
+
+                if tipo_mov.include?('SAÍDA') && produto_log
+                  # 1. VERIFICA SE É UM INSUMO DE FICHA TÉCNICA
+                  comp_como_insumo = Composicao.find_by(insumo_id: produto_log.id)
+                  if comp_como_insumo && comp_como_insumo.unidade_medida_uso.present?
+                    unidade_medida = comp_como_insumo.unidade_medida_uso.to_s.downcase.strip
+                  
+                  # 2. SE FOR O PRODUTO PRINCIPAL LÍQUIDO (SUCO/CAFÉ), RECONSTRÓI O VOLUME DINAMICAMENTE
+                  elsif unidade_medida == 'litro' && (nome_prod.include?('suco') || nome_prod.include?('vitamina') || nome_prod.include?('café') || nome_prod.include?('cafe'))
+                    if qtd_numerica < 1.0 && qtd_numerica > 0
+                      qtd_numerica = (qtd_numerica * 1000).round(0)
+                      unidade_medida = "ml"
+                    end
+                  end
+                end
+
+                qtd_formatada = qtd_numerica == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
+                
+                if qtd_numerica > 1
+                  unidade_medida = case unidade_medida
+                                   when "unidade" then "unidades"
+                                   when "fatia"   then "fatias"
+                                   when "rodela"  then "rodelas"
+                                   when "folha"   then "folhas"
+                                   when "litro"   then "litros"
+                                   when "quilo"   then "quilos"
+                                   when "un"      then "un"
+                                   when "kg"      then "kg"
+                                   when "ml"      then "ml"
+                                   else 
+                                     unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
+                                   end
+                end
+              %>
+              <%= "#{qtd_formatada} #{unidade_medida}" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
   <div style="margin-top: 60px; border-top: 2px solid black; width: 350px; text-align: center; margin-left: auto; margin-right: auto;">
     <p>Responsável pela Conferência</p>

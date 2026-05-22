@@ -1,0 +1,81 @@
+<div class="card-principal" style="max-width: 900px; margin: 40px auto; font-family: sans-serif;">
+  <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-bottom: 30px;">
+    Gerenciar Fichas Técnicas (Receitas)
+  </h1>
+
+  <%# --- SELETOR DE PRODUTO --- %>
+  <div style="background: #f9f9f9; padding: 20px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 30px;">
+    <label style="font-weight: bold; color: #333; display: block; margin-bottom: 10px;">Selecione o Produto para ver ou editar a Receita:</label>
+    <%= form_with url: gerenciar_composicoes_path, method: :get, local: true, id: "form-selecionar-produto" do |f| %>
+      <%= f.select :produto_id, @produtos.map { |p| [p.nome, p.id] }, 
+                   { prompt: "--- Escolha um Produto de Venda ---", selected: params[:produto_id] }, 
+                   { class: "input-estilizado", style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 1em;", onchange: "this.form.submit();" } %>
+    <% end %>
+  </div>
+
+  <% if @produto_selecionado.present? %>
+    <%# --- EXIBIÇÃO DA RECEITA ATUAL --- %>
+    <h3 style="color: #7D3C98; border-bottom: 2px solid #7D3C98; padding-bottom: 5px; margin-bottom: 20px;">
+      Receita Atual de: <%= @produto_selecionado.nome %>
+    </h3>
+
+    <% if @composicoes.any? %>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <thead>
+          <tr style="background: #D71920; color: white; text-align: left;">
+            <th style="padding: 12px;">Insumo</th>
+            <th style="padding: 12px;">Qtd. Gasta</th>
+            <th style="padding: 12px;">Medida Uso</th>
+            <th style="padding: 12px; text-align: center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @composicoes.each do |comp| %>
+            <tr style="border-bottom: 1px solid #eee; background: #fff;">
+              <td style="padding: 12px; font-weight: bold; color: #555;"><%= comp.insumo.nome %></td>
+              <td style="padding: 12px; color: #333;"><%= comp.quantidade %></td>
+              <td style="padding: 12px;"><span style="background: #e0f2f1; color: #00796b; padding: 4px 10px; border-radius: 15px; font-size: 0.85em; font-weight: bold;"><%= comp.unidade_medida_uso %></span></td>
+              <td style="padding: 12px; text-align: center;">
+                <%= link_to "Remover", composicoes_path(comp), data: { turbo_method: :delete, turbo_confirm: "Tem certeza que deseja retirar este insumo da receita?" }, style: "color: #ff4444; text-decoration: none; font-weight: bold; font-size: 0.9em;" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="background: #fff8e1; color: #f57f17; padding: 15px; border-radius: 10px; border-left: 5px solid #ffb300; margin-bottom: 30px;">
+        💡 Este produto ainda não possui ingredientes cadastrados na ficha técnica. Use o formulário abaixo para adicionar!
+      </p>
+    <% end %>
+
+    <%# --- FORMULÁRIO DE ADIÇÃO CENTRALIZADO --- %>
+    <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+      <h4 style="margin-top: 0; color: #333; font-weight: bold; margin-bottom: 15px;">Adicionar Insumo à Receita</h4>
+      
+      <%= form_with(model: @nova_composicao, url: composicoes_path, local: true) do |f| %>
+        <%= f.hidden_field :produto_id, value: @produto_selecionado.id %>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
+          <div>
+            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Insumo</label>
+            <%= f.collection_select :insumo_id, @insumos_disponiveis, :id, :nome, { prompt: "Selecione um insumo..." }, { class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+          </div>
+
+          <div>
+            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Qtd.</label>
+            <%= f.number_field :quantidade, step: :any, class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
+          </div>
+
+          <div>
+            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Medida Uso</label>
+            <%= f.select :unidade_medida_uso, [["unidade", "unidade"], ["fatia", "fatia"], ["rodela", "rodela"], ["folha", "folha"], ["kg", "kg"], ["gramas", "gramas"], ["ml", "ml"]], { prompt: "Selecione" }, { class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+          </div>
+
+          <div>
+            <%= f.submit "Adicionar", style: "background: #28a745; color: white; border: none; padding: 11px 25px; border-radius: 10px; font-weight: bold; cursor: pointer;" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -17,6 +17,17 @@ class ApplicationController < ActionController::Base
     checkin_path
   end
 
+  # --- PASSO 2: ACTION GLOBAL DE VALIDAÇÃO DE SEGURANÇA ---
+  def autorizar_gerente
+    codigo = params[:codigo]
+    
+    # Busca se existe algum administrador com esse código ativo no banco
+    autorizado = Funcionario.where(admin: true, codigo_autorizacao: codigo).exists?
+
+    # Retorna a resposta estruturada em JSON para o JavaScript
+    render json: { autorizado: autorizado }
+  end
+
   private
 
   # NOVO MÉTODO: Sensor de Primeiro Acesso
@@ -29,6 +40,9 @@ class ApplicationController < ActionController::Base
 
   def verificar_checkin_turno
     if funcionario_signed_in?
+      # ADICIONADO: Se a requisição for para a nossa rota de autorização, não aplica o bloqueio de tela
+      return if action_name == 'autorizar_gerente'
+
       if session[:unidade_atual].blank?
         unless request.path == checkin_path || request.path == confirmar_checkin_path || request.path.include?('sign_out')
           redirect_to checkin_path, alert: "Confirmação Necessária: Selecione a unidade e o turno de atuação."

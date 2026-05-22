@@ -3,26 +3,92 @@
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
   <div style="font-size: 18px; margin-bottom: 30px; text-align: left;">
-  <p><strong>Valor de Custo (Compra/Produção):</strong> <%= number_to_currency(@produto.valor_unitario) %></p>
-  <p><strong>Preço de Venda:</strong> <%= number_to_currency(@produto.preco_venda) %></p>
-  <hr>
-  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-  <p> Centro: <%= @produto.estoque_centro || 0 %> <%= @produto.unidade_medida %></p>
-  <p> Pavilhão Novo: <%= @produto.estoque_pavilhao_novo || 0 %> <%= @produto.unidade_medida %></p>
-  <p> Pavilhão Antigo: <%= @produto.estoque_pavilhao_antigo || 0 %> <%= @produto.unidade_medida %></p>
-</div>
+    <p><strong>Valor de Custo (Compra/Produção):</strong> <%= number_to_currency(@produto.valor_unitario) %></p>
+    <p><strong>Preço de Venda:</strong> <%= number_to_currency(@produto.preco_venda) %></p>
+    
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    
+    <%# --- CÓDIGO DO PLURAL MANUAL CORRIGIDO --- %>
+    <% 
+      def formatar_unidade(quantidade, unidade)
+        return unidade if quantidade <= 1
+        
+        case unidade.to_s.downcase
+        when 'unidade'
+          'unidades'
+        when 'fatia'
+          'fatias'
+        else
+          unidade # Para kg, gramas, ml mantém o padrão
+        end
+      end
+    %>
 
-  <div style="margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 25px;">
-  
-  <%# Botão de Editar apenas para Admin - Agora em Vermelho %>
-  <% if current_funcionario.admin? %>
-    <%= link_to "EDITAR LANCHE", edit_cardapio_path(@produto), 
-        style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer;" %>
+    <p> 
+      <strong>Centro:</strong> 
+      <% qtd_centro = @produto.estoque_centro || 0 %>
+      <%= number_with_precision(qtd_centro, precision: 2, separator: ',', strip_insignificant_zeros: true) %> 
+      <%= formatar_unidade(qtd_centro, @produto.unidade_medida) %>
+    </p>
+
+    <p> 
+      <strong>Pavilhão Novo:</strong> 
+      <% qtd_novo = @produto.estoque_pavilhao_novo || 0 %>
+      <%= number_with_precision(qtd_novo, precision: 2, separator: ',', strip_insignificant_zeros: true) %> 
+      <%= formatar_unidade(qtd_novo, @produto.unidade_medida) %>
+    </p>
+
+    <p> 
+      <strong>Pavilhão Antigo:</strong> 
+      <% qtd_antigo = @produto.estoque_pavilhao_antigo || 0 %>
+      <%= number_with_precision(qtd_antigo, precision: 2, separator: ',', strip_insignificant_zeros: true) %> 
+      <%= formatar_unidade(qtd_antigo, @produto.unidade_medida) %>
+    </p>
+  </div>
+
+  <%# --- SEÇÃO DE INGREDIENTES --- %>
+  <% if @produto.composicoes.any? %>
+    <div style="margin-top: 30px; margin-bottom: 30px; text-align: left; font-family: sans-serif;">
+      <h3 style="color: #7D3C98; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #7D3C98; padding-bottom: 5px; font-size: 18px;">
+        Ficha Técnica / Ingredientes
+      </h3>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; font-size: 16px;">
+        <thead>
+          <tr style="background-color: #f4f6f7; color: #555; text-align: left;">
+            <th style="padding: 12px; border-bottom: 2px solid #eee;">Insumo</th>
+            <th style="padding: 12px; border-bottom: 2px solid #eee; text-align: center;">Qtd. Gasta</th>
+            <th style="padding: 12px; border-bottom: 2px solid #eee; text-align: center;">Medida</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @produto.composicoes.each do |comp| %>
+            <tr style="border-bottom: 1px solid #eee; background: #fff;">
+              <td style="padding: 12px; font-weight: bold; color: #444;"><%= comp.insumo.nome %></td>
+              
+              <td style="padding: 12px; text-align: center; color: #333;">
+                <%= number_with_precision(comp.quantidade, precision: 2, separator: ',', strip_insignificant_zeros: true) %>
+              </td>
+              
+              <td style="padding: 12px; text-align: center;">
+                <span style="background: #e2f0d9; color: #385723; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: bold; display: inline-block;">
+                  <%= comp.unidade_medida_uso %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% end %>
 
-  <%# Link de Voltar - Agora no padrão Azul Sublinhado %>
-  <%= link_to "Voltar para o Cardápio", cardapio_index_path, 
-      style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  <div style="margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 25px;">
+    <% if current_funcionario.admin? %>
+      <%= link_to "EDITAR LANCHE", edit_cardapio_path(@produto), 
+          style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer;" %>
+    <% end %>
 
-</div>
+    <%= link_to "Voltar para o Cardápio", cardapio_index_path, 
+        style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  </div>
 </div>

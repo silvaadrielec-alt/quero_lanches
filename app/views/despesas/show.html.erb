@@ -1,4 +1,4 @@
-<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; font-family: sans-serif;">
 
   <%# Título Centralizado %>
   <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 20px;">Detalhes da Despesa</h1>
@@ -61,29 +61,64 @@
 
 </div>
 
+<%# --- CONTROLADOR DE SEGURANÇA DINÂMICA (API FETCH) --- %>
 <script>
-function confirmarExclusaoDetalhe(id) {
-  const ehAdmin = <%= current_funcionario.admin? %>;
-  const codigoOk = () => {
-    if (confirm("Deseja realmente apagar esta despesa?")) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '/despesas/' + id;
-      form.innerHTML = `<input type="hidden" name="_method" value="delete"><input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">`;
-      document.body.appendChild(form);
-      form.submit();
+document.addEventListener("turbo:load", function() {
+
+  window.solicitarAutorizacaoGerente = function(onSucesso) {
+    const ehAdmin = <%= current_funcionario&.admin? || false %>;
+
+    if (ehAdmin) {
+      onSucesso();
+    } else {
+      const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o seu código de segurança:");
+      
+      if (codigo) {
+        fetch("/autorizar_gerente", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({ codigo: codigo })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.autorizado) {
+            onSucesso();
+          } else {
+            alert("Código Inválido ou Usuário não é Administrador! Ação cancelada.");
+          }
+        })
+        .catch(() => alert("Erro ao processar a validação de segurança remota."));
+      }
     }
   };
 
-  if (ehAdmin) {
-    codigoOk();
-  } else {
-    const codigo = prompt("AUTORIZAÇÃO DO GERENTE\nDigite o código:");
-    if (codigo === "1234") {
-      codigoOk();
-    } else if (codigo !== null) {
-      alert("Código inválido!");
-    }
-  }
-}
+  window.confirmarExclusaoDetalhe = function(id) {
+    solicitarAutorizacaoGerente(function() {
+      if (confirm("Deseja realmente apagar esta despesa?")) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/despesas/' + id;
+        
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'delete';
+        
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'authenticity_token';
+        tokenInput.value = "<%= form_authenticity_token %>";
+        
+        form.appendChild(methodInput);
+        form.appendChild(tokenInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  };
+
+});
 </script>

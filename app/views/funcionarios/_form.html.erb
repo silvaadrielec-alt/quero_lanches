@@ -65,9 +65,16 @@
   <div style="margin-bottom: 20px; padding: 10px; border: 1px dashed #D71920; border-radius: 8px; background-color: #fff;">
     <%= f.label :admin, "Acesso de Administrador?", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 5px;" %>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <%= f.check_box :admin, style: "width: 20px; height: 20px;" %>
+      <%= f.check_box :admin, id: "checkbox-admin", style: "width: 20px; height: 20px; cursor: pointer;" %>
       <span style="color: #666; font-size: 14px;">(Permite visualizar faturamentos e gerenciar equipe)</span>
     </div>
+  </div>
+
+  <%# --- INTEGRADO: NOVO CAMPO DINÂMICO PARA CÓDIGO DE AUTORIZAÇÃO --- %>
+  <div style="margin-bottom: 20px; padding: 15px; border: 2px solid #D71920; border-radius: 8px; background-color: #fff; display: none;" id="bloco-codigo-autorizacao">
+    <%= f.label :codigo_autorizacao, "Código de Autorização (PIN do Gerente)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 5px;" %>
+    <%= f.text_field :codigo_autorizacao, id: "input-codigo-autorizacao", maxlength: 6, placeholder: "Ex: 9876", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;" %>
+    <p style="font-size: 12px; color: #666; margin-top: 5px; margin-bottom: 0;">* Este código será exigido pelo sistema para validar operações restritas realizadas por funcionários comuns.</p>
   </div>
 
   <div style="margin-top: 30px;">
@@ -75,3 +82,41 @@
   </div>
 
 <% end %>
+
+<%# --- LOGICA VISUAL DE EXIBIÇÃO DO CAMPO DE SEGURANÇA --- %>
+<script>
+function gerenciarCampoCodigo() {
+  const checkboxAdmin = document.getElementById("checkbox-admin");
+  const blocoCodigo = document.getElementById("bloco-codigo-autorizacao");
+  const inputCodigo = document.getElementById("input-codigo-autorizacao");
+
+  if (!checkboxAdmin || !blocoCodigo) return;
+
+  if (checkboxAdmin.checked) {
+    blocoCodigo.style.display = "block";
+    if (inputCodigo) inputCodigo.required = true; // Força o preenchimento se for admin
+  } else {
+    blocoCodigo.style.display = "none";
+    if (inputCodigo) {
+      inputCodigo.required = false;
+      inputCodigo.value = ""; // Reseta o valor caso o privilégio seja removido
+    }
+  }
+}
+
+function inicializarEventosFuncionario() {
+  const checkboxAdmin = document.getElementById("checkbox-admin");
+  
+  if (checkboxAdmin) {
+    checkboxAdmin.removeEventListener("change", gerenciarCampoCodigo);
+    checkboxAdmin.addEventListener("change", gerenciarCampoCodigo);
+  }
+
+  // Executa imediatamente para checar o estado atual (útil na edição de admins existentes)
+  gerenciarCampoCodigo();
+}
+
+// Vincula os listeners de ciclo de vida do Turbo do Rails
+document.addEventListener("turbo:load", inicializarEventosFuncionario);
+document.addEventListener("DOMContentLoaded", inicializarEventosFuncionario);
+</script>

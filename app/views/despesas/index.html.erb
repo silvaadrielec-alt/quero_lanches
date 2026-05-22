@@ -1,4 +1,4 @@
-<div style="max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center;">
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center; font-family: sans-serif;">
   
   <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 20px;">
     Gestão de Despesas 
@@ -11,7 +11,7 @@
   </div>
 
   <%# PAINEL DE FILTROS POR PERÍODO %>
-  <div style="background: white; border: 2px solid #D71920; border-radius: 20px; padding: 20px; margin: 0 auto 25px auto; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); font-family: sans-serif;">
+  <div style="background: white; border: 2px solid #D71920; border-radius: 20px; padding: 20px; margin: 0 auto 25px auto; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
     <%= form_with url: despesas_path, method: :get, local: true, style: "display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; justify-content: center;" do |f| %>
       <div style="display: flex; flex-direction: column; text-align: left;">
         <%= f.label :data_inicio, "Data Inicial", style: "font-size: 0.8em; font-weight: bold; color: #555; margin-bottom: 4px;" %>
@@ -36,7 +36,7 @@
   <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
     <div style="text-align: right; margin-bottom: 20px;">
         <span style="color: #D71920; font-weight: bold;">Total de Saídas:</span>
-        <strong style="font-size: 2.2em; block; color: #333;">
+        <strong style="font-size: 2.2em; color: #333;">
           R$ <%= number_with_precision(@total_despesas, precision: 2, separator: ',', delimiter: '.') %>
         </strong>
         <hr style="border: 0; border-top: 1px solid #D71920; margin-top: 10px;">
@@ -46,43 +46,37 @@
       <table style="width: 100%; border-collapse: separate; border-spacing: 0;" id="tabelaDespesas">
         <thead>
           <tr style="background-color: #D71920; color: white;">
-            <th style="padding: 15px; text-align: left; border-radius: 10px 0 0 10px; font-size: 0.9em;">VENCIMENTO / PAGTO</th>
-            <th style="padding: 15px; text-align: left; font-size: 0.9em;">DESCRIÇÃO</th>
-            <th style="padding: 15px; text-align: left; font-size: 0.9em;">CATEGORIA</th>
-            <th style="padding: 15px; text-align: left; font-size: 0.9em;">UNIDADE</th>
-            <th style="padding: 15px; text-align: left; font-size: 0.9em;">RESPONSÁVEL</th>
-            <th style="padding: 15px; text-align: right; font-size: 0.9em;">VALOR</th>
-            <th style="padding: 15px; text-align: center; font-size: 0.9em;">STATUS</th>
-            <th style="padding: 15px; text-align: center; border-radius: 0 10px 10px 0; font-size: 0.9em;">AÇÕES</th>
+            <th style="padding: 15px; text-align: left; border-radius: 10px 0 0 10px; font-size: 0.9em; width: 16%;">VENCIMENTO / PAGTO</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em; width: 22%;">DESCRIÇÃO</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em; width: 15%;">CATEGORIA</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em; width: 12%;">UNIDADE</th>
+            <th style="padding: 15px; text-align: left; font-size: 0.9em; width: 11%;">RESPONSÁVEL</th>
+            <th style="padding: 15px; text-align: right; font-size: 0.9em; width: 10%;">VALOR</th>
+            <th style="padding: 15px; text-align: center; font-size: 0.9em; width: 8%;">STATUS</th>
+            <th style="padding: 15px; text-align: center; border-radius: 0 10px 10px 0; font-size: 0.9em; width: 14%;">AÇÕES</th>
           </tr>
         </thead>
         <tbody>
           <% @despesas.each do |despesa| %>
             <tr style="border-bottom: 1px solid #eee;">
               
-              <%# COLUNA DE DATA E HORA DEFINITIVA %>
               <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; line-height: 1.4; vertical-align: middle;">
                 <% if despesa.pago? %>
-                  <% data_paga = despesa.data_pagamento || despesa.created_at %>
                   <span style="color: #28a745; font-weight: bold;">
-                     <%= data_paga.strftime("%d/%m/%Y") %>
+                     <%= despesa.updated_at.strftime("%d/%m/%Y") %>
                   </span>
                   <br>
                   <small style="color: #888; font-size: 0.85em;">
-                    às <%= data_paga.strftime("%H:%M") %>
+                    pago às <%= despesa.updated_at.strftime("%H:%M") %>
                   </small>
                 <% else %>
-                  <% if despesa.data_vencimento.present? %>
-                    <span style="color: #D71920; font-weight: bold;">
-                       <%= despesa.data_vencimento.strftime("%d/%m/%Y") %>
-                    </span>
-                    <br>
-                    <small style="color: #888; font-size: 0.85em;">
-                      às <%= despesa.data_vencimento.strftime("%H:%M") %>
-                    </small>
-                  <% else %>
-                    <span style="color: #D71920; font-weight: bold;">Não definida</span>
-                  <% end %>
+                  <span style="color: #D71920; font-weight: bold;">
+                     <%= despesa.created_at.strftime("%d/%m/%Y") %>
+                  </span>
+                  <br>
+                  <small style="color: #888; font-size: 0.85em;">
+                    criada às <%= despesa.created_at.strftime("%H:%M") %>
+                  </small>
                 <% end %>
               </td>
 
@@ -104,9 +98,11 @@
                   <span style="background-color: #FFF0F0; color: #D71920; padding: 5px 12px; border-radius: 50px; font-weight: bold; font-size: 0.8em; border: 1px solid #D71920; display: inline-block;">PENDENTE</span>
                 <% end %>
               </td>
-              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center; vertical-align: middle;">
-                <%= link_to "Detalhes", despesa, style: "color: #0000FF; text-decoration: underline; margin-right: 10px; font-size: 0.9em;" %>
-                <button onclick="confirmarExclusaoDespesa(<%= despesa.id %>)" style="background: none; border: none; color: #0000FF; text-decoration: underline; cursor: pointer; font-size: 0.9em;">Excluir</button>
+              
+              <%# CORRIGIDO AQUI: Alinhamento horizontal travado sem quebra de linhas %>
+              <td style="padding: 15px; border-bottom: 1px solid #f0f0f0; text-align: center; vertical-align: middle; white-space: nowrap;">
+                <%= link_to "Detalhes", despesa, style: "color: #0000FF; text-decoration: underline; margin-right: 12px; font-size: 0.9em; font-weight: 500;" %>
+                <button onclick="confirmarExclusaoDespesa(<%= despesa.id %>)" style="background: none; border: none; color: #0000FF; text-decoration: underline; cursor: pointer; font-size: 0.9em; font-weight: 500;">Excluir</button>
               </td>
             </tr>
           <% end %>
@@ -116,6 +112,7 @@
   </div>
 </div>
 
+<%# --- CONTROLADOR DE INTERCEPTAÇÃO E COMPLIANCE DE SEGURANÇA --- %>
 <script>
 function filtrarDespesas() {
   const input = document.getElementById("buscaDespesa").value.toUpperCase();
@@ -123,33 +120,73 @@ function filtrarDespesas() {
   for (let i = 0; i < rows.length; i++) {
     const dataTxt   = rows[i].cells[0].textContent.toUpperCase();
     const descricao = rows[i].cells[1].textContent.toUpperCase();
-    const categoria = rows[i].cells[2].toUpperCase();
+    const category  = rows[i].cells[2].textContent.toUpperCase(); 
     const unidade   = rows[i].cells[3].textContent.toUpperCase();
     const status    = rows[i].cells[6].textContent.toUpperCase();
-    if (dataTxt.includes(input) || descricao.includes(input) || categoria.includes(input) || unidade.includes(input) || status.includes(input)) {
+    if (dataTxt.includes(input) || descricao.includes(input) || category.includes(input) || unidade.includes(input) || status.includes(input)) {
       rows[i].style.display = "";
     } else {
       rows[i].style.display = "none";
     }
   }
 }
-function confirmarExclusaoDespesa(id) {
-  const ehAdmin = <%= current_funcionario.admin? %>;
-  if (ehAdmin) { processarExclusao(id); }
-  else {
-    const codigo = prompt("AUTORIZAÇÃO NECESSÁRIA\nDigite o código de gerente:");
-    if (codigo === "1234") { processarExclusao(id); }
-    else if (codigo !== null) { alert("Código incorreto!"); }
-  }
-}
-function processarExclusao(id) {
-  if (confirm("Deseja realmente apagar esta despesa?")) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/despesas/' + id;
-    form.innerHTML = `<input type="hidden" name="_method" value="delete"><input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">`;
-    document.body.appendChild(form);
-    form.submit();
-  }
-}
+
+document.addEventListener("turbo:load", function() {
+  window.solicitarAutorizacaoGerente = function(onSucesso) {
+    const ehAdmin = <%= current_funcionario&.admin? || false %>;
+    if (ehAdmin) {
+      onSucesso();
+    } else {
+      const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o seu código de segurança para excluir a despesa:");
+      if (codigo) {
+        fetch("/autorizar_gerente", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify({ codigo: codigo })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.autorizado) {
+            onSucesso();
+          } else {
+            alert("Código Inválido ou Usuário não é Administrador! Ação cancelada.");
+          }
+        })
+        .catch(() => alert("Erro ao processar a validação de segurança remota."));
+      }
+    }
+  };
+
+  window.confirmarExclusaoDespesa = function(id) {
+    solicitarAutorizacaoGerente(function() {
+      processarExclusao(id);
+    });
+  };
+
+  window.processarExclusao = function(id) {
+    if (confirm("Deseja realmente apagar esta despesa?")) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/despesas/' + id;
+      
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'delete';
+      
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = 'authenticity_token';
+      tokenInput.value = "<%= form_authenticity_token %>";
+      
+      form.appendChild(methodInput);
+      form.appendChild(tokenInput);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+});
 </script>

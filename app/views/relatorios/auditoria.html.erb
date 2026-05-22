@@ -36,40 +36,62 @@
         <tr>
           <td style="color: #888; font-size: 0.9em;"><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
           
-          <%# Responsável: Tenta pegar o nome do funcionário ou mostra 'Sistema' %>
           <td><strong><%= log.funcionario&.nome || "Sistema" %></strong></td>
           
           <td><span class="badge-unidade"><%= log.unidade&.upcase %></span></td>
           
-          <%# Item: Tenta pegar o nome do produto associado %>
           <td><%= log.produto&.nome || "Item removido" %></td>
           
-          <%# Ação: Lógica de cores baseada em 'tipo_movimentacao' %>
           <% status_classe = log.tipo_movimentacao.to_s.upcase.include?('ENTRADA') ? 'status-entrada' : 'status-saida' %>
           <td class="<%= status_classe %>">
             <%= log.tipo_movimentacao.to_s.upcase %>
           </td>
           
-          <%# COLUNA QTD: PADRÃO BRASILEIRO COM PLURAL INTELLIGENT %>
           <td style="font-weight: bold;">
             <% 
-              qtd_numerica = log.quantidade
+              qtd_numerica = log.quantidade.to_f
+              produto_log = log.produto
+              unidade_medida = produto_log&.respond_to?(:unidade_medida) ? produto_log.unidade_medida.to_s.downcase.strip : "unidade"
+              nome_prod = produto_log&.nome.to_s.downcase
+
+              if log.tipo_movimentacao.to_s.upcase.include?('SAÍDA') && produto_log
+                # 1. VERIFICA SE É UM INSUMO SEGUIDO POR FICHA TÉCNICA
+                comp_como_insumo = Composicao.find_by(insumo_id: produto_log.id)
+                
+                if comp_como_insumo && comp_como_insumo.unidade_medida_uso.present?
+                  unidade_medida = comp_como_insumo.unidade_medida_uso.to_s.downcase.strip
+                
+                # 2. SE FOR O PRODUTO PRINCIPAL LÍQUIDO (SUCO/CAFÉ), RECONSTRÓI O VOLUME BASEADO NO GASTO DE INSUMO
+                elsif unidade_medida == 'litro' && (nome_prod.include?('suco') || nome_prod.include?('vitamina') || nome_prod.include?('café') || nome_prod.include?('cafe'))
+                  # Busca no mesmo bloco de tempo se houve baixa de laranja ou insumo correspondente para decifrar a dose
+                  log_insumo_irmao = @movimentacoes.find { |m| m.created_at == log.created_at && m.id != log.id && m.produto&.nome&.downcase&.include?('laranja') }
+                  
+                  if log_insumo_irmao
+                    laranjas_gastas = log_insumo_irmao.quantidade.to_f
+                    case laranjas_gastas
+                    when 4.0  then qtd_numerica = 200; unidade_medida = "ml"
+                    when 6.0  then qtd_numerica = 300; unidade_medida = "ml"
+                    when 10.0 then qtd_numerica = 500; unidade_medida = "ml"
+                    when 14.0 then qtd_numerica = 700; unidade_medida = "ml"
+                    when 20.0 then qtd_numerica = 1; unidade_medida = "litro"
+                    end
+                  end
+                end
+              end
               
-              # 1. Formata o número retirando o .0 de inteiros e aplicando a vírgula comercial
-              qtd_formatada = qtd_numerica.to_f == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
+              qtd_formatada = qtd_numerica == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
               
-              # 2. Resgata a unidade de medida do banco de dados
-              unidade_medida = log.produto&.respond_to?(:unidade_medida) ? log.produto.unidade_medida.to_s.downcase : "unidade"
-              
-              # 3. Lógica de Pluralização para Língua Portuguesa (Adiciona 's' apenas se a quantidade for maior que 1)
-              # Insumos fracionados (como 0,02 kg) mantêm a palavra no singular por padrão de mercado.
               if qtd_numerica > 1
                 unidade_medida = case unidade_medida
                                  when "unidade" then "unidades"
+                                 when "fatia"   then "fatias"
+                                 when "rodela"  then "rodelas"
+                                 when "folha"   then "folhas"
                                  when "litro"   then "litros"
                                  when "quilo"   then "quilos"
-                                 when "un"      then "un" # Abreviações comerciais fixas geralmente não variam
+                                 when "un"      then "un"
                                  when "kg"      then "kg"
+                                 when "ml"      then "ml"
                                  else 
                                    unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
                                  end

@@ -56,11 +56,11 @@ class FaturamentosController < ApplicationController
       { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) }
     ]
 
-    # CORRIGIDO AQUI: Top 5 Itens mais vendidos usando a coluna real :quantidade
+    # AJUSTADO AQUI: Agora faz o join cruzando o carrinho para somar as quantidades dos itens
     @itens_mais_vendidos = Pedido.where(created_at: @range)
-                                 .joins(:produto)
+                                 .joins(item_pedidos: :produto)
                                  .group('produtos.nome')
-                                 .sum(:quantidade)
+                                 .sum('item_pedidos.quantidade')
                                  .sort_by { |_nome, qtd| -qtd }
                                  .first(5)
 

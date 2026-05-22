@@ -1,35 +1,35 @@
-<h1 style="text-align: center; color: #333; font-weight: bold; margin-top: 20px;">Novo Item no Cardápio</h1>
+<h1 style="text-align: center; color: #333; font-weight: bold; margin-top: 40px; font-family: sans-serif;">Novo Item no Cardápio</h1>
 
-<div class="card-principal" style="max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px;">
+<div class="card-principal" style="max-width: 600px; margin: 20px auto 40px auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px; background: white; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
   <%= form_with(model: @produto, url: cardapio_index_path, local: true) do |form| %>
     
-    <div style="margin-bottom: 20px;">
-      <%= form.label :nome, "Nome do Lanche", style: "display: block; font-weight: bold;" %>
-      <%= form.text_field :nome, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    <div style="margin-bottom: 20px; text-align: left;">
+      <%= form.label :nome, "Nome do Lanche", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
+      <%= form.text_field :nome, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", required: true, placeholder: "Ex: X-Burguer Especial" %>
     </div>
 
     <%# CAMPO DE CUSTO - IMPORTANTE PARA O LUCRO %>
-    <div style="margin-bottom: 20px;">
-      <%= form.label :valor_unitario, "Custo de Produção (Compra ou Produção)", style: "display: block; font-weight: bold;" %>
-      <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    <div style="margin-bottom: 20px; text-align: left;">
+      <%= form.label :valor_unitario, "Custo de Produção (Compra ou Produção)", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
+      <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", placeholder: "0,00" %>
     </div>
 
-    <div style="margin-bottom: 20px;">
-      <%= form.label :preco_venda, "Preço de Venda", style: "display: block; font-weight: bold;" %>
-      <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    <div style="margin-bottom: 20px; text-align: left;">
+      <%= form.label :preco_venda, "Preço de Venda", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
+      <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", required: true, placeholder: "0,00" %>
     </div>
 
     <%# UNIDADE DE MEDIDA - PARA NÃO CONFUNDIR KG COM UNIDADE %>
-    <div style="margin-bottom: 20px;">
-      <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold;" %>
-      <%= form.select :unidade_medida, ['unidade', 'fatia', 'kg', 'gramas', 'ml'], { selected: 'unidade' }, { style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
+    <div style="margin-bottom: 25px; text-align: left;">
+      <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
+      <%= form.select :unidade_medida, ['unidade', 'fatia', 'kg', 'gramas', 'ml'], { selected: 'unidade' }, { style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em; background: white;" } %>
     </div>
 
     <div style="text-align: center; margin-top: 30px;">
-      <%= form.submit "SALVAR NO CARDÁPIO", style: "background-color: #D71920; color: white; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%;" %>
+      <%= form.submit "SALVAR NO CARDÁPIO", style: "background-color: #D71920; color: white; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 1.05em; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" %>
       
-      <div style="margin-top: 20px;">
-        <%= link_to "← Voltar para o Cardápio", cardapio_index_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+      <div style="margin-top: 25px;">
+        <%= link_to "← Voltar para o Cardápio", cardapio_index_path, style: "color: #0000FF; text-decoration: underline;" %>
       </div>
     </div>
   <% end %>

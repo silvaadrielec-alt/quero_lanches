@@ -58,9 +58,8 @@
           </div>
 
           <div style="flex: 1; min-width: 200px; background: #fff3e0; padding: 15px; border-radius: 12px; border-left: 6px solid #ff9800;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Custo de Produção</span>
+            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Custo de Production</span>
             <h3 style="margin: 5px 0; color: #e65100; font-size: 1.6em;">
-              <%# CORRIGIDO: Tudo unificado para 'fator' com o sem o k %>
               <% custo_total = @produto.composicoes.sum do |c| 
                     qtd = c.quantidade.to_f
                     preco_insumo = c.insumo.valor_unitario.to_f
@@ -101,59 +100,7 @@
         <% end %>
       </div>
 
-      <%# BLINDADO: A Ficha Técnica inteira só aparece se o produto NÃO for comprado pronto %>
-      <% if @produto.categoria == "Venda" && @produto.composicoes.any? %>
-        <hr style="margin-top: 40px; border: 1px solid #eee;">
-        <h3 style="color: #D71920; font-weight: bold; font-family: sans-serif; text-align: left;">Ficha Técnica / Receita</h3>
-        
-        <table class="table" style="width: 100%; margin-top: 20px; border-collapse: collapse; font-family: sans-serif; text-align: left;">
-          <thead style="background-color: #f8f8f8;">
-            <tr>
-              <th style="padding: 12px; border-bottom: 2px solid #ddd;">Insumo</th>
-              <th style="padding: 12px; border-bottom: 2px solid #ddd;">Qtd. Gasta</th>
-              <th style="padding: 12px; border-bottom: 2px solid #ddd;">Medida Uso</th>
-              <th style="padding: 12px; border-bottom: 2px solid #ddd;">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @produto.composicoes.each do |comp| %>
-              <tr style="border-bottom: 1px solid #eee;">
-                <td style="padding: 10px;"><%= comp.insumo.nome %></td>
-                <td style="padding: 10px;"><%= comp.quantidade %></td>
-                <td style="padding: 10px;">
-                  <span style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.9em;">
-                    <%= comp.unidade_medida_uso %>
-                  </span>
-                </td>
-                <td style="padding: 10px;">
-                  <%= button_to 'Remover', composico_path(comp), method: :delete, data: { confirm: 'Deseja remover este insumo da receita?' }, style: "background: none; border: none; color: #ff4444; cursor: pointer; text-decoration: underline;" %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-
-        <div style="background: #fdf8f5; padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px dashed #D71920; font-family: sans-serif; text-align: left;">
-          <h4 style="margin-top: 0; color: #333;">Adicionar Insumo à Receita</h4>
-          <%= form_with(model: [ @produto, Composicao.new ], url: produto_composicoes_path(@produto)) do |f| %>
-            <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-              <div style="flex: 2; min-width: 200px;">
-                <%= f.label :insumo_id, "Insumo", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-                <%= f.collection_select :insumo_id, Produto.where(categoria: "Insumo"), :id, :nome, { prompt: "Selecione um insumo..." }, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-              </div>
-              <div style="flex: 1; min-width: 80px;">
-                <%= f.label :quantidade, "Qtd.", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-                <%= f.number_field :quantidade, step: :any, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-              </div>
-              <div style="flex: 1; min-width: 120px;">
-                <%= f.label :unidade_medida_uso, "Medida", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-                <%= f.select :unidade_medida_uso, ['unidade', 'fatia', 'rodela', 'folha', 'kg', 'gramas', 'ml'], {}, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-              </div>
-              <%= f.submit "Adicionar", style: "background: #28a745; color: white; padding: 11px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;" %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+      <%# --- DESTRUIÇÃO REMOVIDA DAQUI E FORMULÁRIO TAMBÉM --- %>
 
       <div style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; text-align: left;">
         <%= button_to "Excluir este produto permanentemente", @produto, method: :delete, data: { confirm: "Atenção: Esta ação não pode ser desfeita. Confirmar exclusão?" }, style: "background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; opacity: 0.7; font-size: 0.9em;" %>

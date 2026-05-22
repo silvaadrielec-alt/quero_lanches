@@ -15,7 +15,7 @@
 <body onload="window.print()">
   <div class="text-center">
     <h2 style="margin: 0; color: #000;">QUERO LANCHES</h2>
-    <p style="margin: 0;"><%= @pedido.unidade&.upcase %></p>
+    <p style="margin: 0;"><%= @pedido.unidade&.gsub('_', ' ')&.upcase %></p>
     <p style="margin: 0;"><%= @pedido.created_at.strftime("%d/%m/%Y %H:%M") %></p>
   </div>
 
@@ -27,14 +27,44 @@
     <strong>Cliente:</strong> <%= @pedido.cliente_nome.presence || "Não identificado" %>
   </div>
 
-  <div class="flex">
-    <span>Item</span>
+  <div class="flex" style="font-weight: bold; border-bottom: 1px dashed #000; padding-bottom: 3px; margin-bottom: 5px;">
+    <span>Item / Detalhes</span>
     <span>Valor</span>
   </div>
-  <div class="flex">
-    <span><%= @pedido.produto&.nome %> (x<%= @pedido.quantidade %>)</span>
-    <span>R$ <%= number_with_precision(@pedido.valor_total, precision: 2) %></span>
-  </div>
+
+  <%# --- SEÇÃO ADAPTADA PARA MULTI-ITENS DO CARRINHO --- %>
+  <% if @pedido.item_pedidos.any? %>
+    <% @pedido.item_pedidos.each do |item| %>
+      <% 
+        fator = case item.tamanho
+                when "Copo 200ml" then 0.2
+                when "Copo 300ml" then 0.3
+                when "Copo 500ml" then 0.5
+                when "Jarra 1L"    then 1.0
+                else 1.0
+                end
+        preco_un = (item.produto&.preco_venda.to_f * fator).round(2)
+        total_item = preco_un * item.quantidade.to_f
+      %>
+      <div style="margin-bottom: 5px;">
+        <div class="flex">
+          <span><%= item.produto&.nome %> (x<%= item.quantidade %>)</span>
+          <span>R$ <%= number_with_precision(total_item, precision: 2) %></span>
+        </div>
+        <% if item.tamanho.present? %>
+          <div style="font-size: 10px; color: #555; padding-left: 5px;">
+            Size: <%= item.tamanho %> (un: R$ <%= number_with_precision(preco_un, precision: 2) %>)
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <%# Linha de compatibilidade caso precise reimprimir um pedido legado antigo %>
+    <div class="flex">
+      <span><%= @pedido.respond_to?(:produto) && @pedido.produto ? @pedido.produto.nome : "Produto legado" %> (x<%= @pedido.respond_to?(:quantidade) ? @pedido.quantidade : 1 %>)</span>
+      <span>R$ <%= number_with_precision(@pedido.valor_total, precision: 2) %></span>
+    </div>
+  <% end %>
 
   <% if @pedido.observacao.present? %>
     <div class="obs-box">
@@ -75,7 +105,7 @@
 
   <div class="text-center" style="margin-top: 15px; font-size: 10px;">
     Atendente: <%= @pedido.funcionario&.nome %><br>
-    Turno: <%= @pedido.turno&.titleize || "Geral" %><br>
+    Turno: <%= @pedido.turno&.gsub('_', ' ')&.titleize || "Geral" %><br>
     --- OBRIGADO E VOLTE SEMPRE ---
   </div>
 

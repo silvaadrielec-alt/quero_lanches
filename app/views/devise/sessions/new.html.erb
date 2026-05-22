@@ -15,7 +15,13 @@
 
       <div style="margin-bottom: 20px; text-align: left;">
         <%= f.label :password, "Sua senha", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #555;" %>
-        <%= f.password_field :password, autocomplete: "current-password", placeholder: "••••••••", style: "width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;" %>
+        
+        <div style="position: relative; width: 100%;">
+          <%= f.password_field :password, id: "input-senha-login", autocomplete: "current-password", placeholder: "••••••••", style: "width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none;" %>
+          <button type="button" onclick="alternarSenhaLogin()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.2em; cursor: pointer; padding: 0; line-height: 1; outline: none;">
+            
+          </button>
+        </div>
       </div>
 
       <% if devise_mapping.rememberable? %>
@@ -35,3 +41,11 @@
     </div>
   </div>
 </div>
+
+<script>
+function alternarSenhaLogin() {
+  const inputSenha = document.getElementById("input-senha-login");
+  if (!inputSenha) return;
+  inputSenha.type = (inputSenha.type === "password") ? "text" : "password";
+}
+</script>

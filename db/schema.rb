@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
@@ -65,6 +65,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
     t.integer "pedido_id", null: false
     t.integer "produto_id", null: false
     t.decimal "quantidade"
+    t.string "tamanho"
     t.datetime "updated_at", null: false
     t.index ["pedido_id"], name: "index_item_pedidos_on_pedido_id"
     t.index ["produto_id"], name: "index_item_pedidos_on_produto_id"
@@ -95,8 +96,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
     t.decimal "pago_cartao_debito"
     t.decimal "pago_dinheiro"
     t.decimal "pago_pix"
-    t.integer "produto_id", null: false
-    t.decimal "quantidade", precision: 10, scale: 3
     t.string "tamanho"
     t.string "turno"
     t.string "unidade"
@@ -104,7 +103,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
     t.decimal "valor_total"
     t.index ["cliente_id"], name: "index_pedidos_on_cliente_id"
     t.index ["funcionario_id"], name: "index_pedidos_on_funcionario_id"
-    t.index ["produto_id"], name: "index_pedidos_on_produto_id"
   end
 
   create_table "produtos", force: :cascade do |t|
@@ -135,5 +133,4 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_19_152927) do
   add_foreign_key "movimentacaos", "produtos"
   add_foreign_key "pedidos", "clientes"
   add_foreign_key "pedidos", "funcionarios"
-  add_foreign_key "pedidos", "produtos"
 end

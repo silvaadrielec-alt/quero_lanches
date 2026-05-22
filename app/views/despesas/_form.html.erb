@@ -1,3 +1,27 @@
+<%# --- MODAL DE AUTORIZAÇÃO ATUALIZADO COM RECURSO VISUAL (OLHINHO) --- %>
+<div id="modal-autorizacao-gerente" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+  <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 400px; border-top: 6px solid #D71920; text-align: center; font-family: sans-serif;">
+    <h3 style="color: #D71920; margin-top: 0; margin-bottom: 10px; font-weight: bold;">AUTORIZAÇÃO DO GERENTE</h3>
+    <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">Esta ação requer privilégios elevados. Digite o código de segurança:</p>
+    
+    <%# Container relativo para alinhar o input e o botão do olhinho %>
+    <div style="position: relative; margin-bottom: 20px; width: 100%;">
+      <input type="password" id="input-pin-gerente" maxlength="6" placeholder="••••" style="width: 100%; padding: 12px 50px 12px 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.5em; text-align: center; letter-spacing: 5px; outline: none; box-sizing: border-box;">
+      
+      <%# Botão do Olhinho posicionado estrategicamente dentro do input %>
+      <button type="button" onclick="alternarVisibilidadePin()" id="btn-olhinho" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 0; line-height: 1; outline: none;" title="Mostrar/Ocultar Código">
+        
+      </button>
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button type="button" onclick="fecharModalAutorizacao()" style="background: #ccc; color: #333; border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; flex: 1;">Cancelar</button>
+      <button type="button" onclick="processarPinRemoto()" style="background: #D71920; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; flex: 1;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<%# --- FORMULÁRIO ORIGINAL MANTIDO --- %>
 <%= form_with(model: despesa, id: "form-despesa") do |form| %>
   <% if despesa.errors.any? %>
     <div style="color: white; background: #D71920; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -10,7 +34,6 @@
     </div>
   <% end %>
 
-  <%# 1. CAMPO DE CATEGORIA %>
   <div style="margin-bottom: 15px;">
     <%= form.label :categoria, "Categoria", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.select :categoria, 
@@ -19,31 +42,26 @@
         { id: "select-categoria", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
   </div>
 
-  <%# 2. BLOCO DA DESCRIÇÃO DINÂMICA %>
   <div style="margin-bottom: 15px; display: none;" id="bloco-descricao">
     <%= form.label :descricao, "Especifique a Despesa (Descrição)", id: "label-descricao", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.text_field :descricao, id: "input-descricao", placeholder: "Ex: Conta de Luz Maio", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
   </div>
 
-  <%# 3. CAMPO DE VALOR %>
   <div style="margin-bottom: 15px;">
     <%= form.label :valor, "Valor (R$)", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.number_field :valor, step: 0.01, placeholder: "0,00", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
   </div>
 
-  <%# 4. STATUS: JÁ FOI PAGA? (Movido para cima das datas para ditar a lógica visual) %>
   <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
     <%= form.check_box :pago, id: "check-pago", style: "width: 20px; height: 20px; cursor: pointer;" %>
     <%= form.label :pago, "Esta despesa já foi paga?", style: "font-weight: bold; color: #333; cursor: pointer;" %>
   </div>
 
-  <%# 5. CAMPO DINÂMICO: DATA DE PAGAMENTO (Só aparece se PAGO for TRUE) %>
   <div style="margin-bottom: 15px; display: none;" id="bloco-data-pagamento">
     <%= form.label :data_pagamento, "Data em que foi Paga", style: "display: block; font-weight: bold; color: #28a745;" %>
     <%= form.date_field :data_pagamento, value: (despesa.data_pagamento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #28a745;" %>
   </div>
 
-  <%# 6. CAMPO DINÂMICO: DATA DE VENCIMENTO (Só aparece se PAGO for FALSE) %>
   <div style="margin-bottom: 15px; display: none;" id="bloco-data-vencimento">
     <%= form.label :data_vencimento, "Data de Vencimento (Prazo Limite)", style: "display: block; font-weight: bold; color: #D71920;" %>
     <%= form.date_field :data_vencimento, value: (despesa.data_vencimento || Date.today), style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #D71920;" %>
@@ -57,7 +75,6 @@
 <% end %>
 
 <script>
-// 1. GERENCIAR EXIBIÇÃO DE DESCRIÇÃO POR CATEGORIA
 function gerenciarCampos() {
   const selectCategoria = document.getElementById("select-categoria");
   const blocoDescricao = document.getElementById("bloco-descricao");
@@ -65,7 +82,6 @@ function gerenciarCampos() {
   const inputDescricao = document.getElementById("input-descricao");
 
   if (!selectCategoria || !blocoDescricao) return;
-
   const valorSelecionado = selectCategoria.value;
 
   if (valorSelecionado === "") {
@@ -81,7 +97,6 @@ function gerenciarCampos() {
   }
 }
 
-// 2. GERENCIAR EXIBIÇÃO FLUIDA DE VENCIMENTO VS PAGAMENTO
 function gerenciarDatas() {
   const checkPago = document.getElementById("check-pago");
   const blocoPagamento = document.getElementById("bloco-data-pagamento");
@@ -98,19 +113,19 @@ function gerenciarDatas() {
   }
 }
 
-// Vincula os escopos de escuta de eventos (Turbo e DOM padrão)
 function inicializarEventosForm() {
   const selectCategoria = document.getElementById("select-categoria");
   const checkPago = document.getElementById("check-pago");
   
   if (selectCategoria) {
+    selectCategoria.removeEventListener("change", gerenciarCampos);
     selectCategoria.addEventListener("change", gerenciarCampos);
   }
   if (checkPago) {
+    checkPago.removeEventListener("change", gerenciarDatas);
     checkPago.addEventListener("change", gerenciarDatas);
   }
 
-  // Executa imediatamente no carregamento da view
   gerenciarCampos();
   gerenciarDatas();
 }
@@ -118,20 +133,85 @@ function inicializarEventosForm() {
 document.addEventListener("turbo:load", inicializarEventosForm);
 document.addEventListener("DOMContentLoaded", inicializarEventosForm);
 
-function validarAcessoDespesa() {
-  const ehAdmin = <%= current_funcionario.admin? %>;
+// --- LÓGICA DE INTERFACE DO MODAL DE SEGURANÇA ---
+window.validarAcessoDespesa = function() {
+  const ehAdmin = <%= current_funcionario&.admin? || false %>;
   const formulario = document.getElementById('form-despesa');
 
   if (ehAdmin) {
     formulario.submit();
   } else {
-    const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o código de segurança para registrar a despesa:");
-    
-    if (codigo === "1234") {
-      formulario.submit();
-    } else if (codigo !== null) {
-      alert("Código Inválido! Registro cancelado.");
+    const modal = document.getElementById("modal-autorizacao-gerente");
+    if (modal) {
+      modal.style.display = "flex";
+      const inputPin = document.getElementById("input-pin-gerente");
+      if (inputPin) {
+        inputPin.value = "";
+        inputPin.type = "password"; // Garante que comece oculto
+        inputPin.style.letterSpacing = "5px";
+        inputPin.focus();
+      }
     }
   }
-}
+};
+
+// ATUALIZADO: Reseta o campo para 'password' ao fechar o modal
+window.fecharModalAutorizacao = function() {
+  const modal = document.getElementById("modal-autorizacao-gerente");
+  const inputPin = document.getElementById("input-pin-gerente");
+  
+  if (modal) modal.style.display = "none";
+  if (inputPin) {
+    inputPin.type = "password"; 
+    inputPin.style.letterSpacing = "5px";
+  }
+};
+
+// NOVO: Função que faz a alternância do ícone do Olhinho
+window.alternarVisibilidadePin = function() {
+  const inputPin = document.getElementById("input-pin-gerente");
+  if (!inputPin) return;
+
+  if (inputPin.type === "password") {
+    inputPin.type = "text";
+    inputPin.style.letterSpacing = "normal"; // Texto normal para ver o PIN limpo
+  } else {
+    inputPin.type = "password";
+    inputPin.style.letterSpacing = "5px";    // Volta a exibir as bolinhas espaçadas
+  }
+};
+
+window.processarPinRemoto = function() {
+  const inputPin = document.getElementById("input-pin-gerente");
+  const codigo = inputPin ? inputPin.value : "";
+  const formulario = document.getElementById('form-despesa');
+
+  if (!codigo) {
+    alert("Por favor, informe o código de autorização.");
+    return;
+  }
+
+  fetch("/autorizar_gerente", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: JSON.stringify({ codigo: codigo })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.autorizado) {
+      fecharModalAutorizacao();
+      formulario.submit();
+    } else {
+      alert("Código Inválido ou Usuário não é Administrador! Registro cancelado.");
+      fecharModalAutorizacao();
+    }
+  })
+  .catch(() => {
+    alert("Erro ao processar a validação de segurança remota.");
+    fecharModalAutorizacao();
+  });
+};
 </script>

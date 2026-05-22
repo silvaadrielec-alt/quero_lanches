@@ -19,16 +19,22 @@ class FuncionariosController < ApplicationController
     turno = params[:turno]
     codigo = params[:codigo_gerente]
 
-    # Validação: Se a unidade for diferente da habitual, exige o código 1234
-    if unidade != current_funcionario.unidade && codigo != "1234"
-      redirect_to checkin_path, alert: "Código de autorização inválido para troca de unidade!"
-    else
-      # Salva na sessão do navegador (fica guardado enquanto o usuário estiver logado)
-      session[:unidade_atual] = unidade
-      session[:turno_atual] = turno
+    # --- SENSOR DE COMPLIANCE DE TURNO E UNIDADE ---
+    # Se mudar de unidade OU se mudar de turno, exige o PIN de um Admin ativo no banco
+    if unidade != current_funcionario.unidade || turno != current_funcionario.turno
+      gerente_autorizou = Funcionario.where(admin: true, codigo_autorizacao: codigo).exists?
       
-      redirect_to root_path, notice: "Entrada confirmada! Bom trabalho, #{current_funcionario.nome}."
+      unless gerente_autorizou
+        redirect_to checkin_path, alert: "Código de autorização inválido ou ausente! É necessária autorização do Gerente para alterar posto ou turno."
+        return # Interrompe a execução para impedir o salvamento da sessão inválida
+      end
     end
+
+    # Se estiver tudo certo (ou no posto padrão), salva o novo estado operacional na sessão
+    session[:unidade_atual] = unidade
+    session[:turno_atual] = turno
+    
+    redirect_to root_path, notice: "Entrada confirmada! Bom trabalho, #{current_funcionario.nome}."
   end
 
   # --- FIM DOS MÉTODOS DE CHECK-IN ---
@@ -88,8 +94,8 @@ class FuncionariosController < ApplicationController
   end
 
   def funcionario_params
-    # Adicionamos :unidade aqui para permitir o cadastro/edição da unidade base
-    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade, :turno, :cargo)
+    # ATUALIZADO: Adicionado :codigo_autorizacao no Strong Parameters para permitir a persistência segura do PIN
+    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade, :turno, :cargo, :codigo_autorizacao)
   end
 
   def verificar_admin

@@ -5,7 +5,7 @@
     <p style="color: #666; font-size: 1.1em;">Acompanhamento de entradas, saídas e saúde financeira da Cantina Quero Lanches</p>
   </div>
 
-  <%# 1. ABAS DE SELEÇÃO DE PERÍODO (Mantém o filtro da unidade ao clicar) %>
+  <%# 1. ABAS DE SELEÇÃO DE PERÍODO %>
   <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
     <% ['diario', 'semanal', 'mensal', 'anual'].each do |p| %>
       <%= link_to p.upcase, fluxo_de_caixa_path(periodo: p, unidade: @unidade), 
@@ -14,14 +14,12 @@
     <% end %>
   </div>
 
-  <%# 2. SELEÇÃO DE UNIDADE (Sugestão do Professor) %>
+  <%# 2. SELEÇÃO DE UNIDADE %>
   <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 35px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
-    <%# Link Geral (Sem unidade específica) %>
-    <%= link_to "GERAL (TODAS)", fluxo_de_caixa_path(periodo: @periodo, unidade: nil),
+    <%= link_to "GERAL (TODAS)", fluxo_de_caixa_path(periodo: @periodo, geometry: nil),
         style: "text-decoration: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.85em; " +
         (@unidade.nil? ? "background: #7D3C98; color: white;" : "background: #eef; color: #555;") %>
 
-    <%# Mapeia as unidades comerciais existentes no seu banco %>
     <% ['centro', 'pavilhao_novo', 'pavilhao_antigo'].each do |u| %>
       <%= link_to u.upcase.gsub('_', ' '), fluxo_de_caixa_path(periodo: @periodo, unidade: u), 
           style: "text-decoration: none; padding: 6px 15px; border-radius: 4px; font-weight: bold; font-size: 0.85em; transition: 0.2s; " + 
@@ -29,7 +27,7 @@
     <% end %>
   </div>
 
-  <%# TÍTULO INDICADOR DA VISÃO ATUAL %>
+  <%# TÍTULO INDICADOR %>
   <div style="text-align: center; margin-bottom: 25px;">
     <span style="background: #333; color: white; padding: 6px 18px; border-radius: 4px; font-weight: bold; font-size: 0.9em; text-transform: uppercase;">
       Visão Atual: <%= @unidade.present? ? @unidade.gsub('_', ' ') : "Consolidado Geral" %> (<%= @periodo %>)
@@ -115,7 +113,7 @@
             <% @despesas_detalhadas.each do |despesa| %>
               <tr style="border-bottom: 1px solid #f9f9f9;">
                 <td style="padding: 10px 5px; color: #666; line-height: 1.4;">
-                  <% obj_data = despesa.pago? ? (despesa.data_pagamento || despesa.created_at) : despesa.data_vencimento %>
+                  <% obj_data = despesa.pago? ? despesa.updated_at : despesa.created_at %>
                   <% if obj_data.present? %>
                     <strong><%= obj_data.strftime("%d/%m/%Y") %></strong>
                     <br>

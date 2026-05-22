@@ -23,18 +23,23 @@ Rails.application.routes.draw do
 
   resources :cardapio
   
-  resources :produtos do
-    resources :composicoes, as: 'composicoes', only: [:create]
-  end
+  # MODIFICADO: Removido o sub-recurso antigo de composições daqui de dentro
+  resources :produtos
 
   resources :estoques, only: [:index, :edit, :update] do
     collection do
-      get :lote              # Tela da entrada por lote
+      get :lote           # Tela da entrada por lote
       post :processar_lote   # Ação que salva o lote inteiro
     end
   end
   post 'estoques/repor', to: 'estoques#repor', as: :repor_estoque
-  resources :composicoes, only: [:destroy]
+  
+  # ATUALIZADO: Nova rota centralizada para gerenciar fichas técnicas em uma única tela
+  resources :composicoes, only: [:create, :destroy], as: 'composicoes' do
+    collection do
+      get :gerenciar      # Rota para a nova tela de gerenciamento
+    end
+  end
   
   resources :pedidos do
     member do
@@ -43,6 +48,9 @@ Rails.application.routes.draw do
   end
 
   resources :movimentacaos
+
+  # Rota global para validação dinâmica de gerente no sistema inteiro
+  post 'autorizar_gerente', to: 'application#autorizar_gerente'
   
   resources :faturamentos do
     get :exportar, on: :collection

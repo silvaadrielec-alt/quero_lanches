@@ -4,15 +4,15 @@ class Produto < ApplicationRecord
   has_many :composicoes, class_name: "Composicao", foreign_key: "produto_id", dependent: :destroy
   has_many :insumos, through: :composicoes
 
+  # Callback do Rails: Executa a lógica do código ANTES de validar o formulário
+  before_validation :gerar_codigo_automatico
+
   # Validações existentes
   validates :nome, presence: { message: "não pode ficar em branco" }
   validates :valor_unitario, presence: { message: "deve ser preenchido" }
   
-  # Garante que se um código for digitado manualmente, ele seja exclusivo no sistema
-  validates :codigo, uniqueness: { message: "já está cadastrado em outro produto", allow_blank: true }
-
-  # Callback do Rails: Executa a lógica do código antes de validar o formulário
-  before_validation :gerar_codigo_automatico
+  # Garante a exclusividade real do código gerado ou digitado
+  validates :codigo, uniqueness: { message: "já está cadastrado em outro produto" }
 
   def estoque_total
     estoque_centro.to_f + estoque_pavilhao_novo.to_f + estoque_pavilhao_antigo.to_f
@@ -41,19 +41,22 @@ class Produto < ApplicationRecord
 
   private
 
-  # Método inteligente para o código da mercadoria
+  # CORRIGIDO: Nome alterado de 'generar' para 'gerar' para bater com o callback
   def gerar_codigo_automatico
     if self.codigo.blank?
-      # Descobre o maior ID atual no banco de dados (se o banco estiver vazio, assume 0)
-      maior_id = Produto.maximum(:id).to_i
-      proximo_id = maior_id + 1
+      # Se o produto já existe no banco (caso do Tomate e Cebola antigos), usamos o ID dele!
+      if self.id.present?
+        id_referencia = self.id
+      else
+        # Se for um produto genuinamente novo, pega o próximo disponível
+        id_referencia = (Produto.maximum(:id).to_i) + 1
+      end
       
-      # .rjust(4, '0') garante que o número tenha sempre 4 dígitos (ex: 0001, 0012, 0145)
-      self.codigo = "PRD-#{proximo_id.to_s.rjust(4, '0')}"
+      # Garante os 4 dígitos com base no ID correto
+      self.codigo = "PRD-#{id_referencia.to_s.rjust(4, '0')}"
     else
-      # Se o Davi preencheu algo, remove espaços nas pontas e força Letras Maiúsculas
-      self.codigo = self.codigo.strip.upcase
+      # Se foi preenchido manualmente, limpa os espaços e força maiúsculas
+      self.codigo = self.codigo.to_s.strip.upcase
     end
   end
 end
-
