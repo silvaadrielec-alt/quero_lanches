@@ -26,12 +26,27 @@
       </div>
     </div>
 
-    <%# Grid de Informações do Cadastro %>
+    <%# Grid de Informações do Cadastro Atualizado %>
     <div style="display: grid; grid-template-columns: 1fr; gap: 20px; text-align: left;">
       
       <div>
         <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">E-MAIL DE ACESSO</label>
         <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.email %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CARGO / FUNÇÃO</label>
+        <span style="font-size: 1.1em; color: #333; font-weight: bold; text-transform: uppercase;"><%= @funcionario.cargo.presence || "NÃO INFORMADO" %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">TELEFONE</label>
+        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.telefone.presence || "NÃO CADASTRADO" %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CPF</label>
+        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.cpf.presence || "NÃO INFORMADO" %></span>
       </div>
 
       <div>
@@ -49,8 +64,15 @@
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CONTA CRIADA EM</label>
-        <span style="font-size: 1em; color: #666;"><%= @funcionario.created_at&.strftime("%d/%m/%Y às %H:%M") %></span>
+        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">DATA DE ADMISSÃO</label>
+        <span style="display: inline-block; background: #e8f4fd; color: #1d8cf8; padding: 4px 10px; border-radius: 6px; font-size: 0.95em; font-weight: bold; border: 1px solid #b3d7ff;">
+           <%= @funcionario.data_admissao.present? ? @funcionario.data_admissao.strftime("%d/%m/%Y") : "NÃO INFORMADA" %>
+        </span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85em; color: #aaa; font-weight: bold; margin-bottom: 3px;">CONTA CRIADA EM</label>
+        <span style="font-size: 0.9em; color: #999; font-style: italic;"><%= @funcionario.created_at&.strftime("%d/%m/%Y às %H:%M") %></span>
       </div>
 
     </div>

@@ -33,6 +33,11 @@
         <%= f.email_field :email, placeholder: "admin@querolanches.com", required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
       </div>
 
+     <div style="text-align: left; margin-bottom: 20px;">
+        <%= f.label :codigo_autorizacao, "Código de Autorização (Para operações críticas)", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
+        <%= f.text_field :codigo_autorizacao, placeholder: "Ex: 1234", required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>
+      </div>
+     
       <div style="text-align: left; margin-bottom: 20px;">
         <%= f.label :password, "Defina uma Senha", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #444;" %>
         <%= f.password_field :password, required: true, style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" %>

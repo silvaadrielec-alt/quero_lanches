@@ -76,7 +76,7 @@ class FuncionariosController < ApplicationController
     end
 
     if sucesso
-      redirect_to funcionarios_path, notice: "Informações atualizadas com sucesso!"
+      redirect_to funcionarios_path, notice: "Informações updated com sucesso!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -94,8 +94,12 @@ class FuncionariosController < ApplicationController
   end
 
   def funcionario_params
-    # ATUALIZADO: Adicionado :codigo_autorizacao no Strong Parameters para permitir a persistência segura do PIN
-    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation, :admin, :unidade, :turno, :cargo, :codigo_autorizacao)
+    # ATUALIZADO: Adicionado :telefone, :data_admissao e :data_demissao para persistência segura
+    params.require(:funcionario).permit(
+      :nome, :email, :password, :password_confirmation, :admin, 
+      :unidade, :turno, :cargo, :codigo_autorizacao,
+      :telefone, :data_admissao, :data_demissao, :cpf
+    )
   end
 
   def verificar_admin

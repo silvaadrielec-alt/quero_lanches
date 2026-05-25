@@ -10,7 +10,7 @@
     </div>
   <% end %>
 
-  <%# NOVO: CÓDIGO DO PRODUTO (MANUAL OU AUTOMÁTICO) %>
+  <%# CÓDIGO DO PRODUTO (MANUAL OU AUTOMÁTICO) %>
   <div style="margin-bottom: 20px;">
     <%= form.label :codigo, "Código do Produto / Insumo", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #D71920;" %>
     <%= form.text_field :codigo, 
@@ -46,16 +46,57 @@
     <small style="color: #666;">Preencha apenas se o item for comprado em KG mas usado em unidade/fatia/rodela.</small>
   </div>
 
-  <%# 4. VALOR DE CUSTO %>
+  <%# 4. VALOR DE CUSTO (FORMATADO COM 2 CASAS DECIMAIS) %>
   <div style="margin-bottom: 20px;">
     <%= form.label :valor_unitario, "Valor de Custo (Compra/Produção)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+    <%= form.number_field :valor_unitario, 
+        step: 0.01, 
+        value: form.object.valor_unitario.present? ? sprintf("%.2f", form.object.valor_unitario) : "", 
+        style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
   </div>
 
-  <%# 5. PREÇO DE VENDA %>
-  <div style="margin-bottom: 30px;">
-    <%= form.label :preco_venda, "Preço de Venda (Para o Cliente)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+  <%# 5. PREÇO DE VENDA PADRÃO (FORMATADO COM 2 CASAS DECIMAIS) %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :preco_venda, "Preço de Venda Padrão (Sem variação de tamanho)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.number_field :preco_venda, 
+        step: 0.01, 
+        value: form.object.preco_venda.present? ? sprintf("%.2f", form.object.preco_venda) : "", 
+        style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+  </div>
+
+  <%# --- BLOCO: OPÇÕES SELECIONÁVEIS, ESPAÇADAS E COM FORMATO FINANCEIRO CORRETO --- %>
+  <div id="secao-variacoes-tamanho" style="margin-bottom: 40px; background: #fdfefe; border: 1px solid #7D3C98; padding: 20px; border-radius: 12px; font-family: sans-serif;">
+    <h3 style="color: #7D3C98; margin-top: 0; font-size: 1.1em; font-weight: bold;">Precificação Especial por Tamanho / Volume</h3>
+    <p style="font-size: 13px; color: #666; margin-bottom: 20px;">* Escolha o tamanho e defina o preço específico para o cardápio e a tela de pedidos. Deixe vazio para usar o preço padrão acima.</p>
+    
+    <div id="container-variacoes">
+      <% options_tamanhos = ["Copo 200ml", "Copo 300ml", "Copo 500ml", "Copo 700ml", "Jarra 1L", "Porção 300g", "Porção 500g", "Por Peso / Balança (KG)"] %>
+
+      <%= form.fields_for :variacao_produtos do |v_form| %>
+        <div class="linha-variacao" style="display: flex; gap: 25px; margin-bottom: 18px; align-items: center;">
+          <%= v_form.hidden_field :_destroy, class: "destroy-flag", value: "false" %>
+          
+          <div style="flex: 2;">
+            <%= v_form.select :tamanho, options_tamanhos, { prompt: "Selecione o Tamanho..." }, { style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff;" } %>
+          </div>
+          <div style="flex: 1;">
+            <%# FORÇA DUAS CASAS DECIMAIS NAS LINHAS QUE VÊM SALVAS DO BANCO %>
+            <%= v_form.number_field :preco_venda, 
+                step: 0.01, 
+                placeholder: "Preço de Venda R$", 
+                value: v_form.object.preco_venda.present? ? sprintf("%.2f", v_form.object.preco_venda) : "", 
+                style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px;" %>
+          </div>
+          <div>
+            <button type="button" onclick="removerVariacao(this)" style="background: #ff4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">✕</button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <button type="button" id="btn-add-variacao" style="background: #7D3C98; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; margin-top: 10px;">
+      + Adicionar Tamanho e Preço
+    </button>
   </div>
 
   <%# LIMITES %>
@@ -85,27 +126,82 @@
 <% end %>
 
 <script>
-  function gerenciarCampoMedia() {
+  function gerenciarCamposDinamicos() {
     const selectCategoria = document.getElementById("select-categoria");
     const blocoMedia = document.getElementById("bloco-media");
+    const secaoVariacoes = document.getElementById("secao-variacoes-tamanho");
 
-    if (selectCategoria && blocoMedia) {
+    if (selectCategoria) {
       if (selectCategoria.value === "Insumo") {
-        blocoMedia.style.display = "block";
+        if (blocoMedia) blocoMedia.style.display = "block";
+        if (secaoVariacoes) secaoVariacoes.style.display = "none";
       } else {
-        blocoMedia.style.display = "none";
+        if (blocoMedia) blocoMedia.style.display = "none";
+        if (secaoVariacoes) secaoVariacoes.style.display = "block";
       }
     }
   }
 
-  document.addEventListener("turbo:load", function() {
-    const selectCategoria = document.getElementById("select-categoria");
+  window.removerVariacao = function(botao) {
+    const linha = botao.closest(".linha-variacao");
+    const flagDestruicao = inline = linha.querySelector(".destroy-flag");
     
-    if (selectCategoria) {
-      gerenciarCampoMedia();
-      selectCategoria.addEventListener("change", gerenciarCampoMedia);
+    if (flagDestruicao) {
+      flagDestruicao.value = "true";
+      linha.style.display = "none";
+    } else {
+      linha.remove();
     }
-  });
+  }
 
-  document.addEventListener("DOMContentLoaded", gerenciarCampoMedia);
+  function inicializarEventosVariacoes() {
+    const selectCategoria = document.getElementById("select-categoria");
+    if (selectCategoria) {
+      gerenciarCamposDinamicos();
+      selectCategoria.removeEventListener("change", gerenciarCamposDinamicos);
+      selectCategoria.addEventListener("change", gerenciarCamposDinamicos);
+    }
+
+    const btnAdd = document.getElementById("btn-add-variacao");
+    if (btnAdd) {
+      const novoBtn = btnAdd.cloneNode(true);
+      btnAdd.parentNode.replaceChild(novoBtn, btnAdd);
+
+      novoBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        const container = document.getElementById("container-variacoes");
+        const tempoIndex = new Date().getTime();
+
+        // Insere as novas linhas também com o formato placeholder correto
+        const novaLinhaHTML = `
+          <div class="linha-variacao" style="display: flex; gap: 25px; margin-bottom: 18px; align-items: center;">
+            <div style="flex: 2;">
+              <select name="produto[variacao_produtos_attributes][${tempoIndex}][tamanho]" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff;">
+                <option value="">Selecione o Tamanho...</option>
+                <option value="Copo 200ml">Copo 200ml</option>
+                <option value="Copo 300ml">Copo 300ml</option>
+                <option value="Copo 500ml">Copo 500ml</option>
+                <option value="Copo 700ml">Copo 700ml</option>
+                <option value="Jarra 1L">Jarra 1L</option>
+                <option value="Porção 300g">Porção 300g</option>
+                <option value="Porção 500g">Porção 500g</option>
+                <option value="Por Peso / Balança (KG)">Por Peso / Balança (KG)</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <input type="number" step="0.01" name="produto[variacao_produtos_attributes][${tempoIndex}][preco_venda]" placeholder="0,00" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px;">
+            </div>
+            <div>
+              <button type="button" onclick="removerVariacao(this)" style="background: #ff4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">✕</button>
+            </div>
+          </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', novaLinhaHTML);
+      });
+    }
+  }
+
+  document.addEventListener("turbo:load", inicializarEventosVariacoes);
+  document.addEventListener("DOMContentLoaded", inicializarEventosVariacoes);
 </script>

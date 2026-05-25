@@ -3,8 +3,8 @@
   <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
   <div style="font-size: 18px; margin-bottom: 30px; text-align: left;">
-    <p><strong>Valor de Custo (Compra/Produção):</strong> <%= number_to_currency(@produto.valor_unitario) %></p>
-    <p><strong>Preço de Venda:</strong> <%= number_to_currency(@produto.preco_venda) %></p>
+    <p><strong>Valor de Custo (Compra/Produção):</strong> <%= number_to_currency(@produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></p>
+    <p><strong>Preço de Venda:</strong> <%= number_to_currency(@produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></p>
     
     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
     

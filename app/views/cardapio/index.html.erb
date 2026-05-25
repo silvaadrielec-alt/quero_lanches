@@ -28,9 +28,22 @@
           <td style="padding: 15px; text-align: left; padding-left: 30px;">
             <strong style="font-size: 1.1em; color: #333;"><%= produto.nome %></strong>
           </td>
-          <td style="padding: 15px; text-align: center; font-weight: bold; color: #28a745;">
-            <%= number_to_currency(produto.preco_venda) %>
+          
+          <%# EXIBIÇÃO DE PREÇOS LOCALIZADOS COM DUAS CASAS DECIMAIS E VARIANTES DE TAMANHO %>
+          <td style="padding: 15px; text-align: center; font-weight: bold;">
+            <% if produto.variacao_produtos.any? %>
+              <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
+                <% produto.variacao_produtos.each do |v| %>
+                  <span style="font-size: 13px; font-weight: normal; color: #555;">
+                    <%= v.tamanho %>: <strong style="color: #28a745;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+                  </span>
+                <% end %>
+              </div>
+            <% else %>
+              <span style="color: #28a745; font-size: 1.1em;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
+            <% end %>
           </td>
+
           <td style="text-align: center; padding: 15px;">
             <%= link_to 'Detalhes', cardapio_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 15px; font-weight: bold;" %>
 

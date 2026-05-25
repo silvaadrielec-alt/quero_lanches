@@ -4,35 +4,28 @@
     <h3 style="color: #D71920; margin: 0;">Detalhamento do Pedido</h3>
   </div>
 
-  <%# --- SEÇÃO DE PRODUTOS (MÚLTIPLOS ITENS OU LEGADO) --- %>
+  <%# --- SEÇÃO DE PRODUTOS CORRIGIDA --- %>
   <div style="margin-bottom: 15px; background: #fff8f8; padding: 12px; border-radius: 8px; border-left: 4px solid #7D3C98;">
     <strong style="color: #7D3C98; display: block; margin-bottom: 5px;">🛒 Itens do Pedido:</strong>
     <% if pedido.item_pedidos.any? %>
       <ul style="margin: 0; padding-left: 20px; color: #333;">
         <% pedido.item_pedidos.each do |item| %>
           <% 
-            fator = case item.tamanho
-                    when "Copo 200ml" then 0.2
-                    when "Copo 300ml" then 0.3
-                    when "Copo 500ml" then 0.5
-                    when "Jarra 1L"    then 1.0
-                    else 1.0
-                    end
-            preco_un = (item.produto&.preco_venda.to_f * fator).round(2)
+            # Puxa o preço unitário real gravado no banco de dados
+            preco_un = item.respond_to?(:preco_unitario) && item.preco_unitario.to_f > 0 ? item.preco_unitario.to_f : item.produto&.preco_venda.to_f
           %>
           <li style="margin-bottom: 5px;">
             <strong><%= item.produto&.nome %></strong> 
             <%= "<span style='color: #7D3C98; font-size:0.9em;'>[#{item.tamanho}]</span>".html_safe if item.tamanho.present? %>
             <br>
             <span style="color: #666; font-size: 0.9em;">
-              <%= item.quantidade %>x de <%= number_to_currency(preco_un, unit: "R$ ") %> 
-              (Total: <%= number_to_currency(preco_un * item.quantidade.to_f, unit: "R$ ") %>)
+              <%= item.quantidade %>x de <%= number_to_currency(preco_un, unit: "R$ ", separator: ",", delimiter: ".") %> 
+              (Total: <%= number_to_currency(preco_un * item.quantidade.to_f, unit: "R$ ", separator: ",", delimiter: ".") %>)
             </span>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <%# Garante que dados antigos não quebrem se você acessar um pedido antigo %>
       <span style="color: #333;"><%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome : "Produto legado" %></span>
     <% end %>
   </div>
@@ -51,14 +44,13 @@
     <strong style="color: #555;">Quantidade Total:</strong> 
     <span style="color: #333;">
       <% if pedido.item_pedidos.any? %>
-        <%= pedido.item_pedidos.sum(:quantidade) %> un
+        <%= number_with_precision(pedido.item_pedidos.sum(:quantidade), precision: 2, separator: ",", delimiter: ".")&.gsub(',00', '') %> un
       <% else %>
-        <%= pedido.respond_to?(:quantidade) ? pedido.quantidade : 1 %>
+        <%= pedido.respond_to?(:quantidade) ? number_with_precision(pedido.quantidade, precision: 2, separator: ",", delimiter: ".")&.gsub(',00', '') : 1 %>
       <% end %>
     </span>
   </div>
 
-  <%# --- BLOCO DE DATA E HORA --- %>
   <div style="margin-top: 5px;">
     <strong style="color: #555;">Data:</strong> 
     <span style="color: #333;"><%= pedido.created_at.strftime("%d/%m/%Y") %></span>
@@ -69,7 +61,6 @@
     <span style="color: #333;"><%= pedido.created_at.strftime("%H:%M") %></span>
   </div>
 
-  <%# --- LOGICA DA FORMA DE PAGAMENTO DINÂMICA --- %>
   <div>
     <strong style="color: #555;">Forma de Pagamento:</strong> 
     <span style="color: #333;">
@@ -91,20 +82,18 @@
     </div>
   <% end %>
 
-  <%# --- VALOR TOTAL --- %>
   <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
     <strong style="color: #D71920; font-size: 1.2em;">Valor Total:</strong> 
     <span style="color: #28a745; font-size: 1.2em; font-weight: bold;">
-      <%= number_to_currency(pedido.valor_total, unit: "R$ ") %>
+      <%= number_to_currency(pedido.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %>
     </span>
   </div>
 
-  <%# --- BLOCO DE TROCO --- %>
   <% if pedido.respond_to?(:calcular_troco) && pedido.calcular_troco > 0 %>
     <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e9; border-radius: 8px; border-left: 5px solid #28a745;">
       <strong style="color: #2e7d32;">Troco a devolver (Dinheiro):</strong> 
       <span style="color: #1b5e20; font-weight: bold;">
-        <%= number_to_currency(pedido.calcular_troco, unit: "R$ ") %>
+        <%= number_to_currency(pedido.calcular_troco, unit: "R$ ", separator: ",", delimiter: ".") %>
       </span>
     </div>
   <% end %>

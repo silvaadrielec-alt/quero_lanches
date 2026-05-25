@@ -14,7 +14,7 @@
   <% end %>
 
  <div class="card-principal">
-  <%# --- SEÇÃO 1: ITENS DE VENDA --- %>
+  <%# --- SEÇÃO 1: ITENS DE VENDA (COM EXIBIÇÃO DE VARIANTES) --- %>
   <h2 style="text-align: left; margin-left: 20px; color: #D71920; border-bottom: 2px solid #D71920;">Produtos para Venda (Lanches e Bebidas)</h2>
   <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;" id="tabelaVendas">
     <thead>
@@ -33,10 +33,24 @@
             <%= produto.codigo.present? ? produto.codigo : "---" %>
           </td>
           <td style="text-align: left;"><strong><%= produto.nome %></strong></td>
-          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ") %></td>
-          <td><%= number_to_currency(produto.preco_venda, unit: "R$ ") %></td>
+          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
+          
+          <%# MOTOR DE VERIFICAÇÃO DE VARIANTES %>
+          <td>
+            <% if produto.variacao_produtos.any? %>
+              <div style="display: flex; flex-direction: column; gap: 4px; text-align: center;">
+                <% produto.variacao_produtos.each do |v| %>
+                  <span style="font-size: 12px; display: block;">
+                    <%= v.tamanho %>: <strong style="color: #28a745;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+                  </span>
+                <% end %>
+              </div>
+            <% else %>
+              <span style="color: #28a745; font-weight: bold;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
+            <% end %>
+          </td>
+
           <td style="text-align: center; padding: 10px;">
-            <%# Mantemos apenas o link Detalhes unificado %>
             <%= link_to 'Detalhes', produto_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
             
             <% if current_funcionario.admin? %>
@@ -66,9 +80,8 @@
             <%= insumo.codigo.present? ? insumo.codigo : "---" %>
           </td>
           <td style="text-align: left;"><strong><%= insumo.nome %></strong></td>
-          <td><%= number_to_currency(insumo.valor_unitario, unit: "R$ ") %></td>
+          <td><%= number_to_currency(insumo.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
           <td style="text-align: center; padding: 10px;">
-            <%# Link Detalhes unificado para os Insumos %>
             <%= link_to 'Detalhes', produto_path(insumo), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
 
             <% if current_funcionario.admin? %>

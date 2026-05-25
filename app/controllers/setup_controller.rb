@@ -13,11 +13,17 @@ class SetupController < ApplicationController
 
   def create
     @funcionario = Funcionario.new(setup_params)
-    @funcionario.admin = true # O primeiro usuário é OBRIGATORIAMENTE o dono (Admin)
+    
+    # REGRAS DE NEGÓCIO BLINDADAS (Sem brechas para o usuário burlar)
+    @funcionario.admin = true
+    @funcionario.role = "admin"       # Garante o nível mais alto no sistema de roles
+    @funcionario.cargo = "Dono"       # Deixa explícito no perfil dele
+    @funcionario.unidade = "Matriz"   # Define uma unidade inicial padrão para evitar erros de queries
+    @funcionario.turno = "Integral"   # Define um turno padrão inicial
 
     if @funcionario.save
       sign_in(@funcionario) # Faz o login automático para facilitar a vida do Davi
-      redirect_to root_path, notice: "Bem-vindo, Davi! Sua conta de Administrador Geral foi criada com sucesso."
+      redirect_to root_path, notice: "Bem-vindo! Sua conta de Administrador Geral foi criada com sucesso."
     else
       # Se houver erro (ex: senha curta ou e-mail inválido), volta para o form
       render :index, status: :unprocessable_entity
@@ -27,7 +33,7 @@ class SetupController < ApplicationController
   private
 
   def setup_params
-    # Permitimos apenas os campos básicos para o primeiro acesso
-    params.require(:funcionario).permit(:nome, :email, :password, :password_confirmation)
+    # MUDANÇA AQUI: Adicionamos o :codigo_autorizacao na lista de permissões
+    params.require(:funcionario).permit(:nome, :email, :codigo_autorizacao, :password, :password_confirmation)
   end
 end

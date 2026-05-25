@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_25_013023) do
   create_table "clientes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "nome"
@@ -45,7 +45,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
     t.boolean "admin", default: false
     t.string "cargo"
     t.string "codigo_autorizacao"
+    t.string "cpf"
     t.datetime "created_at", null: false
+    t.date "data_admissao"
+    t.date "data_demissao"
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "nome"
@@ -53,6 +56,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.string "role"
+    t.string "telefone"
     t.string "turno"
     t.string "unidade"
     t.datetime "updated_at", null: false
@@ -63,6 +67,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
   create_table "item_pedidos", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "pedido_id", null: false
+    t.decimal "preco_unitario", precision: 10, scale: 2, default: "0.0"
     t.integer "produto_id", null: false
     t.decimal "quantidade"
     t.string "tamanho"
@@ -126,6 +131,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
     t.decimal "valor_unitario"
   end
 
+  create_table "variacao_produtos", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "preco_venda"
+    t.integer "produto_id", null: false
+    t.string "tamanho"
+    t.datetime "updated_at", null: false
+    t.index ["produto_id"], name: "index_variacao_produtos_on_produto_id"
+  end
+
   add_foreign_key "despesas", "funcionarios"
   add_foreign_key "item_pedidos", "pedidos"
   add_foreign_key "item_pedidos", "produtos"
@@ -133,4 +147,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_20_180458) do
   add_foreign_key "movimentacaos", "produtos"
   add_foreign_key "pedidos", "clientes"
   add_foreign_key "pedidos", "funcionarios"
+  add_foreign_key "variacao_produtos", "produtos"
 end

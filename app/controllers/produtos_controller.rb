@@ -79,8 +79,13 @@ private
   end
 
   def produto_params
-    params.require(:produto).permit(:nome, :valor_unitario, :preco_venda, :categoria, :unidade_medida, :media_unidades_kg, :codigo, :estoque_minimo, :limite_centro, :limite_pavilhao_novo, :limite_pavilhao_antigo)
-  end
+  params.require(:produto).permit(
+    :nome, :valor_unitario, :preco_venda, :categoria, :unidade_medida, 
+    :media_unidades_kg, :codigo, :estoque_minimo, :limite_centro, 
+    :limite_pavilhao_novo, :limite_pavilhao_antigo,
+    variacao_produtos_attributes: [:id, :tamanho, :preco_venda, :_destroy]
+  )
+end
 
   # Adicione o método aqui, antes do último 'end'
   def verificar_admin

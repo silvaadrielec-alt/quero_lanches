@@ -28,32 +28,32 @@ class PedidosController < ApplicationController
   def edit
   end
 
-  def create
+ def create
     @pedido = Pedido.new(pedido_params)
-    
-    # Vincula o atendente logado e preenche a unidade/turno automaticamente pelas credenciais ativas
     @pedido.funcionario = current_funcionario
     @pedido.unidade     = current_funcionario.unidade
     @pedido.turno       = current_funcionario.turno
     
-    # Cálculo do Valor Total do Carrinho
     total_acumulado = 0
+    
     @pedido.item_pedidos.each do |item|
       produto = item.produto
       next unless produto
       
-      # Lógica de Fator de Tamanho aplicada por item
-      fator = case item.tamanho
-              when "Copo 200ml" then 0.2
-              when "Copo 300ml" then 0.3
-              when "Copo 500ml" then 0.5
-              when "Jarra 1L"    then 1.0
-              else 1.0
-              end
+      # Define o preço base padrão do produto
+      preco_final = produto.preco_venda.to_f
       
-      preco_unitario = (produto.preco_venda.to_f * fator).round(2)
+      # Se houver variação por tamanho, busca rigorosamente na tabela associada
+      if item.tamanho.present?
+        tamanho_busca = item.tamanho.to_s.strip.downcase
+        variacao = produto.variacao_produtos.find { |v| v.tamanho.to_s.strip.downcase == tamanho_busca }
+        preco_final = variacao.preco_venda.to_f if variacao
+      end
+      
+      # Grava o preço definitivo diretamente na nova coluna do banco de dados
+      item.preco_unitario = preco_final
       item.quantidade ||= 1
-      total_acumulado += (preco_unitario * item.quantidade.to_f)
+      total_acumulado += (preco_final * item.quantidade.to_f)
     end
     
     @pedido.valor_total = total_acumulado.round(2)
@@ -71,7 +71,7 @@ class PedidosController < ApplicationController
   def update
     respond_to do |format|
       if @pedido.update(pedido_params)
-        format.html { redirect_to @pedido, notice: "Pedido atualizado com sucesso!", status: :see_other }
+        format.html { redirect_to @pedido, notice: "Pedido updated com sucesso!", status: :see_other }
       else
         format.html { render :edit, status: :unprocessable_entity }
       end
@@ -88,7 +88,6 @@ class PedidosController < ApplicationController
   private
 
   def set_pedido
-    # Busca o pedido validando também o escopo se não for admin (Segurança extra contra manipulação de URL)
     if current_funcionario.admin?
       @pedido = Pedido.find(params[:id])
     else
@@ -102,8 +101,8 @@ class PedidosController < ApplicationController
     params.require(:pedido).permit(
       :cliente_nome, :valor_total, 
       :pago_dinheiro, :pago_pix, :pago_cartao_debito, :pago_cartao_credito, :observacao,
-      :ingredientes_removidos,
-      item_pedidos_attributes: [:id, :produto_id, :quantidade, :tamanho, :_destroy]
+      :ingredientes_removidos, :unidade, :turno,
+      item_pedidos_attributes: [:id, :produto_id, :quantidade, :tamanho, :preco_unitario, :_destroy]
     )
   end
 end

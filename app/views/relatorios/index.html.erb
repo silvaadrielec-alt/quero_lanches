@@ -110,7 +110,7 @@
     <p>EMISSÃO: <%= Time.current.strftime("%d/%m/%Y - %H:%M") %></p>
   </div>
 
-  <%# ==================== 1. RELATÓRIO DE ESTOQUE ==================== %>
+  <%# ==================== 1. RELATÓRIO DE ESTOQUE (ATUALIZADO COM UNIDADE DE MEDIDA) ==================== %>
   <div id="relatorio-estoque" class="secao-relatorio">
     <h1>RELATÓRIO TÉCNICO DE REPOSIÇÃO DE ESTOQUE</h1>
     
@@ -123,7 +123,39 @@
         </thead>
         <tbody>
           <% matriz_alerta.each do |p| %>
-            <tr><td><%= p.nome.upcase %></td><td><%= p.estoque_centro %></td><td><%= p.limite_centro %></td></tr>
+            <%# Captura e trata a unidade de medida da matriz %>
+            <% 
+              unidade_p = p.respond_to?(:unidade_medida) ? p.unidade_medida.to_s.downcase.strip : "unidade"
+              
+              estoque_num = p.estoque_centro.to_f
+              limite_num = p.limite_centro.to_f
+
+              estoque_formatado = estoque_num == estoque_num.to_i ? estoque_num.to_i.to_s : sprintf("%.2f", estoque_num).gsub('.', ',')
+              limite_formatado = limite_num == limite_num.to_i ? limite_num.to_i.to_s : sprintf("%.2f", limite_num).gsub('.', ',')
+
+              unidade_estoque = unidade_p
+              if estoque_num > 1
+                unidade_estoque = case unidade_p
+                                 when "unidade" then "unidades" when "fatia" then "fatias" when "rodela" then "rodelas"
+                                 when "folha" then "folhas" when "litro" then "litros" when "quilo" then "quilos"
+                                 when "un" then "un" when "kg" then "kg" when "ml" then "ml"
+                                 else unidade_p.end_with?('s') ? unidade_p : "#{unidade_p}s" end
+              end
+
+              unidade_limite = unidade_p
+              if limite_num > 1
+                unidade_limite = case unidade_p
+                                 when "unidade" then "unidades" when "fatia" then "fatias" when "rodela" then "rodelas"
+                                 when "folha" then "folhas" when "litro" then "litros" when "quilo" then "quilos"
+                                 when "un" then "un" when "kg" then "kg" when "ml" then "ml"
+                                 else unidade_p.end_with?('s') ? unidade_p : "#{unidade_p}s" end
+              end
+            %>
+            <tr>
+              <td><%= p.nome.upcase %></td>
+              <td><%= "#{estoque_formatado} #{unidade_estoque}" %></td>
+              <td><%= "#{limite_formatado} #{unidade_limite}" %></td>
+            </tr>
           <% end %>
         </tbody>
       </table>
@@ -138,7 +170,39 @@
         </thead>
         <tbody>
           <% pav_novo_alerta.each do |p| %>
-            <tr><td><%= p.nome.upcase %></td><td><%= p.estoque_pavilhao_novo %></td><td><%= p.limite_pavilhao_novo %></td></tr>
+            <%# Captura e trata a unidade de medida do pavilhão novo %>
+            <% 
+              unidade_p = p.respond_to?(:unidade_medida) ? p.unidade_medida.to_s.downcase.strip : "unidade"
+              
+              estoque_num = p.estoque_pavilhao_novo.to_f
+              limite_num = p.limite_pavilhao_novo.to_f
+
+              estoque_formatado = estoque_num == estoque_num.to_i ? estoque_num.to_i.to_s : sprintf("%.2f", estoque_num).gsub('.', ',')
+              limite_formatado = limite_num == limite_num.to_i ? limite_num.to_i.to_s : sprintf("%.2f", limite_num).gsub('.', ',')
+
+              unidade_estoque = unidade_p
+              if estoque_num > 1
+                unidade_estoque = case unidade_p
+                                 when "unidade" then "unidades" when "fatia" then "fatias" when "rodela" then "rodelas"
+                                 when "folha" then "folhas" when "litro" then "litros" when "quilo" then "quilos"
+                                 when "un" then "un" when "kg" then "kg" when "ml" then "ml"
+                                 else unidade_p.end_with?('s') ? unidade_p : "#{unidade_p}s" end
+              end
+
+              unidade_limite = unidade_p
+              if limite_num > 1
+                unidade_limite = case unidade_p
+                                 when "unidade" then "unidades" when "fatia" then "fatias" when "rodela" then "rodelas"
+                                 when "folha" then "folhas" when "litro" then "litros" when "quilo" then "quilos"
+                                 when "un" then "un" when "kg" then "kg" when "ml" then "ml"
+                                 else unidade_p.end_with?('s') ? unidade_p : "#{unidade_p}s" end
+              end
+            %>
+            <tr>
+              <td><%= p.nome.upcase %></td>
+              <td><%= "#{estoque_formatado} #{unidade_estoque}" %></td>
+              <td><%= "#{limite_formatado} #{unidade_limite}" %></td>
+            </tr>
           <% end %>
         </tbody>
       </table>
@@ -151,16 +215,15 @@
     
     <div class="resumo-bloco">
       <strong>EXTRATO CONSOLIDADO ATUAL:</strong><br>
-      (+) Total Entrada (Vendas): <span style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas) %></span><br>
-      (-) Total Saída (Despesas Pagas): <span style="color: red !important; font-weight: bold;"><%= number_to_currency(@total_despesas) %></span><br>
+      (+) Total Entrada (Vendas): <span style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas, unit: "R$ ", separator: ",", delimiter: ".") %></span><br>
+      (-) Total Saída (Despesas Pagas): <span style="color: red !important; font-weight: bold;"><%= number_to_currency(@total_despesas, unit: "R$ ", separator: ",", delimiter: ".") %></span><br>
       
-      <%# CORES ALTERNADAS: AZUL PARA POSITIVO, VERMELHO PARA NEGATIVO %>
       <strong>
         (=) Saldo de Caixa Líquido: 
         <% if @lucro_liquido >= 0 %>
-          <span style="color: #0000FF !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido) %></span>
+          <span style="color: #0000FF !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
         <% else %>
-          <span style="color: #D71920 !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido) %></span>
+          <span style="color: #D71920 !important; font-weight: bold;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
         <% end %>
       </strong>
     </div>
@@ -183,7 +246,7 @@
             <td>#<%= p.id %></td>
             <td><%= p.unidade&.upcase %></td>
             <td><%= p.respond_to?(:metodo_pagamento) ? p.metodo_pagamento&.upcase : "CONCLUÍDO" %></td>
-            <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total) %></td>
+            <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %></td>
           </tr>
         <% end %>
       </tbody>
@@ -208,7 +271,7 @@
               <td><%= d.descricao.upcase %></td>
               <td><%= d.categoria&.upcase %></td>
               <td><%= d.unidade&.upcase %></td>
-              <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor) %></td>
+              <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor, unit: "R$ ", separator: ",", delimiter: ".") %></td>
             </tr>
           <% end %>
         <% else %>
@@ -235,7 +298,7 @@
               <td><%= d.data_vencimento&.strftime("%d/%m/%Y") || "N/A" %></td>
               <td><%= d.descricao.upcase %></td>
               <td><%= d.categoria.present? ? d.categoria.upcase : "GERAL" %></td>
-              <td><%= number_to_currency(d.valor) %></td>
+              <td><%= number_to_currency(d.valor, unit: "R$ ", separator: ",", delimiter: ".") %></td>
             </tr>
           <% end %>
         </tbody>
@@ -256,19 +319,19 @@
       <tbody>
         <tr>
           <td><strong>FATURAMENTO BRUTO (+)</strong> (Total bruto arrecadado em vendas de lanches)</td>
-          <td style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas) %></td>
+          <td style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
         </tr>
         <tr>
           <td><strong>DESPESAS OPERACIONAIS (-)</strong> (Custos pagos com insumos e infraestrutura)</td>
-          <td style="color: red !important;"><%= number_to_currency(@total_despesas) %></td>
+          <td style="color: red !important;"><%= number_to_currency(@total_despesas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
         </tr>
         <tr style="background-color: #eee !important;">
           <td><strong>LUCRO LÍQUIDO CONSOLIDADO (=)</strong></td>
           <td style="font-weight: bold;">
             <% if @lucro_liquido >= 0 %>
-              <span style="color: #0000FF !important;"><%= number_to_currency(@lucro_liquido) %></span>
+              <span style="color: #0000FF !important;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
             <% else %>
-              <span style="color: #D71920 !important;"><%= number_to_currency(@lucro_liquido) %></span>
+              <span style="color: #D71920 !important;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
             <% end %>
           </td>
         </tr>
@@ -276,7 +339,7 @@
     </table>
   </div>
 
-  <%# ==================== 5. RELATÓRIO DE AUDITORIA (ATUALIZADO COM AS REGRAS DE HOJE) ==================== %>
+  <%# ==================== 5. RELATÓRIO DE AUDITORIA ==================== %>
   <div id="relatorio-auditoria" class="secao-relatorio">
     <h1>RELATÓRIO DE AUDITORIA E MOVIMENTAÇÕES DE ESTOQUE</h1>
     
@@ -309,12 +372,9 @@
                 tipo_mov = log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase
 
                 if tipo_mov.include?('SAÍDA') && produto_log
-                  # 1. VERIFICA SE É UM INSUMO DE FICHA TÉCNICA
                   comp_como_insumo = Composicao.find_by(insumo_id: produto_log.id)
                   if comp_como_insumo && comp_como_insumo.unidade_medida_uso.present?
                     unidade_medida = comp_como_insumo.unidade_medida_uso.to_s.downcase.strip
-                  
-                  # 2. SE FOR O PRODUTO PRINCIPAL LÍQUIDO (SUCO/CAFÉ), RECONSTRÓI O VOLUME DINAMICAMENTE
                   elsif unidade_medida == 'litro' && (nome_prod.include?('suco') || nome_prod.include?('vitamina') || nome_prod.include?('café') || nome_prod.include?('cafe'))
                     if qtd_numerica < 1.0 && qtd_numerica > 0
                       qtd_numerica = (qtd_numerica * 1000).round(0)
@@ -357,22 +417,17 @@
 
 <script>
   function dispararImpressao() {
-    // 1. Obtém o valor selecionado no select do HTML
     var seletor = document.getElementById("tipoRelatorio");
     var tipoSelecionado = seletor.value;
     
-    // 2. Remove a classe de impressão de todas as seções para limpar o cache visual
     var secoes = document.getElementsByClassName("secao-relatorio");
     for (var i = 0; i < secoes.length; i++) {
       secoes[i].classList.remove("ativo-print");
     }
     
-    // 3. Identifica a seção correta pelo ID e aplica a classe ativa de impressão
     var secaoAlvo = document.getElementById("relatorio-" + tipoSelecionado);
     if (secaoAlvo) {
       secaoAlvo.classList.add("ativo-print");
-      
-      // 4. Executa a chamada do driver de impressão do navegador (PDF nativo)
       window.print();
     }
   }

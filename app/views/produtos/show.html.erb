@@ -54,7 +54,7 @@
           <%# --- VISÃO PARA PRODUTOS DE VENDA --- %>
           <div style="flex: 1; min-width: 200px; background: #e3f2fd; padding: 15px; border-radius: 12px; border-left: 6px solid #2196f3;">
             <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Preço de Venda</span>
-            <h3 style="margin: 5px 0; color: #0d47a1; font-size: 1.6em;"><%= number_to_currency(@produto.preco_venda) %></h3>
+            <h3 style="margin: 5px 0; color: #0d47a1; font-size: 1.6em;"><%= number_to_currency(@produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></h3>
           </div>
 
           <div style="flex: 1; min-width: 200px; background: #fff3e0; padding: 15px; border-radius: 12px; border-left: 6px solid #ff9800;">
@@ -75,14 +75,14 @@
                     end
                   end 
               %>
-              <%= number_to_currency(custo_total) %>
+              <%= number_to_currency(custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
             </h3>
           </div>
 
           <div style="flex: 1; min-width: 200px; background: #e8f5e9; padding: 15px; border-radius: 12px; border-left: 6px solid #4caf50;">
             <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Lucro p/ Unidade</span>
             <h3 style="margin: 5px 0; color: #1b5e20; font-size: 1.6em;">
-              <%= number_to_currency(@produto.preco_venda.to_f - custo_total) %>
+              <%= number_to_currency(@produto.preco_venda.to_f - custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
             </h3>
           </div>
 
@@ -90,7 +90,7 @@
           <%# --- VISÃO PARA INSUMOS --- %>
           <div style="flex: 1; min-width: 200px; background: #f1f8e9; padding: 15px; border-radius: 12px; border-left: 6px solid #8bc34a;">
             <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Custo de Aquisição</span>
-            <h3 style="margin: 5px 0; color: #33691e; font-size: 1.6em;"><%= number_to_currency(@produto.valor_unitario) %></h3>
+            <h3 style="margin: 5px 0; color: #33691e; font-size: 1.6em;"><%= number_to_currency(@produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></h3>
           </div>
 
           <div style="flex: 1; min-width: 200px; background: #fffde7; padding: 15px; border-radius: 12px; border-left: 6px solid #fbc02d;">

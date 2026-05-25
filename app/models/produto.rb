@@ -3,6 +3,10 @@ class Produto < ApplicationRecord
   has_many :movimentacaos, dependent: :destroy
   has_many :composicoes, class_name: "Composicao", foreign_key: "produto_id", dependent: :destroy
   has_many :insumos, through: :composicoes
+  
+  # NOVA RELAÇÃO: Permite que um produto tenha múltiplos tamanhos precificados
+  has_many :variacao_produtos, dependent: :destroy
+  accepts_nested_attributes_for :variacao_produtos, allow_destroy: true, reject_if: :all_blank
 
   # Callback do Rails: Executa a lógica do código ANTES de validar o formulário
   before_validation :gerar_codigo_automatico
@@ -41,7 +45,6 @@ class Produto < ApplicationRecord
 
   private
 
-  # CORRIGIDO: Nome alterado de 'generar' para 'gerar' para bater com o callback
   def gerar_codigo_automatico
     if self.codigo.blank?
       # Se o produto já existe no banco (caso do Tomate e Cebola antigos), usamos o ID dele!
