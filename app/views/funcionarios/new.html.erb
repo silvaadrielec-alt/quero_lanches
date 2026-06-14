@@ -1,11 +1,22 @@
 <% content_for :title, "Novo funcionario" %>
 
-<h1>Cadastrar Novo Funcionário</h1>
+<div style="max-width: 750px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <%# BARRA DE RETORNO SUPERIOR %>
+  <div style="margin-bottom: 20px; text-align: left;">
+    <%= link_to funcionarios_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+      ← CANCELAR E VOLTAR
+    <% end %>
+  </div>
 
-<%= render "form", funcionario: @funcionario %>
+  <%# CARD DE NOVO FORMULÁRIO COM BORDA VERMELHA %>
+  <div class="card-principal" style="background: white; border: 2px solid #D71920 !important; border-radius: 12px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); box-sizing: border-box;">
+    
+    <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-top: 0; margin-bottom: 30px; font-size: 2em; letter-spacing: 0.5px;">
+      Cadastrar Novo Funcionário
+    </h1>
 
-<br>
+    <%= render "form", funcionario: @funcionario %>
 
-<div>
-  <%= link_to "Voltar para funcionários", funcionarios_path %>
+  </div>
 </div>

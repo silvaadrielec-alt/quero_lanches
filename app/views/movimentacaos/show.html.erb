@@ -1,10 +1,24 @@
-<p style="color: green"><%= notice %></p>
+<% if notice.present? %>
+  <p style="color: #16a34a; font-weight: bold; text-align: center; font-family: sans-serif; font-size: 14px; margin-bottom: 15px;"><%= notice %></p>
+<% end %>
 
-<%= render @movimentacao %>
+<% content_for :title, "Detalhes da Movimentação" %>
 
-<div>
-  <%= link_to "Editar movimentação", edit_movimentacao_path(@movimentacao) %> |
-  <%= link_to "Voltar para movimentações", movimentacaos_path %>
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 600px; margin: 20px auto 15px auto; padding: 0 10px; box-sizing: border-box; text-align: left; font-family: sans-serif;">
+  <%= link_to movimentacaos_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← VOLTAR PARA MOVIMENTAÇÕES
+  <% end %>
+</div>
 
-  <%= button_to "Excluir movimentação", @movimentacao, method: :delete %>
+<%# CARD PRINCIPAL COM A MOLDURA VERMELHA OFICIAL REINTEGRADA %>
+<div class="card-principal" style="max-width: 600px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important;">
+  
+  <h2 style="color: #D71920; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-top: 0; margin-bottom: 25px; text-align: center; font-weight: bold; font-size: 1.6em; text-transform: uppercase; letter-spacing: 0.5px;">
+    Detalhes de Movimentação
+  </h2>
+
+  <%# Renderiza o card parcial polido com os dados do banco %>
+  <%= render @movimentacao %>
+
 </div>

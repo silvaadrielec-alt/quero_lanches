@@ -1,47 +1,68 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
-
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "funcionarios/shared/error_messages", resource: resource %>
-
-  <div class="field" style="margin-bottom: 15px;">
-  <%= f.label :nome, "Nome Completo" %><br />
-  <%= f.text_field :nome, autofocus: true, style: "width: 100%; padding: 8px;" %>
-</div>
-
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
-  </div>
-
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
-
-  <div class="field">
-    <p><%= f.label :password %> <i>(leave blank if you don't want to change it)</i></p>
-    <p><%= f.password_field :password, autocomplete: "new-password" %></p>
-    <% if @minimum_password_length %>
-      <p><em><%= @minimum_password_length %> characters minimum</em></p>
+<div style="max-width: 750px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <div style="margin-bottom: 20px; text-align: left;">
+    <%= link_to :back, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+      ← VOLTAR
     <% end %>
   </div>
 
-  <div class="field">
-    <p><%= f.label :password_confirmation %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
+  <div class="card-principal" style="background: white; border: 2px solid #D71920 !important; border-radius: 12px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); box-sizing: border-box;">
+    
+    <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-top: 0; margin-bottom: 30px; font-size: 2em; letter-spacing: 0.5px;">
+      Editar Minha Conta
+    </h1>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+      <%= render "funcionarios/shared/error_messages", resource: resource %>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; text-align: left; box-sizing: border-box;">
+        
+        <div style="display: flex; flex-direction: column; grid-column: span 2;">
+          <%= f.label :nome, "Nome Completo", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" %>
+          <%= f.text_field :nome, autofocus: true, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b;" %>
+        </div>
+
+        <div style="display: flex; flex-direction: column; grid-column: span 2;">
+          <%= f.label :email, "E-mail de Acesso", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" %>
+          <%= f.email_field :email, autocomplete: "email", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b;" %>
+        </div>
+
+        <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+          <div style="grid-column: span 2; background: #fffde7; padding: 10px; border-radius: 6px; font-size: 13px; color: #a16207; border: 1px solid #fef08a;">
+            Aguardando confirmação para: <strong><%= resource.unconfirmed_email %></strong>
+          </div>
+        <% end %>
+
+        <div style="display: flex; flex-direction: column;">
+          <%= f.label :password, style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" do %>
+            Nova Senha <span style="color: #64748b; font-size: 10px; font-weight: normal;">(deixe em branco se não quiser alterar)</span>
+          <% end %>
+          <%= f.password_field :password, autocomplete: "new-password", placeholder: "Mínimo #{@minimum_password_length} caracteres" , style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;" %>
+        </div>
+
+        <div style="display: flex; flex-direction: column;">
+          <%= f.label :password_confirmation, "Confirmar Nova Senha", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder: "Repita a nova senha", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;" %>
+        </div>
+
+        <div style="display: flex; flex-direction: column; grid-column: span 2; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-top: 10px;">
+          <%= f.label :current_password, style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" do %>
+            Senha Atual <span style="color: #64748b; font-size: 11px; font-weight: normal;">(necessária para confirmar as alterações)</span>
+          <% end %>
+          <%= f.password_field :current_password, autocomplete: "current-password", placeholder: "Digite sua senha atual", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fff;" %>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 30px;">
+        <%= f.submit "SALVAR ALTERAÇÕES", style: "width: 100%; background: #D71920; color: white; border: none; padding: 13px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" %>
+      </div>
+    <% end %>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+      <span style="font-size: 13px; color: #64748b; font-weight: 500;">Deseja encerrar o vínculo?</span>
+      <%= button_to "Cancelar minha conta", registration_path(resource_name), data: { confirm: "Tem certeza?", turbo_confirm: "Tem certeza que deseja apagar sua conta?" }, method: :delete, style: "background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;" %>
+    </div>
+
   </div>
-
-  <div class="field">
-    <p><%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i></p>
-    <p><%= f.password_field :current_password, autocomplete: "current-password" %></p>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
-<% end %>
-
-<h3>Cancel my account</h3>
-
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+</div>

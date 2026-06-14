@@ -2,10 +2,14 @@
 <% content_for :turbo_cache, "false" %>
 
 <%= form_with(model: pedido, id: "form-pedido") do |form| %>
+  
+  <%# EXIBIÇÃO DE ERROS NO PADRÃO TONAL PREMIUM %>
   <% if pedido.errors.any? %>
-    <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-family: sans-serif;">
-      <h2 style="font-size: 1.1em;"><%= pedido.errors.count %> <%= pedido.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar:</h2>
-      <ul style="font-size: 0.9em;">
+    <div style="color: #dc2626; background: #fef2f2; padding: 18px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #fee2e2; text-align: left; box-sizing: border-box; font-family: sans-serif; font-size: 14px;">
+      <h2 style="font-size: 15px; font-weight: bold; margin-top: 0; text-transform: uppercase; letter-spacing: 0.3px;">
+        <%= pedido.errors.count %> <%= pedido.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar o pedido:
+      </h2>
+      <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #b91c1c; line-height: 1.4;">
         <% pedido.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -15,9 +19,9 @@
 
   <%= form.hidden_field :ingredientes_removidos, id: "campo-ingredientes-removidos" %>
 
-  <%# --- BLOCO DO CARRINHO MULTI-ITENS --- %>
-  <div style="background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 25px; font-family: sans-serif;">
-    <h3 style="color: #7D3C98; margin-top: 0; font-weight: bold; font-size: 1.2em;">Carrinho de Itens</h3>
+  <%# --- BLOCO DO CARRINHO MULTI-ITENS WITH MOLDURA VERMELHA OFICIAL --- %>
+  <div style="background: #fff; padding: 30px; border-radius: 12px; border: 2px solid #D71920 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 25px; font-family: sans-serif; box-sizing: border-box;">
+    <h3 style="color: #D71920; margin-top: 0; font-weight: bold; font-size: 1.4em; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; text-align: left; letter-spacing: 0.5px;">CARRINHO DE ITENS</h3>
     
     <%# --- DATALIST GLOBAL NATIVO DOS PRODUTOS --- %>
     <datalist id="lista-produtos-venda">
@@ -27,151 +31,180 @@
                 data-id="<%= p.id %>"
                 data-price="<%= p.preco_venda %>"
                 data-ingredients="<%= p.composicoes.map { |c| "#{c.insumo.nome.downcase.strip}:#{c.insumo_id}" }.join(',') %>"
-                data-variants="<%= p.variacao_produtos.map { |v| "#{v.tamanho.downcase.strip}:#{v.preco_venda}" }.join(',') %>">
+                data-variants="<%= p.variacao_produtos.map { |v| "#{v.tamanho.downcase.strip}:#{v.preco_venda}" }.join(',') %>"
+                data-aceita-adicional="<%= p.aceita_adicional %>">
         </option>
       <% end %>
     </datalist>
 
-    <div id="itens-carrinho">
+    <%# --- DATALIST PARA ADICIONAIS --- %>
+    <datalist id="lista-adicionais-venda">
+      <% Insumo.all.each do |insumo| %>
+        <% preco_add = insumo.preco_venda.present? ? insumo.preco_venda : 2.00 %>
+        <option value="<%= insumo.nome.upcase %>" data-id="<%= insumo.id %>" data-price="<%= preco_add %>"></option>
+      <% end %>
+    </datalist>
+
+    <div id="itens-carrinho" style="box-sizing: border-box;">
       <%= form.fields_for :item_pedidos do |item_form| %>
-        <div class="item-linha" style="display: grid; grid-template-columns: 35% 25% 15% 15% 5%; gap: 15px; margin-bottom: 15px; align-items: start; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0;">
+        <% index_item = item_form.index %>
+        <div class="item-linha" style="background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 20px; box-sizing: border-box;">
           
-          <%# COLUNA 1: CAMPO DE TEXTO INTELIGENTE COM DATALIST %>
-          <div style="display: flex; flex-direction: column;">
-            <label style="font-weight: bold; font-size: 0.8em; color: #D71920; display: block; margin-bottom: 5px; text-transform: uppercase;">Digite o Nome ou Código</label>
+          <div style="display: grid; grid-template-columns: 35% 25% 15% 15% 5%; gap: 15px; align-items: end; padding-bottom: 10px; box-sizing: border-box;">
             
-            <%# Input de busca visual para o usuário %>
-            <input type="text" 
-                   list="lista-produtos-venda" 
-                   class="input-busca-produto input-estilizado" 
-                   placeholder="Busque pelo nome ou código..." 
-                   style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; height: 38px;"
-                   value="<%= item_form.object.produto ? "#{item_form.object.produto.codigo} - #{item_form.object.produto.nome.upcase}" : "" %>">
-            
-            <%# Campo oculto do Rails que realmente envia o ID do produto pro banco %>
-            <%= item_form.hidden_field :produto_id, class: "select-produto" %>
-            
-            <div class="coluna-remocoes" style="display: none; margin-top: 8px;">
-              <input type="text" class="input-obs-item" placeholder=" Ex: Sem cebola, Sem tomate..." style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ffcccc; background: #fffcfc; font-size: 0.9em; color: #c0392b; font-family: sans-serif; box-sizing: border-box;">
+            <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+              <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 6px; text-transform: uppercase;">Item do Cardápio</label>
+              <input type="text" 
+                     list="lista-produtos-venda" 
+                     class="input-busca-produto" 
+                     placeholder="Nome ou código..." 
+                     autocomplete="off"
+                     style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; font-size: 14px; color: #1e293b; font-weight: 500;"
+                     value="<%= item_form.object.produto ? "#{item_form.object.produto.codigo} - #{item_form.object.produto.nome.upcase}" : "" %>">
+              
+              <%= item_form.hidden_field :produto_id, class: "select-produto" %>
+              
+              <div class="coluna-remocoes" style="display: none; margin-top: 8px; box-sizing: border-box;">
+                <input type="text" class="input-obs-item" placeholder=" Ex: Sem cebola, Sem tomate..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #fca5a5; background: #fffcfc; font-size: 13px; color: #b91c1c; box-sizing: border-box; height: 36px; font-weight: 500;">
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+              <div class="coluna-tamanho" style="visibility: hidden; display: block; box-sizing: border-box;">
+                <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 6px; text-transform: uppercase;">Tamanho / Volume</label>
+                <%= item_form.select :tamanho, [
+                  ["Copo 200ml", "Copo 200ml"], 
+                  ["Copo 300ml", "Copo 300ml"], 
+                  ["Copo 500ml", "Copo 500ml"], 
+                  ["Copo 700ml", "Copo 700ml"], 
+                  ["Jarra 1L", "Jarra 1L"],
+                  ["Porção 300g", "Porção 300g"],
+                  ["Porção 500g", "Porção 500g"],
+                  ["Por Peso / Balança (KG)", "Por Peso / Balança (KG)"]
+                ], { prompt: "Tamanho Padrão" }, { class: "select-tamanho", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; background: #fff; font-size: 14px; color: #1e293b;" } %>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+              <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 6px; text-transform: uppercase;">Qtd / Peso</label>
+              <%= item_form.number_field :quantidade, class: "input-quantidade", step: 1, min: 1, value: (item_form.object.quantidade || 1), style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; font-size: 14px; color: #1e293b; font-weight: bold;" %>
+            </div>
+
+            <div style="text-align: right; display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; height: 58px;">
+              <label style="font-weight: bold; font-size: 11px; color: #64748b; display: block; margin-bottom: 8px; text-transform: uppercase; text-align: right;">Valor Base</label>
+              <span class="label-subtotal-item" style="font-size: 1.1em; font-weight: bold; color: #1e293b; display: block; padding-bottom: 4px;">R$ 0,00</span>
+              <%= item_form.hidden_field :preco_unitario, class: "input-preco-unitario-oculto" %>
+            </div>
+
+            <div style="text-align: center; box-sizing: border-box;">
+              <button type="button" onclick="removerLinha(this)" style="background: #dc2626; color: white; border: none; border-radius: 8px; padding: 9px 15px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; height: 38px;">✕</button>
             </div>
           </div>
 
-          <%# COLUNA 2: TAMANHO %>
-          <div style="display: flex; flex-direction: column;">
-            <div class="coluna-tamanho" style="visibility: hidden; display: block;">
-              <label style="font-weight: bold; font-size: 0.8em; color: #D71920; display: block; margin-bottom: 5px; text-transform: uppercase;">Tamanho / Volume</label>
-              <%= item_form.select :tamanho, [
-                ["Copo 200ml", "Copo 200ml"], 
-                ["Copo 300ml", "Copo 300ml"], 
-                ["Copo 500ml", "Copo 500ml"], 
-                ["Copo 700ml", "Copo 700ml"], 
-                ["Jarra 1L", "Jarra 1L"],
-                ["Porção 300g", "Porção 300g"],
-                ["Porção 500g", "Porção 500g"],
-                ["Por Peso / Balança (KG)", "Por Peso / Balança (KG)"]
-              ], { prompt: "Tamanho Padrão" }, { class: "select-tamanho input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; height: 38px;" } %>
+          <div class="bloco-adicionais" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #D71920; margin-top: 10px; display: none; box-sizing: border-box;">
+            <strong style="color: #D71920; font-size: 12px; display: block; margin-bottom: 12px; text-transform: uppercase; text-align: left; letter-spacing: 0.3px;">✨ Adicionais Extra (Opcional):</strong>
+            
+            <div class="container-adicionais-linhas" id="container-adicionais-linhas-<%= index_item %>" style="box-sizing: border-box;"></div>
+
+            <div style="text-align: left;">
+              <%= link_to "+ Incluir Adicional", 
+                  adicionar_adicional_pedidos_path(index_item: index_item), 
+                  data: { turbo_method: :post }, 
+                  class: "btn-adicionar-adicional",
+                  style: "background: #1e293b; color: white; text-decoration: none; display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.3px;" %>
             </div>
           </div>
 
-          <%# COLUNA 3: QUANTIDADE %>
-          <div style="display: flex; flex-direction: column;">
-            <label style="font-weight: bold; font-size: 0.8em; color: #D71920; display: block; margin-bottom: 5px; text-transform: uppercase;">Quantidade / Peso</label>
-            <%= item_form.number_field :quantidade, class: "input-quantidade", step: 1, min: 1, value: 1, style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; height: 38px;" %>
+          <div style="text-align: right; margin-top: 10px; font-size: 13px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+            <span style="color: #64748b;">Subtotal da Linha:</span>
+            <strong class="linha-subtotal-totalizado" style="color: #16a34a; font-size: 1.1em; margin-left: 5px;">R$ 0,00</strong>
           </div>
 
-          <%# COLUNA 4: VALOR ITEM %>
-          <div style="text-align: right; display: flex; flex-direction: column; justify-content: flex-start;">
-            <label style="font-weight: bold; font-size: 0.75em; color: #666; display: block; margin-bottom: 8px; text-transform: uppercase; text-align: right;">Valor Item</label>
-            <span class="label-subtotal-item" style="font-size: 1.2em; font-weight: bold; color: #28a745; display: block; padding-top: 4px;">R$ 0,00</span>
-            <%= item_form.hidden_field :preco_unitario, class: "input-preco-unitario-oculto" %>
-          </div>
-
-          <%# COLUNA 5: BOTÃO EXCLUIR %>
-          <div style="text-align: center; padding-top: 23px;">
-            <button type="button" onclick="removerLinha(this)" style="background: #ff4444; color: white; border: none; border-radius: 10px; padding: 9px 15px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; height: 38px;">
-              ✕
-            </button>
-          </div>
         </div>
       <% end %>
     </div>
 
-    <button type="button" id="btn-adicionar-item-carrinho" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-      + Adicionar Outro Item
-    </button>
+    <div style="text-align: left; margin-top: 5px;">
+      <%= link_to adicionar_item_pedidos_path, 
+                  data: { turbo_method: :post }, 
+                  style: "background: #f1f5f9; color: #16a34a; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + Adicionar Outro Item ao Carrinho
+      <% end %>
+    </div>
   </div>
 
   <%# --- DADOS DE IDENTIFICAÇÃO --- %>
-  <div class="field" style="margin-bottom: 15px; font-family: sans-serif;">
-    <%= form.label :cliente_nome, "Identificação (Nome ou Nº do Pedido)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 5px;" %>
-    <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Cliente", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 1em; box-sizing: border-box;" %>
+  <div style="margin-bottom: 22px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; font-family: sans-serif;">
+    <%= form.label :cliente_nome, "Identificação (Nome ou Nº da mesa)", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+    <%= form.text_field :cliente_nome, placeholder: "Ex: Mesa 10, Ficha 05 ou Nome do Cliente", style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
   </div>
 
-  <div class="field" style="margin-bottom: 15px; opacity: 0.8; font-family: sans-serif;">
-    <label style="color: #D71920; font-weight: bold;">Atendente:</label>
-    <p style="background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin: 5px 0; font-weight: bold; color: #333;">
-      <%= current_funcionario.nome %>
+  <%# ATENDENTE %>
+  <div style="margin-bottom: 22px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box; font-family: sans-serif;">
+    <label style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Atendente Responsável</label>
+    <p style="background: #f8fafc; padding: 11px 15px; border: 1px solid #cbd5e1; border-radius: 8px; margin: 0; font-weight: bold; color: #1e293b; font-size: 14px; box-sizing: border-box;">
+       <%= current_funcionario.nome %>
     </p>
   </div>
 
-  <div style="background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px; border-left: 6px solid #28a745; display: flex; align-items: center; justify-content: space-between; font-family: sans-serif;">
-    <div>
-      <p style="margin: 0; color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Posto de Atendimento Ativo</p>
-      <h4 style="margin: 5px 0; color: #333;">
-        <%= unidade_trabalho_atual&.gsub('_', ' ')&.upcase %> 
-        <span style="color: #ccc; margin: 0 10px;">|</span> 
-        <span style="color: #28a745;">Turno: <%= turno_trabalho_atual&.gsub('_', ' ')&.titleize %></span>
+  <%# POSTO ATIVO INFORMATIVO %>
+  <div style="background: #fff7ed; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #ea580c; display: flex; align-items: center; justify-content: space-between; font-family: sans-serif; box-sizing: border-box; border-top: 1px solid #ffedd5; border-right: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5;">
+    <div style="text-align: left;">
+      <p style="margin: 0; color: #c2410c; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;">Posto de Atendimento Ativo</p>
+      <h4 style="margin: 4px 0 0 0; color: #1e293b; font-size: 13px; font-weight: bold;">
+          <%= current_funcionario.unidade&.nome&.gsub('_', ' ')&.upcase || "SEM UNIDADE" %>
+        <span style="color: #cbd5e1; margin: 0 8px;">|</span> 
+        <span style="color: #c2410c;">TURNO: <%= current_funcionario.turno.gsub('_', ' ').upcase %></span>
       </h4>
     </div>
     <div style="text-align: right;">
-      <span style="background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold;">
-        ✓ Autenticado
-      </span>
-    </div>
-
-    <%= form.hidden_field :unidade, value: unidade_trabalho_atual %>
-    <%= form.hidden_field :turno, value: turno_trabalho_atual %>
-  </div>
-
-  <div style="margin-bottom: 15px; background: #fff5f5; padding: 15px; border-radius: 10px; border: 1px solid #ffcccc; font-family: sans-serif;">
-    <%= form.label :valor_total, "VALOR TOTAL DO PEDIDO", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 5px;" %>
-    <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; font-size: 1.6em; font-weight: bold; color: #28a745; background: none; border: none;", placeholder: "0,00" %>
-  </div>
-
-  <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #ddd; font-family: sans-serif;">
-    <h4 style="margin: 0 0 15px 0; color: #333; font-weight: bold;">Formas de Pagamento (Grupo)</h4>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <div>
-        <label style="font-size: 0.9em; font-weight: bold; color: #555;">Dinheiro</label>
-        <%= form.number_field :pago_dinheiro, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;" %>
-      </div>
-      <div>
-        <label style="font-size: 0.9em; font-weight: bold; color: #555;">Pix</label>
-        <%= form.number_field :pago_pix, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;" %>
-      </div>
-      <div>
-        <label style="font-size: 0.9em; font-weight: bold; color: #555;">Débito</label>
-        <%= form.number_field :pago_cartao_debito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;" %>
-      </div>
-      <div>
-        <label style="font-size: 0.9em; font-weight: bold; color: #555;">Crédito</label>
-        <%= form.number_field :pago_cartao_credito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box;" %>
-      </div>
-    </div>
-
-    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; text-align: right;">
-      <strong style="color: #555;">Troco (Dinheiro):</strong>
-      <span id="label-troco" style="font-size: 1.2em; font-weight: bold; color: #666; margin-left: 10px;">R$ 0,00</span>
+      <span style="background: #dcfce7; color: #15803d; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 1px solid #bbf7d0;">✓ ATIVO</span>
     </div>
   </div>
 
-  <div style="margin-top: 20px; margin-bottom: 20px; font-family: sans-serif;">
-    <%= form.label :observacao, "Observações do Pedido", style: "display: block; font-weight: bold; color: #333; margin-bottom: 5px;" %>
-    <%= form.text_area :observacao, id: "observacao-geral", rows: 3, placeholder: "Ex: Sem açúcar, retirar no balcão...", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; font-family: sans-serif; box-sizing: border-box;" %>
+  <%# CAIXA VALOR TOTAL DESTACADA %>
+  <div style="margin-bottom: 25px; background: #fff5f5; padding: 18px; border-radius: 12px; border: 1px solid #fee2e2; font-family: sans-serif; text-align: left; box-sizing: border-box;">
+    <%= form.label :valor_total, "VALOR TOTAL DO PEDIDO", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.3px;" %>
+    <%= form.text_field :valor_total, id: "input-total", readonly: true, style: "width: 100%; font-size: 2em; font-weight: bold; color: #16a34a; background: none; border: none; outline: none; padding: 0; box-sizing: border-box;", placeholder: "0,00" %>
   </div>
 
-  <div style="margin-top: 20px; text-align: center;">
-    <%= form.submit "FINALIZAR PEDIDO COMPLETO", class: "btn-quero", style: "width: 100%; padding: 15px; font-weight: bold; background-color: #D71920; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1.1em;" %>
+  <%# MEIOS DE PAGAMENTO MULTIPLOS %>
+  <div style="margin-top: 20px; padding: 25px; background: #fafafa; border-radius: 12px; border: 1px solid #e2e8f0; font-family: sans-serif; box-sizing: border-box;">
+    <h4 style="margin: 0 0 18px 0; color: #1e293b; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.3px; text-align: left; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Formas de Pagamento Múltiplas</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px 20px; text-align: left; box-sizing: border-box;">
+      <div style="display: flex; flex-direction: column;">
+        <label style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Dinheiro (R$)</label>
+        <%= form.number_field :pago_dinheiro, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; height: 38px; font-weight: 500;" %>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <label style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Pix (R$)</label>
+        <%= form.number_field :pago_pix, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; height: 38px; font-weight: 500;" %>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <label style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Cartão Débito (R$)</label>
+        <%= form.number_field :pago_cartao_debito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; height: 38px; font-weight: 500;" %>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <label style="font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 5px;">Cartão Crédito (R$)</label>
+        <%= form.number_field :pago_cartao_credito, step: 0.01, class: "input-pagamento", style: "width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 14px; height: 38px; font-weight: 500;" %>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px dashed #cbd5e1; text-align: right; box-sizing: border-box;">
+      <strong style="color: #475569; font-size: 14px;">Troco em Dinheiro:</strong>
+      <span id="label-troco" style="font-size: 1.4em; font-weight: bold; color: #1e293b; margin-left: 10px;">R$ 0,00</span>
+    </div>
+  </div>
+
+  <%# OBSERVAÇÕES %>
+  <div style="margin-top: 25px; margin-bottom: 30px; font-family: sans-serif; text-align: left; box-sizing: border-box; display: flex; flex-direction: column;">
+    <%= form.label :observacao, "Observações do Pedido", style: "font-size: 12px; font-weight: bold; color: #1e293b; margin-bottom: 6px; text-transform: uppercase;" %>
+    <%= form.text_area :observacao, id: "observacao-geral", rows: 3, placeholder: "Ex: Sem açúcar, retirar no balcão...", style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: sans-serif; box-sizing: border-box; font-size: 14px; color: #1e293b;" %>
+  </div>
+
+  <%# BOTÃO FINALIZAR PREMIUM %>
+  <div style="margin-top: 20px; text-align: center; box-sizing: border-box;">
+    <%= form.submit "FINALIZAR PEDIDO COMPLETO", style: "width: 100%; padding: 14px; font-weight: bold; background-color: #D71920; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" %>
   </div>
 <% end %>
 
@@ -181,6 +214,7 @@ function calcularTudo() {
   const labelTroco = document.getElementById("label-troco");
   let totalGeral = 0;
   
+  const datalistAdd = document.getElementById("lista-adicionais-venda");
   const datalist = document.getElementById("lista-produtos-venda");
   if (!datalist) return;
 
@@ -190,58 +224,74 @@ function calcularTudo() {
     const labelSubtotal = linha.querySelector(".label-subtotal-item");
     const inputQtd = linha.querySelector(".input-quantidade");
     const inputPrecoOculto = linha.querySelector(".input-preco-unitario-oculto");
+    const totalizerLinha = linha.querySelector(".linha-subtotal-totalizado");
     
     if (!inputBusca || !inputOcultoId) return;
 
-    const textoDigitado = inputBusca.value;
+    let textoDigitado = inputBusca.value;
+    let idProduto = inputOcultoId.value;
     
-    // Procura se o texto digitado bate com alguma opção do datalist
-    const opcaoSelecionada = Array.from(datalist.options).find(opt => opt.value === textoDigitado);
+    let opcaoSelecionada = null;
+    if (textoDigitado) {
+      opcaoSelecionada = Array.from(datalist.options).find(opt => opt.value === textoDigitado);
+    }
+    
+    if (!opcaoSelecionada && idProduto) {
+      opcaoSelecionada = Array.from(datalist.options).find(opt => opt.getAttribute("data-id") === idProduto);
+      if (opcaoSelecionada && !textoDigitado) {
+        inputBusca.value = opcaoSelecionada.value;
+        textoDigitado = opcaoSelecionada.value;
+      }
+    }
+
+    // --- CORREÇÃO 1: FECHAMENTO DO DATALIST ---
+    if (opcaoSelecionada) {
+       inputOcultoId.value = opcaoSelecionada.getAttribute("data-id");
+       setTimeout(() => inputBusca.blur(), 100); 
+    }
 
     if (!textoDigitado || !opcaoSelecionada) {
-      inputOcultoId.value = ""; // Limpa o ID se apagou o texto
+      if (inputBusca.value === "") inputOcultoId.value = ""; 
       if (labelSubtotal) labelSubtotal.innerText = "R$ 0,00";
       if (inputPrecoOculto) inputPrecoOculto.value = "0.00";
+      if (totalizerLinha) totalizerLinha.innerText = "R$ 0,00";
       return; 
     }
 
-    // Seta o ID correto do produto no campo invisível para salvar no Rails
     inputOcultoId.value = opcaoSelecionada.getAttribute("data-id");
 
     let precoItem = parseFloat(opcaoSelecionada.getAttribute("data-price") || 0);
-    const nomeProd = textoDigitado.toLowerCase();
-    const variantesData = opcaoSelecionada.getAttribute("data-variants") || ""; 
+    const variantsData = opcaoSelecionada.getAttribute("data-variants") || ""; 
+    const aceitaAdicional = opcaoSelecionada.getAttribute("data-aceita-adicional") === "true";
     
     const selectTamanho = linha.querySelector(".select-tamanho");
     const tamanho = selectTamanho ? selectTamanho.value.toLowerCase().trim() : "";
     
     const divTamanho = linha.querySelector(".coluna-tamanho");
     if (divTamanho) {
-      if (nomeProd.includes("suco") || nomeProd.includes("vitamina") || nomeProd.includes("açaí") || nomeProd.includes("acai") || nomeProd.includes("copo") || nomeProd.includes("sorvete") || nomeProd.includes("café") || nomeProd.includes("cafe")) {
+      if (variantsData.trim() !== "") {
         divTamanho.style.visibility = "visible";
       } else {
         divTamanho.style.visibility = "hidden";
-        if (selectTamanho) selectTamanho.value = "";
+        if (selectTamanho) selectTamanho.value = ""; 
       }
     }
 
-    if (variantesData && tamanho !== "") {
-      const mapaVariantes = variantesData.split(","); 
+    if (variantsData && tamanho !== "") {
+      const mapaVariantes = variantsData.split(","); 
       mapaVariantes.forEach(par => {
         const partes = par.split(":");
         if (partes.length === 2) {
           const tamanhoNomeBanco = partes[0].toLowerCase().trim();
           const precoBanco = parseFloat(partes[1] || 0);
           if (tamanhoNomeBanco === tamanho) {
-            precoItem = precoBanco;
+            precoItem = precoBanco; 
           }
         }
       });
     }
 
-    if (inputPrecoOculto) {
-      inputPrecoOculto.value = precoItem.toFixed(2);
-    }
+    if (inputPrecoOculto) inputPrecoOculto.value = precoItem.toFixed(2);
 
     if (inputQtd) {
       if (tamanho.includes("balança") || tamanho.includes("(kg)")) {
@@ -259,7 +309,7 @@ function calcularTudo() {
 
     const divRemocoes = linha.querySelector(".coluna-remocoes");
     if (divRemocoes) {
-      if (nomeProd.includes("burg") || nomeProd.includes("búrg") || nomeProd.includes("sandu") || nomeProd.includes("passaporte") || nomeProd.includes("misto") || nomeProd.includes("lanche")) {
+      if (aceitaAdicional) {
         divRemocoes.style.display = "block";
       } else {
         divRemocoes.style.display = "none";
@@ -268,27 +318,102 @@ function calcularTudo() {
       }
     }
 
-    const subtotalItem = precoItem * qtd;
-    if (labelSubtotal) {
-      labelSubtotal.innerText = "R$ " + subtotalItem.toFixed(2).replace('.', ',');
+    const blocoAdd = linha.querySelector(".bloco-adicionais");
+    if (blocoAdd) {
+      if (aceitaAdicional) { 
+        blocoAdd.style.display = "block";
+      } else {
+        blocoAdd.style.display = "none";
+        const containerAddLinhas = linha.querySelector(".container-adicionais-linhas");
+        if (containerAddLinhas) containerAddLinhas.innerHTML = ""; 
+      }
     }
 
-    totalGeral += subtotalItem;
+    const subtotalBase = precoItem * qtd;
+    if (labelSubtotal) {
+      labelSubtotal.innerText = "R$ " + subtotalBase.toFixed(2).replace('.', ',');
+    }
+
+    let totalAdicionaisLinha = 0;
+    linha.querySelectorAll(".adicional-linha, .adicional-linha-sub").forEach(linhaAdd => {
+      const inputBuscaAdd = linhaAdd.querySelector(".input-busca-adicional");
+      const inputOcultoAddId = linhaAdd.querySelector(".select-adicional-id");
+      const inputPrecoAddOculto = linhaAdd.querySelector(".input-preco-add-oculto");
+      const inputQtdAdd = linhaAdd.querySelector(".input-qtd-adicional");
+
+      if (inputBuscaAdd && datalistAdd) {
+        const optAdd = Array.from(datalistAdd.options).find(o => o.value === inputBuscaAdd.value.toUpperCase().trim());
+        if (optAdd) {
+          inputOcultoAddId.value = optAdd.getAttribute("data-id");
+          let precoAdd = parseFloat(optAdd.getAttribute("data-price") || 0);
+          inputPrecoAddOculto.value = precoAdd.toFixed(2);
+          let qtdAdd = parseFloat(inputQtdAdd.value || 1);
+          totalAdicionaisLinha += (precoAdd * qtdAdd);
+        } else {
+          if (inputBuscaAdd.value === "") inputOcultoAddId.value = "";
+          inputPrecoAddOculto.value = "0.00";
+        }
+      }
+    });
+
+    const subtotalFinalLinha = subtotalBase + (totalAdicionaisLinha * qtd);
+    if (totalizerLinha) {
+      totalizerLinha.innerText = "R$ " + subtotalFinalLinha.toFixed(2).replace('.', ',');
+    }
+
+    totalGeral += subtotalFinalLinha;
   });
 
   if (inputTotal) inputTotal.value = totalGeral.toFixed(2);
   
-  let pago = 0;
-  document.querySelectorAll(".input-pagamento").forEach(i => pago += parseFloat(i.value || 0));
-  
-  const troco = pago - totalGeral;
+  const campoDinheiro = document.querySelector('input[name*="pago_dinheiro"]');
+  const campoPix = document.querySelector('input[name*="pago_pix"]');
+  const campoDebito = document.querySelector('input[name*="pago_cartao_debito"]');
+  const campoCredito = document.querySelector('input[name*="pago_cartao_credito"]');
+  const camposPagamento = [campoDinheiro, campoPix, campoDebito, campoCredito];
+
+  let totalPagoGeral = camposPagamento.reduce((s, c) => s + parseFloat(c?.value || 0), 0);
+
+  // --- CORREÇÃO 2: TRAVAMENTO DOS PAGAMENTOS ---
+  camposPagamento.forEach(c => {
+    if (c) {
+      // Convertemos para número com fallback para 0, e verificamos se está vazio ou zero
+      const valorCampo = parseFloat(c.value) || 0;
+      
+      // Se já atingimos o total e o campo atual é 0 (está vazio ou zero), travamos.
+      if (totalPagoGeral >= totalGeral && totalGeral > 0 && valorCampo === 0) {
+        c.disabled = true;
+        c.style.backgroundColor = "#e2e8f0";
+        c.style.cursor = "not-allowed";
+      } else {
+        c.disabled = false;
+        c.style.backgroundColor = "#ffffff";
+        c.style.cursor = "text";
+      }
+    }
+  });
+
   if (labelTroco) {
-    if (troco > 0) {
-      labelTroco.innerText = "R$ " + troco.toFixed(2).replace('.', ',');
-      labelTroco.style.color = "#2e7d32";
+    let totalEletronico = parseFloat(campoPix?.value || 0) + parseFloat(campoDebito?.value || 0) + parseFloat(campoCredito?.value || 0);
+    if (totalEletronico > totalGeral) {
+      labelTroco.innerText = "Erro: Cartão/Pix acima do total!";
+      labelTroco.style.color = "#dc2626";
+    } else if (totalPagoGeral >= totalGeral) {
+      let saldoRestanteParaDinheiro = totalGeral - totalEletronico;
+      let trocoReal = parseFloat(campoDinheiro?.value || 0) - saldoRestanteParaDinheiro;
+      if (totalEletronico === totalGeral) {
+        labelTroco.innerText = "R$ 0,00 (Conta Quitada)";
+        labelTroco.style.color = "#16a34a";
+      } else if (trocoReal > 0) {
+        labelTroco.innerText = "R$ " + trocoReal.toFixed(2).replace('.', ',');
+        labelTroco.style.color = "#16a34a";
+      } else {
+        labelTroco.innerText = "R$ 0,00";
+        labelTroco.style.color = "#64748b";
+      }
     } else {
       labelTroco.innerText = "R$ 0,00";
-      labelTroco.style.color = "#666";
+      labelTroco.style.color = "#64748b";
     }
   }
 }
@@ -329,25 +454,35 @@ function processarIngredientesRemovidos() {
   });
 
   campoOculto.value = idsParaRemover.join(",");
-
   if (textoParaImprimirGeral.length > 0 && campoObsGeral) {
     const baseTexto = campoObsGeral.value.replace(/\s*-\s*Remover dos itens:.*$/, "");
     campoObsGeral.value = (baseTexto.trim() + " - Remover dos itens: " + textoParaImprimirGeral.join(", ")).trim();
   }
 }
 
-function vincularEventosLinha(linha) {
-  linha.querySelectorAll("input, select").forEach(el => {
-    el.removeEventListener("change", calcularTudo);
-    el.removeEventListener("input", calcularTudo);
-    el.addEventListener("change", calcularTudo);
-    el.addEventListener("input", calcularTudo);
+function configurarDelegacaoDeEventos() {
+  const formPedido = document.getElementById("form-pedido");
+  if (!formPedido) return;
+  formPedido.addEventListener("input", (e) => {
+    if (e.target.classList.contains("input-busca-produto") || 
+        e.target.classList.contains("input-quantidade") || 
+        e.target.classList.contains("select-tamanho") || 
+        e.target.classList.contains("input-busca-adicional") || 
+        e.target.classList.contains("input-qtd-adicional") || 
+        e.target.classList.contains("input-pagamento")) {
+      if (e.target.classList.contains("input-busca-produto")) forcarAtualizacaoDatalist(e.target);
+      calcularTudo();
+    }
   });
 }
 
+function forcarAtualizacaoDatalist(input) {
+  input.setAttribute("list", "");
+  input.setAttribute("list", "lista-produtos-venda");
+}
+
 window.removerLinha = (btn) => {
-  const lines = document.querySelectorAll(".item-linha");
-  if (lines.length > 1) {
+  if (document.querySelectorAll(".item-linha").length > 1) {
     btn.closest(".item-linha").remove();
     calcularTudo();
   } else {
@@ -355,80 +490,12 @@ window.removerLinha = (btn) => {
   }
 };
 
-function configurarBotaoAdicionar() {
-  const botaoAdd = document.getElementById("btn-adicionar-item-carrinho");
-  if (!botaoAdd) return;
-
-  // TRAVA DE SEGURANÇA: Se o botão já foi configurado nesta carga de página, ignora e sai da função
-  if (botaoAdd.getAttribute("data-ouvinte-ativo") === "true") return;
-
-  function acaoDoClique(e) {
-    e.preventDefault();
-    
-    const container = document.getElementById("itens-carrinho");
-    const linhas = document.querySelectorAll(".item-linha");
-    if (!container || linhas.length === 0) return;
-
-    const linhaMolde = linhas[0];
-    const novaLinha = linhaMolde.cloneNode(true);
-    const novoIndex = new Date().getTime();
-    
-    // Seta valores padrão limpos na linha nova clonada
-    const inputBusca = novaLinha.querySelector(".input-busca-produto");
-    const inputOcultoId = novaLinha.querySelector(".select-produto");
-    
-    if (inputBusca) inputBusca.value = "";
-    if (inputOcultoId) inputOcultoId.value = "";
-
-    novaLinha.querySelectorAll("input, select").forEach(campo => {
-      if (campo.classList.contains("input-quantidade")) {
-        campo.value = 1;
-      } else if (!campo.classList.contains("input-obs-item") && campo !== inputBusca && campo !== inputOcultoId) {
-        campo.value = "";
-      }
-      campo.name = campo.name.replace(/\[\d+\]/g, `[${novoIndex}]`);
-    });
-
-    const divTamanho = novaLinha.querySelector(".coluna-tamanho");
-    if (divTamanho) divTamanho.style.visibility = "hidden";
-    
-    const divRemocoes = novaLinha.querySelector(".coluna-remocoes");
-    if (divRemocoes) divRemocoes.style.display = "none";
-
-    const labelSubtotal = novaLinha.querySelector(".label-subtotal-item");
-    if (labelSubtotal) labelSubtotal.innerText = "R$ 0,00";
-    
-    container.appendChild(novaLinha);
-    vincularEventosLinha(novaLinha);
-    calcularTudo();
-  }
-
-  botaoAdd.removeEventListener("click", acaoDoClique);
-  botaoAdd.addEventListener("click", acaoDoClique);
-
-  // Marca o botão dizendo que ele já possui o ouvinte configurado com sucesso
-  botaoAdd.setAttribute("data-ouvinte-ativo", "true");
-}
-
 function rodarInicializacaoPdv() {
-  document.querySelectorAll(".item-linha").forEach(vincularEventosLinha);
-  
-  document.querySelectorAll(".input-pagamento").forEach(i => {
-    i.removeEventListener("input", calcularTudo);
-    i.addEventListener("input", calcularTudo);
-  });
-  
-  const formPedido = document.getElementById("form-pedido");
-  if (formPedido) {
-    formPedido.removeEventListener("submit", processarIngredientesRemovidos);
-    formPedido.addEventListener("submit", processarIngredientesRemovidos);
-  }
-
-  configurarBotaoAdicionar();
+  configurarDelegacaoDeEventos();
+  document.getElementById("form-pedido")?.addEventListener("submit", processarIngredientesRemovidos);
   calcularTudo();
 }
 
-// Escuta os eventos do Turbo de forma limpa
 document.addEventListener("turbo:load", rodarInicializacaoPdv);
 document.addEventListener("turbo:render", rodarInicializacaoPdv);
-</script>
+</script> 

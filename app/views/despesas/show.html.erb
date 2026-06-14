@@ -1,78 +1,118 @@
-<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; font-family: sans-serif;">
+<% if notice.present? %>
+  <p style="color: #16a34a; font-weight: bold; text-align: center; font-family: sans-serif; font-size: 14px; margin-bottom: 15px;"><%= notice %></p>
+<% end %>
 
-  <%# Título Centralizado %>
-  <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 20px;">Detalhes da Despesa</h1>
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 600px; margin: 20px auto 15px auto; padding: 0 10px; box-sizing: border-box; text-align: left; font-family: sans-serif;">
+  <%= link_to despesas_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← VOLTAR PARA DESPESAS
+  <% end %>
+</div>
 
-  <%# Container com Borda Vermelha %>
-  <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
+<%# CARD PRINCIPAL COM BORDA VERMELHA OFICIAL CORPORATIVA %>
+<div class="card-principal" style="max-width: 600px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important;">
+  
+  <%# LINHA DE TÍTULO INTERNO DESIGN EXECUTIVO %>
+  <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-sizing: border-box; width: 100%;">
+    <h2 style="color: #1e293b; margin: 0; font-weight: bold; font-size: 1.4em; text-align: left;"><%= @despesa.descricao %></h2>
+    <span style="background: #f8fafc; color: #475569; padding: 5px 15px; border-radius: 6px; font-weight: bold; font-size: 11px; border: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 0.3px;">
+      <%= @despesa.categoria %>
+    </span>
+  </div>
+
+  <%# GRID DE INFORMAÇÕES LIMPO %>
+  <div style="display: flex; flex-direction: column; gap: 20px; text-align: left; box-sizing: border-box; width: 100%;">
     
-    <div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="color: #333; margin: 0;"><%= @despesa.descricao %></h2>
-      <span style="background: #f8d7da; color: #721c24; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em;">
-        <%= @despesa.categoria %>
-      </span>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-      <div>
-        <p><strong style="color: #D71920;">Data:</strong><br> 
-        <%= @despesa.data_pagamento&.strftime("%d/%m/%Y") %></p>
-        
-        <p><strong style="color: #D71920;">Responsável:</strong><br> 
-        <%= @despesa.funcionario&.nome %></p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-sizing: border-box; width: 100%;">
+      <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+        <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">Data de Cadastro</span>
+        <span style="font-size: 14px; color: #1e293b; font-weight: bold;"><%= @despesa.created_at.strftime("%d/%m/%Y às %H:%M") %></span>
       </div>
 
-      <div>
-        <p><strong style="color: #D71920;">Unidade:</strong><br> 
-        <%= @despesa.unidade %></p>
-        
-        <p><strong style="color: #D71920;">Status:</strong><br>
-        <% if @despesa.pago %>
-          <span style="color: green; font-weight: bold;">✅ PAGO</span>
-        <% else %>
-          <span style="color: #D71920; font-weight: bold;">⏳ PENDENTE</span>
-        <% end %>
-        </p>
+      <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+        <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">Unidade Alocada</span>
+        <span style="font-size: 11px; color: #D71920; font-weight: bold; background: #fef2f2; padding: 3px 10px; border-radius: 12px; border: 1px solid #fee2e2; display: inline-block;">
+          <%= @despesa.unidade&.nome&.upcase || "SEM UNIDADE" %>
+        </span>
       </div>
     </div>
 
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #D71920; text-align: right;">
-      <small style="color: #666;">Valor Total:</small>
-      <div style="font-size: 2.5em; font-weight: bold; color: #333;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; box-sizing: border-box; width: 100%;">
+      <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+        <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">Prazo de Vencimento</span>
+        <span style="font-size: 14px; color: #1e293b; font-weight: bold;">
+          <% if @despesa.data_vencimento.present? %>
+            <%= @despesa.data_vencimento.strftime("%d/%m/%Y") %>
+            <% if !@despesa.pago && @despesa.data_vencimento < Date.today %>
+              <span style="color: #dc2626; font-weight: bold; font-size: 10px; background: #fef2f2; padding: 2px 6px; border-radius: 4px; margin-left: 4px; border: 1px solid #fee2e2; text-transform: uppercase; letter-spacing: 0.3px;">VENCIDA</span>
+            <% elsif !@despesa.pago && @despesa.data_vencimento == Date.today %>
+              <span style="color: #d97706; font-weight: bold; font-size: 10px; background: #fffbeb; padding: 2px 6px; border-radius: 4px; margin-left: 4px; border: 1px solid #fef3c7; text-transform: uppercase; letter-spacing: 0.3px;">HOJE</span>
+            <% end %>
+          <% else %>
+            <span style="color: #64748b; font-style: italic; font-weight: normal;">Não informada</span>
+          <% end %>
+        </span>
+      </div>
+
+      <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+        <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">Funcionário Responsável</span>
+        <span style="font-size: 14px; color: #1e293b; font-weight: bold;"><%= @despesa.funcionario&.nome %></span>
+      </div>
+    </div>
+
+    <%# STATUS DO PAGAMENTO %>
+    <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+      <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.3px;">Status Atual</span>
+      <% if @despesa.pago %>
+        <span style="color: #16a34a; font-weight: bold; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 12px; border-radius: 12px; font-size: 11px; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">PAGO</span>
+        <small style="color: #64748b; display: block; margin-top: 6px; font-size: 13px; font-style: italic;">
+          Quitado em: <%= @despesa.updated_at.strftime("%d/%m/%Y às %H:%M") %>
+        </small>
+      <% else %>
+        <span style="color: #D71920; font-weight: bold; background: #fef2f2; border: 1px solid #fee2e2; padding: 4px 12px; border-radius: 12px; font-size: 11px; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">PENDENTE</span>
+      <% end %>
+    </div>
+
+    <%# BOX TOTALIZADOR DE VALOR %>
+    <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: right; margin-top: 10px; box-sizing: border-box; border-bottom: 2px solid #cbd5e1;">
+      <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.3px;">Valor Total Liquidado</span>
+      <strong style="font-size: 2.2em; color: #1e293b; font-weight: bold;">
         R$ <%= number_with_precision(@despesa.valor, precision: 2, separator: ",", delimiter: ".") %>
-      </div>
+      </strong>
     </div>
 
   </div>
 
-  <%# Botões de Ação estilo Pílula %>
-  <div style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
-    <%= link_to "Editar", edit_despesa_path(@despesa), 
-        style: "background: #333; color: white; padding: 10px 30px; text-decoration: none; border-radius: 50px; font-weight: bold;" %>
+  <%# BOTÕES DE AÇÃO DO RODAPÉ (ALINHAMENTO BLINDADO PREMIUM) %>
+  <div style="display: flex; gap: 15px; justify-content: center; align-items: stretch; border-top: 1px solid #f1f5f9; padding-top: 25px; margin-top: 30px; box-sizing: border-box; width: 100%;">
     
-    <%= link_to "Voltar", despesas_path, 
-        style: "background: #D71920; color: white; padding: 10px 30px; text-decoration: none; border-radius: 50px; font-weight: bold;" %>
+    <%= link_to edit_despesa_path(@despesa), 
+        style: "background-color: #1e293b; color: white; padding: 14px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; box-shadow: 0 4px 10px rgba(30,41,59,0.15); text-align: center; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;" do %>
+      Editar Gasto
+    <% end %>
     
-    <button onclick="confirmarExclusaoDetalhe(<%= @despesa.id %>)" 
-        style="background: white; color: #D71920; border: 2px solid #D71920; padding: 8px 30px; border-radius: 50px; font-weight: bold; cursor: pointer;">
-      Excluir
-    </button>
-  </div>
+    <%# EXCLUIR GASTO (Com flex: 1 para igualar a largura) %>
+  <%= botao_excluir despesa_path(@despesa), 
+      texto: 'Excluir Gasto', 
+      mensagem: 'Deseja realmente apagar esta despesa?',
+      estilo: "flex: 1; background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; padding: 14px 25px; border-radius: 8px; font-weight: bold; font-size: 13px; text-transform: uppercase; text-align: center; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;" %>
+  
+</div>
 
 </div>
 
 <%# --- CONTROLADOR DE SEGURANÇA DINÂMICA (API FETCH) --- %>
 <script>
 document.addEventListener("turbo:load", function() {
+  if (window.securityScriptsLoaded) return;
+  window.securityScriptsLoaded = true;
 
   window.solicitarAutorizacaoGerente = function(onSucesso) {
     const ehAdmin = <%= current_funcionario&.admin? || false %>;
-
     if (ehAdmin) {
       onSucesso();
     } else {
       const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o seu código de segurança:");
-      
       if (codigo) {
         fetch("/autorizar_gerente", {
           method: "POST",
@@ -119,6 +159,5 @@ document.addEventListener("turbo:load", function() {
       }
     });
   };
-
 });
 </script>

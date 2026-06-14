@@ -1,53 +1,109 @@
-<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-  <thead>
-    <tr style="background-color: #D71920; color: white;">
-      <th style="padding: 15px; border-top-left-radius: 15px;">PRODUTO</th>
-      <th style="padding: 15px;">MATRIZ</th>
-      <th style="padding: 15px;">PAV. NOVO</th>
-      <th style="padding: 15px;">PAV. ANTIGO</th>
-      <th style="padding: 15px; border-top-right-radius: 15px;">AÇÕES</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% colecao.each do |produto| %>
-      <tr class="linha-estoque" style="border-bottom: 1px solid #eee; <%= 'background-color: #FFF5F5;' if produto.precisa_reposicao? %>">
-        <td style="padding: 15px; text-align: left;">
-          <strong><%= produto.nome %></strong>
-          <% if produto.precisa_reposicao? %>
-            <span style="color: #D71920; font-size: 0.75em; display: block; font-weight: bold;">⚠️ REPOSIÇÃO NECESSÁRIA</span>
-          <% end %>
-        </td>
-        
-        <%# MATRIZ - Alterado para precision: 3 %>
-        <td style="padding: 15px; <%= 'color: #D71920; font-weight: bold; background-color: #FFE6E6;' if produto.estoque_centro_baixo? %>">
-          <%= number_with_precision(produto.estoque_centro, precision: 3, separator: ',') %>
-          <span style="font-size: 0.8em; color: #666;"><%= produto.unidade_medida %></span>
-        </td>
-
-        <%# PAV. NOVO - Alterado para precision: 3 %>
-        <td style="padding: 15px; <%= 'color: #D71920; font-weight: bold; background-color: #FFE6E6;' if produto.estoque_pavilhao_novo_baixo? %>">
-          <%= number_with_precision(produto.estoque_pavilhao_novo, precision: 3, separator: ',') %>
-          <span style="font-size: 0.8em; color: #666;"><%= produto.unidade_medida %></span>
-        </td>
-
-        <%# PAV. ANTIGO - Alterado para precision: 3 %>
-        <td style="padding: 15px; <%= 'color: #D71920; font-weight: bold; background-color: #FFE6E6;' if produto.estoque_pavilhao_antigo_baixo? %>">
-          <%= number_with_precision(produto.estoque_pavilhao_antigo, precision: 3, separator: ',') %>
-          <span style="font-size: 0.8em; color: #666;"><%= produto.unidade_medida %></span>
-        </td>
-        
-        <td style="padding: 15px;">
-          <%= form_with url: repor_estoque_path, method: :post, style: "display: flex; flex-direction: column; gap: 5px;" do |f| %>
-            <%= f.hidden_field :produto_id, value: produto.id %>
-            <%= f.select :unidade, [['Centro', 'centro'], ['Pav. Novo', 'pavilhao_novo'], ['Pav. Antigo', 'pavilhao_antigo']], {}, { style: "font-size: 11px; padding: 2px;" } %>
-            <div style="display: flex; gap: 2px;">
-              <%# Alteramos o step para 0.001 para aceitar 3 casas decimais %>
-              <%= f.number_field :quantidade, placeholder: "Qtd", step: 0.001, min: 0.001, style: "width: 55px; padding: 4px;" %>
-              <%= f.submit "Repor", style: "background: #28a745; color: white; border: none; border-radius: 4px; padding: 4px; font-size: 11px; cursor: pointer;" %>
-            </div>
-          <% end %>
-        </td>
+<div style="overflow-x: auto; width: 100%; box-sizing: border-box; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;">
+  <table style="width: 100%; border-collapse: collapse; box-sizing: border-box; background: white; text-align: left; font-family: sans-serif;">
+    <thead>
+      <tr style="background-color: #D71920; color: white; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+        <th style="padding: 14px 15px; width: 32%; font-weight: bold; padding-left: 20px;">Item</th>
+        <th style="padding: 14px 15px; text-align: center; width: 15%; font-weight: bold;">Matriz Centro</th>
+        <th style="padding: 14px 15px; text-align: center; width: 15%; font-weight: bold;">Pav. Novo</th>
+        <th style="padding: 14px 15px; text-align: center; width: 15%; font-weight: bold;">Pav. Antigo</th>
+        <th style="padding: 14px 15px; text-align: center; width: 23%; font-weight: bold; padding-right: 20px;">Ação Rápida de Entrada</th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% colecao.each do |item| %>
+        <% 
+          # Checa se o item possui composições (Ficha Técnica Ativa)
+          tem_ficha = (tipo_item == 'Produto') && item.respond_to?(:composicoes) && item.composicoes.any?
+
+          # Resgata o saldo real calculado dinamicamente se o método existir, ou usa o valor padrão seguro
+          saldo_c  = item.respond_to?(:saldo_centro) ? item.saldo_centro.to_f : (item.respond_to?(:estoque_centro) ? item.estoque_centro.to_f : 0.0)
+          saldo_pn = item.respond_to?(:saldo_pavilhao_novo) ? item.saldo_pavilhao_novo.to_f : (item.respond_to?(:estoque_pavilhao_novo) ? item.estoque_pavilhao_novo.to_f : 0.0)
+          saldo_pa = item.respond_to?(:saldo_pavilhao_antigo) ? item.saldo_pavilhao_antigo.to_f : (item.respond_to?(:estoque_pavilhao_antigo) ? item.estoque_pavilhao_antigo.to_f : 0.0)
+
+          # Lógica dos gatilhos de alerta baseados nos limites mínimos cadastrados
+          # Se tiver ficha técnica, não dispara alerta de estoque baixo direto no produto comercial
+          deve_verificar_limite = (tipo_item == 'Insumo') || !tem_ficha
+
+          baixo_centro = deve_verificar_limite && (item.respond_to?(:estoque_centro_baixo?) ? item.estoque_centro_baixo? : (item.respond_to?(:estoque_centro) && saldo_c < item.estoque_centro.to_f))
+          baixo_novo   = deve_verificar_limite && (item.respond_to?(:estoque_pavilhao_novo_baixo?) ? item.estoque_pavilhao_novo_baixo? : (item.respond_to?(:estoque_pavilhao_novo) && saldo_pn < item.estoque_pavilhao_novo.to_f))
+          baixo_antigo = deve_verificar_limite && (item.respond_to?(:estoque_pavilhao_antigo_baixo?) ? item.estoque_pavilhao_antigo_baixo? : (item.respond_to?(:estoque_pavilhao_antigo) && saldo_pa < item.estoque_pavilhao_antigo.to_f))
+          
+          alerta_geral = baixo_centro || baixo_novo || baixo_antigo
+          unidade_med  = item.respond_to?(:unidade_medida) ? item.unidade_medida : "un"
+          
+          cor_linha_fundo = alerta_geral ? "#fef2f2" : "transparent"
+        %>
+        <tr class="linha-estoque" style="border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #1e293b; background-color: <%= cor_linha_fundo %>; transition: background 0.2s;" onmouseover="this.style.background= '<%= alerta_geral ? "#fee2e2" : "#f8fafc" %>'" onmouseout="this.style.background='<%= cor_linha_fundo %>'">
+          
+          <%# COLUNA 1: NOME DO ITEM %>
+           <td style="padding: 14px 15px; padding-left: 20px; vertical-align: middle;">
+           <strong style="color: #1e293b; font-weight: bold;"><%= item.nome.upcase %></strong>
+  
+            <% if tem_ficha %>
+              <span style="color: #64748b; font-size: 10px; display: block; font-weight: 600; margin-top: 4px; letter-spacing: 0.3px;">⚙️ PRODUÇÃO COMPLEXA (COZINHA)</span>
+            <% elsif alerta_geral %>
+            <%# Este aviso agora aparecerá para qualquer item (Produto ou Insumo) que esteja abaixo do limite %>
+               <span style="color: #dc2626; font-size: 10px; display: block; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase;">⚠️ REPOSIÇÃO NECESSÁRIA</span>
+            <% end %>
+          </td>
+          
+          <%# COLUNA 2: MATRIZ CENTRO %>
+          <td style="padding: 14px 15px; text-align: center; vertical-align: middle; <%= 'color: #dc2626; font-weight: bold; background-color: #fef2f2; border-left: 3px solid #dc2626;' if baixo_centro %>">
+            <% if tem_ficha %>
+              <span style="font-size: 12px; color: #64748b; font-style: italic; font-weight: 500;">Fluido</span>
+            <% else %>
+              <span style="font-size: 15px; font-weight: bold;">
+                <%= number_with_precision(saldo_c, precision: 3, separator: ',', strip_insignificant_zeros: true) %>
+              </span>
+              <small style="font-size: 11px; color: #64748b; font-weight: bold; margin-left: 2px;"><%= unidade_med %></small>
+            <% end %>
+          </td>
+
+          <%# COLUNA 3: PAVILHÃO NOVO %>
+          <td style="padding: 14px 15px; text-align: center; vertical-align: middle; <%= 'color: #dc2626; font-weight: bold; background-color: #fef2f2; border-left: 3px solid #dc2626;' if baixo_novo %>">
+            <% if tem_ficha %>
+              <span style="font-size: 12px; color: #64748b; font-style: italic; font-weight: 500;">Fluido</span>
+            <% else %>
+              <span style="font-size: 15px; font-weight: bold;">
+                <%= number_with_precision(saldo_pn, precision: 3, separator: ',', strip_insignificant_zeros: true) %>
+              </span>
+              <small style="font-size: 11px; color: #64748b; font-weight: bold; margin-left: 2px;"><%= unidade_med %></small>
+            <% end %>
+          </td>
+
+          <%# COLUNA 4: PAVILHÃO ANTIGO %>
+          <td style="padding: 14px 15px; text-align: center; vertical-align: middle; <%= 'color: #dc2626; font-weight: bold; background-color: #fef2f2; border-left: 3px solid #dc2626;' if baixo_antigo %>">
+            <% if tem_ficha %>
+              <span style="font-size: 12px; color: #64748b; font-style: italic; font-weight: 500;">Fluido</span>
+            <% else %>
+              <span style="font-size: 15px; font-weight: bold;">
+                <%= number_with_precision(saldo_pa, precision: 3, separator: ',', strip_insignificant_zeros: true) %>
+              </span>
+              <small style="font-size: 11px; color: #64748b; font-weight: bold; margin-left: 2px;"><%= unidade_med %></small>
+            <% end %>
+          </td>
+          
+          <%# COLUNA 5: FORMULÁRIO COMPACTO EM LINHA %>
+          <td style="padding: 10px 15px; padding-right: 20px; text-align: center; vertical-align: middle; width: 1%;">
+            <% if tem_ficha %>
+              <span style="font-size: 11px; color: #64748b; font-weight: 500;">Repor via Insumos</span>
+            <% else %>
+              <div style="display: flex; gap: 6px; align-items: center; justify-content: center;">
+                <button type="button" 
+                        onclick="abrirModal('repor', '<%= tipo_item %>', <%= item.id %>, '<%= item.nome %>')" 
+                        style="background: #16a34a; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                  Repor
+                </button>
+                <button type="button" 
+                        onclick="abrirModal('transferir', '<%= tipo_item %>', <%= item.id %>, '<%= item.nome %>')" 
+                        style="background: #4f46e5; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                  Transf.
+                </button>
+              </div>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

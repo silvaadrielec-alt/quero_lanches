@@ -1,45 +1,79 @@
-<div class="card-principal" style="max-width: 900px; margin: 40px auto; text-align: center;">
-  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Equipe Quero Lanches</h1>
+<%# --- CONTÊINER PRINCIPAL REORGANIZADO --- %>
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
 
-  <table>
-    <thead>
-      <tr>
-        <th>Nome do Colaborador</th>
-        <th>E-mail</th>
-        <th>Cargo / Função</th>
-        <th style="text-align: center;">Nível</th>
-        <th style="text-align: center;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @funcionarios.each do |funcionario| %>
-        <tr>
-          <td><strong><%= funcionario.nome %></strong></td>
-          <td><%= funcionario.email %></td>
-          
-          <% # EXIBE O CARGO REAL SALVO NO BANCO %>
-          <td>
-            <strong style="color: #333;"><%= funcionario.cargo.present? ? funcionario.cargo.upcase : "NÃO DEFINIDO" %></strong>
-          </td>
-          
-          <% # ADICIONA UMA COLUNA DE NÍVEL DE ACESSO COM BADGES %>
-          <td style="text-align: center;">
-            <span style="background: <%= funcionario.admin? ? '#FFF0F0' : '#EFFFF0' %>; color: <%= funcionario.admin? ? '#D71920' : '#28a745' %>; padding: 4px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; border: 1px solid <%= funcionario.admin? ? '#FFDCDC' : '#D1F2D9' %>;">
-              <%= funcionario.admin? ? "GERÊNCIA" : "OPERACIONAL" %>
-            </span>
-          </td>
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
 
-          <td style="text-align: center;">
-            <%# Aplicando o azul padrão de navegação da Cantina Quero Lanches %>
-            <%= link_to 'Perfil', funcionario_path(funcionario), 
-                style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
-          </td>
-        </tr>
+  <%# CARD PRINCIPAL DA EQUIPE - AJUSTADO COM A BORDA VERMELHA OFICIAL %>
+  <div class="card-principal" style="padding: 35px; border-radius: 12px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.06); box-sizing: border-box; border: 2px solid #D71920 !important;">
+    
+    <%# TÍTULO PREMIUM CENTRALIZADO %>
+    <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-top: 0; margin-bottom: 25px; font-size: 2.2em; letter-spacing: 0.5px;">
+      Equipe Quero Lanches
+    </h1>
+
+    <%# CONTAINER DO BOTÃO SUPERIOR ALINHADO À DIREITA %>
+    <div style="margin-bottom: 20px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to new_funcionario_path, 
+                  style: "background: #D71920; color: white; border: none; padding: 10px 22px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; display: inline-block;" do %>
+        + CADASTRAR NOVO FUNCIONÁRIO
       <% end %>
-    </tbody>
-  </table>
+    </div>
 
-  <div style="margin-top: 30px;">
-    <%= link_to "CADASTRAR FUNCIONÁRIO", new_funcionario_path, class: "btn-quero" %>
+    <%# TABELA CORPORATIVA E RESPONSIVA COM EFEITO HOVER %>
+    <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.04); box-sizing: border-box; background: white;">
+      <thead>
+        <tr style="background: #D71920; color: white; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <th style="padding: 14px; padding-left: 15px; font-weight: bold; width: 30%;">Nome do Colaborador</th>
+          <th style="padding: 14px; font-weight: bold; width: 25%;">E-mail</th>
+          <th style="padding: 14px; font-weight: bold; width: 20%;">Cargo / Função</th>
+          <th style="padding: 14px; text-align: center; font-weight: bold; width: 13%;">Nível</th>
+          <th style="padding: 14px; text-align: center; padding-right: 15px; font-weight: bold; width: 12%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @funcionarios.each do |funcionario| %>
+          <tr class="linha-tabela-rh" style="border-bottom: 1px solid #f1f5f9; background: #fff; font-size: 14px;">
+            
+            <td style="padding: 14px; padding-left: 15px; font-weight: bold; color: #1e293b; text-align: left; vertical-align: middle;">
+              <%= funcionario.nome.upcase %>
+            </td>
+            
+            <td style="padding: 14px; color: #475569; text-align: left; vertical-align: middle;">
+              <%= funcionario.email %>
+            </td>
+            
+            <td style="padding: 14px; text-align: left; vertical-align: middle;">
+              <strong style="color: #333; font-size: 13px;"><%= funcionario.cargo.present? ? funcionario.cargo.upcase : "NÃO DEFINIDO" %></strong>
+            </td>
+            
+            <td style="padding: 14px; text-align: center; vertical-align: middle;">
+              <span style="background: <%= funcionario.admin? ? '#FFF0F0' : '#EFFFF0' %>; color: <%= funcionario.admin? ? '#D71920' : '#28a745' %>; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: 1px solid <%= funcionario.admin? ? '#FFDCDC' : '#D1F2D9' %>; text-transform: uppercase; letter-spacing: 0.3px;">
+                <%= funcionario.admin? ? "GERÊNCIA" : "OPERACIONAL" %>
+              </span>
+            </td>
+
+            <%# BOTÃO DE AÇÃO ESTILIZADO EM BOTAOZINHO %>
+            <td style="padding: 14px; text-align: center; padding-right: 15px; vertical-align: middle; white-space: nowrap;">
+              <%= link_to funcionario_path(funcionario), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; text-decoration: none; display: inline-block; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                Perfil
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
   </div>
 </div>
+
+<%# ESTILO CSS INTERNO PARA ADICIONAR EFEITO DE COR AO PASSAR O MOUSE %>
+<style>
+  .linha-tabela-rh:hover {
+    background-color: #f8fafc !important;
+  }
+</style>

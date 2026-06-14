@@ -1,0 +1,9 @@
+Olá, <%= @admin.nome %>.
+
+O sistema identificou uma conta que precisa de atenção no cronograma da Cantina Quero Lanches:
+
+ Despesa: <%= @despesa.descricao %>
+ Valor: R$ <%= ActionController::Base.helpers.number_with_precision(@despesa.valor, precision: 2, separator: ',', delimiter: '.') %>
+ Vencimento: <%= @despesa.data_vencimento.strftime('%d/%m/%Y') %>
+
+Por favor, verifique o painel do sistema.

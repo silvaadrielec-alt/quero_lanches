@@ -1,6 +1,6 @@
 <style>
   /* --- ESTILO PARA A TELA (Navegação) --- */
-  .conteudo-tela { text-align: center; padding: 50px; font-family: sans-serif; }
+  .conteudo-tela { text-align: center; padding: 20px 50px 50px 50px; font-family: sans-serif; }
   .documento-oficial, .secao-relatorio { display: none; }
 
   /* Elementos de estilização da interface web */
@@ -78,12 +78,40 @@
   }
 </style>
 
-<div class="conteudo-tela">
-  <div style="background: #f8f9fa; padding: 40px; border-radius: 15px; border: 1px solid #ddd; max-width: 700px; margin: 0 auto;">
-    <h2 style="color: #333; text-decoration: none;">Gerador Central de Relatórios Oficiais</h2>
-    <p style="color: #666; margin-bottom: 25px;">Selecione o tipo de relatório que deseja exportar em formato técnico (PDF).</p>
+<div style="max-width: 700px; margin: 30px auto 0 auto; padding: 0 20px; box-sizing: border-box;">
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
+</div>
+
+<div class="conteudo-tela" style="padding-top: 0;">
+  <div style="background: #f8f9fa; padding: 40px; border-radius: 15px; border: 1px solid #ddd; max-width: 700px; margin: 0 auto; box-sizing: border-box;">
+    <h2 style="color: #333; text-decoration: none; margin-top: 0;">Gerador Central de Relatórios Oficiais</h2>
+    <p style="color: #666; margin-bottom: 25px;">Selecione o tipo de relatório e o período desejado para exportação.</p>
     
-    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <%# FORMULÁRIO COM SELETOR DE PERÍODO INTEGRADO %>
+    <%= form_with(url: relatorios_path, method: :get, local: true, style: "margin-bottom: 25px;") do |f| %>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <%= f.label :data_inicio, "De:", style: "font-weight: bold; color: #555;" %>
+          <%= f.date_field :data_inicio, value: params[:data_inicio], style: "padding: 8px; border-radius: 6px; border: 1px solid #ccc; outline: none;" %>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <%= f.label :data_fim, "Até:", style: "font-weight: bold; color: #555;" %>
+          <%= f.date_field :data_fim, value: params[:data_fim], style: "padding: 8px; border-radius: 6px; border: 1px solid #ccc; outline: none;" %>
+        </div>
+        <%= f.submit "Aplicar Período", style: "background-color: #333; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer;" %>
+        
+        <% if params[:data_inicio].present? || params[:data_fim].present? %>
+          <%= link_to "Limpar", relatorios_path, style: "color: #666; text-decoration: underline; font-size: 0.9em;" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; border-top: 1px solid #eee; padding-top: 20px;">
       <select id="tipoRelatorio" class="seletor-relatorio">
         <option value="estoque">Reposição de Estoque</option>
         <option value="fluxo_caixa">Fluxo de Caixa Detalhado</option>
@@ -97,10 +125,6 @@
       </button>
     </div>
   </div>
-
-  <div style="margin-top: 30px; text-align: center;">
-  <%= link_to "← Voltar ao Painel", root_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold; font-size: 0.9em;" %>
-  </div>
 </div>
 
 <div class="documento-oficial">
@@ -108,9 +132,15 @@
   <div style="text-align: center; margin-bottom: 20px;">
     <p><strong>CANTINAS E LANCHONETE QUERO LANCHES</strong> - UNIDADES MATRIZ E IF BAIANO CATU</p>
     <p>EMISSÃO: <%= Time.current.strftime("%d/%m/%Y - %H:%M") %></p>
+    <%# MOSTRA O PERÍODO NO DOCUMENTO IMPRESSO SE ELE ESTIVER ATIVO %>
+    <% if @data_inicio.present? && @data_fim.present? %>
+      <p><strong>PERÍODO DO RELATÓRIO:</strong> <%= Date.parse(@data_inicio).strftime("%d/%m/%Y") %> até <%= Date.parse(@data_fim).strftime("%d/%m/%Y") %></p>
+    <% else %>
+      <p><strong>PERÍODO DO RELATÓRIO:</strong> HISTÓRICO CONSOLIDADO TOTAL</p>
+    <% end %>
   </div>
 
-  <%# ==================== 1. RELATÓRIO DE ESTOQUE (ATUALIZADO COM UNIDADE DE MEDIDA) ==================== %>
+  <%# ==================== 1. RELATÓRIO DE ESTOQUE ==================== %>
   <div id="relatorio-estoque" class="secao-relatorio">
     <h1>RELATÓRIO TÉCNICO DE REPOSIÇÃO DE ESTOQUE</h1>
     
@@ -123,7 +153,6 @@
         </thead>
         <tbody>
           <% matriz_alerta.each do |p| %>
-            <%# Captura e trata a unidade de medida da matriz %>
             <% 
               unidade_p = p.respond_to?(:unidade_medida) ? p.unidade_medida.to_s.downcase.strip : "unidade"
               
@@ -170,7 +199,6 @@
         </thead>
         <tbody>
           <% pav_novo_alerta.each do |p| %>
-            <%# Captura e trata a unidade de medida do pavilhão novo %>
             <% 
               unidade_p = p.respond_to?(:unidade_medida) ? p.unidade_medida.to_s.downcase.strip : "unidade"
               
@@ -244,7 +272,7 @@
           <tr>
             <td><%= p.created_at.strftime("%d/%m/%Y %H:%M") %></td>
             <td>#<%= p.id %></td>
-            <td><%= p.unidade&.upcase %></td>
+            <td><%= p.unidade&.nome&.upcase || "SEM UNIDADE" %></td>
             <td><%= p.respond_to?(:metodo_pagamento) ? p.metodo_pagamento&.upcase : "CONCLUÍDO" %></td>
             <td style="color: green !important; font-weight: bold;"><%= number_to_currency(p.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %></td>
           </tr>
@@ -270,7 +298,7 @@
               <td><%= d.data_pagamento&.strftime("%d/%m/%Y") || d.updated_at.strftime("%d/%m/%Y") %></td>
               <td><%= d.descricao.upcase %></td>
               <td><%= d.categoria&.upcase %></td>
-              <td><%= d.unidade&.upcase %></td>
+              <td><%= d.unidade&.nome&.upcase %></td>
               <td style="color: red !important; font-weight: bold;">- <%= number_to_currency(d.valor, unit: "R$ ", separator: ",", delimiter: ".") %></td>
             </tr>
           <% end %>
@@ -313,100 +341,81 @@
     <h1>RELATÓRIO CONSOLIDADO DE FATURAMENTO</h1>
     
     <table style="margin-top: 30px;">
-      <thead>
-        <tr><th style="width: 70%;">INDICADOR FINANCEIRO PERÍODO TOTAL</th><th>VALOR</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>FATURAMENTO BRUTO (+)</strong> (Total bruto arrecadado em vendas de lanches)</td>
-          <td style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
-        </tr>
-        <tr>
-          <td><strong>DESPESAS OPERACIONAIS (-)</strong> (Custos pagos com insumos e infraestrutura)</td>
-          <td style="color: red !important;"><%= number_to_currency(@total_despesas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
-        </tr>
-        <tr style="background-color: #eee !important;">
-          <td><strong>LUCRO LÍQUIDO CONSOLIDADO (=)</strong></td>
-          <td style="font-weight: bold;">
-            <% if @lucro_liquido >= 0 %>
-              <span style="color: #0000FF !important;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
-            <% else %>
-              <span style="color: #D71920 !important;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
-            <% end %>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <thead>
+      <tr><th style="width: 70%;">INDICADOR FINANCEIRO PERÍODO</th><th>VALOR</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>FATURAMENTO BRUTO (+)</strong></td>
+        <td style="color: green !important; font-weight: bold;"><%= number_to_currency(@total_vendas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
+      </tr>
+      <tr>
+        <td><strong>CUSTO DE MERCADORIAS (CMV) (-)</strong></td>
+        <td style="color: red !important;">- <%= number_to_currency(@total_custo_insumos, unit: "R$ ", separator: ",", delimiter: ".") %></td>
+      </tr>
+      <tr>
+        <td><strong>DESPESAS OPERACIONAIS (-)</strong></td>
+        <td style="color: red !important;">- <%= number_to_currency(@total_despesas, unit: "R$ ", separator: ",", delimiter: ".") %></td>
+      </tr>
+      <tr style="background-color: #eee !important;">
+        <td><strong>LUCRO LÍQUIDO CONSOLIDADO (=)</strong></td>
+        <td style="font-weight: bold;">
+          <% cor = @lucro_liquido >= 0 ? "#0000FF" : "#D71920" %>
+          <span style="color: <%= cor %> !important;"><%= number_to_currency(@lucro_liquido, unit: "R$ ", separator: ",", delimiter: ".") %></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
   </div>
 
   <%# ==================== 5. RELATÓRIO DE AUDITORIA ==================== %>
   <div id="relatorio-auditoria" class="secao-relatorio">
-    <h1>RELATÓRIO DE AUDITORIA E MOVIMENTAÇÕES DE ESTOQUE</h1>
+    <h1>RELATÓRIO DE AUDITORIA FINANCEIRA</h1>
     
-    <table>
-      <thead>
-        <tr>
-          <th>DATA/HORA</th>
-          <th>RESPONSÁVEL</th>
-          <th>UNIDADE</th>
-          <th>ITEM</th>
-          <th>AÇÃO</th>
-          <th>QTD</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @movimentacoes.each do |log| %>
-          <tr>
-            <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
-            <td><%= log.respond_to?(:responsavel) ? log.responsavel : (log.funcionario&.nome || "Sistema") %></td>
-            <td><%= log.unidade&.upcase %></td>
-            <td><%= log.respond_to?(:produto_nome) ? log.produto_nome : log.produto&.nome %></td>
-            <td><%= log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase %></td>
-            
-            <td style="font-weight: bold;">
-              <% 
-                qtd_numerica = log.respond_to?(:qtd) ? log.qtd.to_f : log.quantidade.to_f
-                produto_log = log.produto
-                unidade_medida = produto_log&.respond_to?(:unidade_medida) ? produto_log.unidade_medida.to_s.downcase.strip : "unidade"
-                nome_prod = produto_log&.nome.to_s.downcase
-                tipo_mov = log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase
-
-                if tipo_mov.include?('SAÍDA') && produto_log
-                  comp_como_insumo = Composicao.find_by(insumo_id: produto_log.id)
-                  if comp_como_insumo && comp_como_insumo.unidade_medida_uso.present?
-                    unidade_medida = comp_como_insumo.unidade_medida_uso.to_s.downcase.strip
-                  elsif unidade_medida == 'litro' && (nome_prod.include?('suco') || nome_prod.include?('vitamina') || nome_prod.include?('café') || nome_prod.include?('cafe'))
-                    if qtd_numerica < 1.0 && qtd_numerica > 0
-                      qtd_numerica = (qtd_numerica * 1000).round(0)
-                      unidade_medida = "ml"
-                    end
-                  end
-                end
-
-                qtd_formatada = qtd_numerica == qtd_numerica.to_i ? qtd_numerica.to_i.to_s : sprintf("%.2f", qtd_numerica).gsub('.', ',')
-                
-                if qtd_numerica > 1
-                  unidade_medida = case unidade_medida
-                                   when "unidade" then "unidades"
-                                   when "fatia"   then "fatias"
-                                   when "rodela"  then "rodelas"
-                                   when "folha"   then "folhas"
-                                   when "litro"   then "litros"
-                                   when "quilo"   then "quilos"
-                                   when "un"      then "un"
-                                   when "kg"      then "kg"
-                                   when "ml"      then "ml"
-                                   else 
-                                     unidade_medida.end_with?('s') ? unidade_medida : "#{unidade_medida}s"
-                                   end
-                end
-              %>
-              <%= "#{qtd_formatada} #{unidade_medida}" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+  <table>
+  <thead>
+    <tr>
+      <th>DATA/HORA</th>
+      <th>ITEM</th>
+      <th>AÇÃO</th>
+      <th>QTD</th>
+      <th>CUSTO ESTIMADO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @movimentacoes.each do |log| %>
+      <% 
+        item = log.produto || log.insumo
+        
+        # 1. Lógica inteligente para buscar o preço, independente do nome da coluna
+        custo_unit = 0.0
+        if item.respond_to?(:preco_custo) && item.preco_custo.present?
+          custo_unit = item.preco_custo.to_f
+        elsif item.respond_to?(:valor_unitario) && item.valor_unitario.present?
+          custo_unit = item.valor_unitario.to_f
+        elsif item.respond_to?(:preco_venda) && item.preco_venda.present?
+          custo_unit = item.preco_venda.to_f
+        end
+        
+        # 2. Chama o método centralizado nos Models para exibição correta (fatias/un)
+        res = item&.respond_to?(:exibir_quantidade) ? item.exibir_quantidade(log.quantidade.to_f) : { qtd: log.quantidade.to_f, unidade: "un" }
+        
+        # 3. Formatação brasileira
+        qtd_formatada = sprintf("%.2f", res[:qtd]).gsub('.', ',').gsub(',00', '')
+        total_mov = custo_unit * log.quantidade.to_f
+      %>
+      <tr>
+        <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
+        <td><%= item&.nome || "Item Removido" %></td>
+        <td><%= log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase %></td>
+        <td><%= "#{qtd_formatada} #{res[:unidade]}" %></td>
+        <td style="font-weight: bold; color: #d71920;">
+          <%= number_to_currency(total_mov, unit: "R$ ", separator: ",", delimiter: ".") %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
   </div>
 
   <div style="margin-top: 60px; border-top: 2px solid black; width: 350px; text-align: center; margin-left: auto; margin-right: auto;">
@@ -419,16 +428,18 @@
   function dispararImpressao() {
     var seletor = document.getElementById("tipoRelatorio");
     var tipoSelecionado = seletor.value;
-    
-    var secoes = document.getElementsByClassName("secao-relatorio");
-    for (var i = 0; i < secoes.length; i++) {
-      secoes[i].classList.remove("ativo-print");
-    }
-    
     var secaoAlvo = document.getElementById("relatorio-" + tipoSelecionado);
+    
     if (secaoAlvo) {
+      // Limpa todas as seções antes de marcar a correta
+      document.querySelectorAll(".secao-relatorio").forEach(function(s) {
+        s.classList.remove("ativo-print");
+      });
+      
       secaoAlvo.classList.add("ativo-print");
       window.print();
+    } else {
+      alert("Erro: O relatório selecionado não foi encontrado.");
     }
   }
 </script>

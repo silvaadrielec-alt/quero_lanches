@@ -3,8 +3,11 @@ class HomeController < ApplicationController
 
  def index
   if funcionario_signed_in?
-    # Usamos a nova lógica inteligente que você criou no Model
-    @produtos_criticos = Produto.all.select(&:precisa_reposicao?)
+    @insumos_criticos = Insumo.all.select { |i| i.respond_to?(:precisa_reposicao?) && i.precisa_reposicao? }
+    
+    # Busca produtos e força a verificação na instância
+    @produtos_criticos = Produto.all.select { |p| p.respond_to?(:precisa_reposicao?) && p.precisa_reposicao? }
+    
     render :painel
   else
     render :index
@@ -12,14 +15,13 @@ class HomeController < ApplicationController
 end
 
 def painel
-  # Também atualizamos aqui para manter a consistência
-  @produtos_criticos = Produto.all.select { |produto| produto.precisa_reposicao? }
+  @insumos_criticos = Insumo.all.select { |i| i.respond_to?(:precisa_reposicao?) && i.precisa_reposicao? }
+  @produtos_criticos = Produto.all.select { |p| p.respond_to?(:precisa_reposicao?) && p.precisa_reposicao? }
 end
   
-  # ... mantenha o seu método def faturamento aqui embaixo ...
-
+  # ... mantenha o seu método def faturamento aqui embaixo intacto ...
   def faturamento
-  case params[:periodo]
+    case params[:periodo]
     when "diario"
       range = Time.zone.now.beginning_of_day..Time.zone.now.end_of_day
     when "semanal"
@@ -33,7 +35,6 @@ end
     when "anual"
       range = Time.zone.now.beginning_of_year..Time.zone.now.end_of_year
     else
-      # O padrão se nada for clicado é o dia de hoje
       range = Time.zone.now.beginning_of_day..Time.zone.now.end_of_day
     end
 
@@ -50,6 +51,5 @@ end
                                  .order("total_qtd DESC")
                                  .limit(5)
     @vendas_por_dia = @vendas_hoje.group_by_day(:created_at).sum(:valor_total)
-
-    end
+  end
 end

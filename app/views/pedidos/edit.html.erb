@@ -1,12 +1,28 @@
-<% content_for :title, "Editar pedido" %>
+<% content_for :title, "Acesso Restrito" %>
 
-<h1>Editando pedido</h1>
+<div style="max-width: 600px; margin: 60px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <div class="card-principal" style="padding: 40px 35px; border-radius: 12px; background: #fff; border: 2px solid #D71920 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box;">
+    
+    <div style="font-size: 3.5em; margin-bottom: 15px;">⚠️</div>
+    
+    <h2 style="color: #D71920; font-weight: bold; margin-bottom: 15px; margin-top: 0; letter-spacing: 0.5px;">
+      EDIÇÃO DESATIVADA POR SEGURANÇA
+    </h2>
+    
+    <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 35px; max-width: 480px; margin-left: auto; margin-right: auto;">
+      Para garantir a integridade das auditorias de estoque e evitar furos financeiros nas filiais, os pedidos finalizados não podem ser editados. Se necessário, solicite ao gerente o cancelamento deste pedido e abra um novo.
+    </p>
 
-<%= render "form", pedido: @pedido %>
+    <div style="border-top: 1px solid #f1f5f9; padding-top: 25px; display: flex; gap: 12px; justify-content: center; align-items: center; box-sizing: border-box;">
+      <%= link_to @pedido, style: "background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        Ver Pedido
+      <% end %>
+      
+      <%= link_to pedidos_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        VOLTAR PARA HISTÓRICO
+      <% end %>
+    </div>
 
-<br>
-
-<div>
-  <%= link_to "Mostrar pedido", @pedido %> |
-  <%= link_to "Voltar para pedidos", pedidos_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  </div>
 </div>

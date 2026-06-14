@@ -1,26 +1,39 @@
-<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh; background-color: #fdf8f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border-top: 6px solid #D71920; text-align: center;">
+<style>
+  /* Remove o olhinho/ícone nativo de revelação de senha em navegadores baseados em Chromium (Edge, Chrome) */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+  }
+</style>
+
+<div style="display: flex; justify-content: center; align-items: center; min-height: 85vh; background-color: #fdf8f5; font-family: sans-serif; box-sizing: border-box; padding: 20px;">
+  
+  <%# CARD DE LOGIN COM A MOLDURA VERMELHA OFICIAL %>
+  <div class="card-principal" style="background: white; padding: 45px 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); width: 100%; max-width: 420px; border: 2px solid #D71920 !important; text-align: center; box-sizing: border-box;">
     
+    <%# CABEÇALHO DO LOGIN %>
     <div style="margin-bottom: 30px;">
-      <h2 style="color: #D71920; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px;">ÁREA DE ACESSO</h2>
-      <p style="color: #666; font-size: 0.95em;">Bem-vindo(a) à Cantina Quero Lanches</p>
+      <h2 style="color: #D71920; margin: 0; font-weight: bold; font-size: 2.2em; letter-spacing: 0.5px;">ÁREA DE ACESSO</h2>
+      <p style="color: #64748b; font-size: 14px; margin-top: 6px; margin-bottom: 0;">Bem-vindo(a) à Cantina Quero Lanches</p>
     </div>
 
     <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-      <div style="margin-bottom: 20px; text-align: left;">
-        <%= f.label :email, "E-mail Profissional", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #444;" %>
-        <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "seu@email.com", style: "width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline-color: #D71920;" %>
+      
+      <%# CAMPO: E-MAIL %>
+      <div style="margin-bottom: 22px; text-align: left; display: flex; flex-direction: column;">
+        <%= f.label :email, "E-mail Profissional", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "seu@email.com", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; color: #1e293b; box-sizing: border-box; font-weight: 500;" %>
       </div>
 
-      <%# O campo de senha fica aqui dentro do bloco, onde 'f' existe e funciona! %>
-      <div style="margin-bottom: 20px; text-align: left;">
-        <%= f.label :password, "Senha de Acesso", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #444;" %>
+      <%# CAMPO: SENHA %>
+      <div style="margin-bottom: 22px; text-align: left; display: flex; flex-direction: column;">
+        <%= f.label :password, "Senha de Acesso", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
         
-        <div style="position: relative; width: 100%;">
-          <%= f.password_field :password, id: "input-senha-login", placeholder: "Digite sua senha", style: "width: 100%; padding: 12px 45px 12px 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline-color: #D71920;" %>
+        <div style="position: relative; width: 100%; box-sizing: border-box;">
+          <%= f.password_field :password, id: "input-senha-login", placeholder: "Digite sua senha", style: "width: 100%; padding: 11px 45px 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; color: #1e293b; box-sizing: border-box; font-weight: 500;" %>
           
           <button type="button" onclick="alternarOlhinhoLogin()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; width: 24px; height: 24px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; outline: none;" title="Mostrar/Ocultar Senha">
-            <svg id="svg-olhinho-login" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#666" style="width: 20px; height: 20px;">
+            <svg id="svg-olhinho-login" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#64748b" style="width: 20px; height: 20px;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -28,21 +41,27 @@
         </div>
       </div>
 
+      <%# COMPONENTE REMEMBER ME %>
       <% if devise_mapping.rememberable? %>
-        <div style="margin-bottom: 25px; text-align: left; display: flex; align-items: center;">
-          <%= f.check_box :remember_me, style: "width: 18px; height: 18px; margin-right: 10px; cursor: pointer;" %>
-          <%= f.label :remember_me, "Manter-me conectado", style: "font-size: 0.9em; color: #666; cursor: pointer;" %>
+        <div style="margin-bottom: 25px; text-align: left; display: flex; align-items: center; gap: 8px;">
+          <%= f.check_box :remember_me, style: "width: 18px; height: 18px; cursor: pointer;" %>
+          <%= f.label :remember_me, "Manter-me conectado", style: "font-size: 13px; color: #475569; font-weight: 500; cursor: pointer; user-select: none;" %>
         </div>
       <% end %>
 
+      <%# BOTÃO DE SUBMIT VERMELHO CORPORATIVO %>
       <div>
-        <%= f.submit "ENTRAR NO SISTEMA", style: "width: 100%; background-color: #D71920; color: white; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: background 0.3s; font-size: 1em;" %>
+        <%= f.submit "ENTRAR NO SISTEMA", style: "width: 100%; background-color: #D71920; color: white; padding: 13px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" %>
       </div>
     <% end %>
 
-    <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
-      <%= render "funcionarios/shared/links" %>
+    <%# REORGANIZAÇÃO COMPLETA DOS LINKS INFERIORES COMO BOTÕES EXECUTIVOS COMPACTOS %>
+    <div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px; display: flex; justify-content: center; box-sizing: border-box;">
+      <%= link_to new_funcionario_password_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        Esqueceu sua senha?
+      <% end %>
     </div>
+
   </div>
 </div>
 
@@ -54,13 +73,11 @@ function alternarOlhinhoLogin() {
 
   if (input.type === 'password') {
     input.type = 'text';
-    // Aplica o traço diagonal cortando o olho
     svg.innerHTML = `
       <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
     `;
   } else {
     input.type = 'password';
-    // Retorna para o olho aberto original
     svg.innerHTML = `
       <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

@@ -1,27 +1,34 @@
-<div id="<%= dom_id despesa %>">
+<div id="<%= dom_id despesa %>" style="font-size: 15px; font-family: sans-serif; text-align: left; background: #f8fafc; padding: 22px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; width: 100%;">
+  
   <div>
-    <strong>Descricao:</strong>
-    <%= despesa.descricao %>
+    <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Descrição do Gasto</span>
+    <strong style="font-size: 1.25em; color: #1e293b;"><%= despesa.descricao %></strong>
   </div>
 
-  <div>
-    <strong>Categoria:</strong>
-    <%= despesa.categoria %>
+  <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; box-sizing: border-box;">
+    <div>
+      <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Categoria</span>
+      <strong style="color: #475569; font-weight: 600;"><%= despesa.categoria %></strong>
+    </div>
+    <div>
+      <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Valor Lançado</span>
+      <strong style="color: #dc2626; font-size: 1.1em;"><%= number_to_currency(despesa.valor, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+    </div>
   </div>
 
-  <div>
-    <strong>Valor:</strong>
-    <%= despesa.valor %>
-  </div>
-
-  <div>
-    <strong>Data pagamento:</strong>
-    <%= despesa.data_pagamento %>
-  </div>
-
-  <div>
-    <strong>Pago:</strong>
-    <%= despesa.pago %>
+  <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; box-sizing: border-box;">
+    <div>
+      <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Data de Pagamento</span>
+      <strong style="color: #475569; font-weight: 600;"><%= despesa.data_pagamento.present? ? despesa.data_pagamento.strftime("%d/%m/%Y") : "---" %></strong>
+    </div>
+    <div>
+      <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Status Atual</span>
+      <% if despesa.pago? %>
+        <span style="color: #16a34a; font-weight: bold; text-transform: uppercase; font-size: 13px;">✔ Confirmado (Pago)</span>
+      <% else %>
+        <span style="color: #ea580c; font-weight: bold; text-transform: uppercase; font-size: 13px;">⏳ Pendente</span>
+      <% end %>
+    </div>
   </div>
 
 </div>

@@ -6,6 +6,8 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :verificar_checkin_turno, unless: :devise_controller?
 
+  before_action :set_cache_headers
+
   def after_sign_in_path_for(resource)
     veio_da_porta_admin = request.env['HTTP_REFERER']&.include?('role=admin') || params[:role] == 'admin'
 
@@ -29,6 +31,12 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+def set_cache_headers
+    response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
+  end
 
   # NOVO MÉTODO: Sensor de Primeiro Acesso
   def verificar_se_precisa_setup
@@ -65,7 +73,7 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:nome, :admin, :unidade, :turno, :cargo])
-    devise_parameter_sanitizer.permit(:account_update, keys: [:nome, :admin, :unidade, :turno, :cargo])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:nome, :admin, :unidade_id, :turno, :cargo])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:nome, :admin, :unidade_id, :turno, :cargo])
   end
 end

@@ -6,10 +6,11 @@
 
 <%= form_with(model: @funcionario, url: url_destino, local: true) do |f| %>
   
+  <%# MENSAGENS DE ERRO %>
   <% if @funcionario.errors.any? %>
-    <div style="color: red; background: #fee; padding: 15px; border-radius: 5px; margin-bottom: 40px;">
-      <h2 style="font-size: 16px;"><%= pluralize(@funcionario.errors.count, "erro") %> impediram o salvamento:</h2>
-      <ul>
+    <div style="color: #dc2626; background: #fef2f2; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #fee2e2; text-align: left;">
+      <h2 style="font-size: 15px; font-weight: bold; margin-top: 0;"><%= pluralize(@funcionario.errors.count, "erro") %> impediram o salvamento:</h2>
+      <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 14px; color: #b91c1c;">
         <% @funcionario.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
@@ -17,99 +18,118 @@
     </div>
   <% end %>
 
-  <div style="margin-bottom: 40px;">
-    <%= f.label :nome, "Nome Completo", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.text_field :nome, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" %>
-  </div>
-
-  <div style="margin-bottom: 40px;">
-    <%= f.label :email, "E-mail de Acesso", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.email_field :email, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" %>
-  </div>
-
-  <div style="display: flex; gap: 40px; margin-bottom: 40px;">
-    <div style="flex: 1;">
-      <%= f.label :telefone, "Telefone (Somente Números)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-      <%= f.text_field :telefone, 
-          id: "input-telefone", 
-          maxlength: 15, 
-          placeholder: "Ex: 71999999999", 
-          style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" %>
+  <%# CONTEDOR GRID EM DUAS COLUNAS %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; text-align: left; box-sizing: border-box;">
+    
+    <%# COLUNA 1: Nome Completo %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :nome, "Nome Completo", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.text_field :nome, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
     </div>
-    <div style="flex: 1;">
-      <%= f.label :cpf, "CPF (Opcional - Somente Números)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-      <%= f.text_field :cpf, 
-          id: "input-cpf", 
-          maxlength: 14, 
-          title: "Digite o CPF contendo apenas os 11 números",
-          placeholder: "Ex: 00000000000", 
-          style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" %>
+
+    <%# COLUNA 2: Data de Nascimento %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :data_nascimento, "Data de Nascimento", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.date_field :data_nascimento, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-family: sans-serif; background: #fff;" %>
     </div>
-  </div>
 
-  <div style="display: flex; gap: 40px; margin-bottom: 40px;">
-    <div style="flex: 1;">
-      <%= f.label :data_admissao, "Data de Admissão", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-      <%= f.date_field :data_admissao, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" %>
+    <%# COLUNA 1: E-mail de Acesso %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :email, "E-mail de Acesso", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.email_field :email, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
     </div>
-    <div style="flex: 1;">
-      <%= f.label :data_demissao, "Data de Demissão (Se houver)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-      <%= f.date_field :data_demissao, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" %>
+
+    <%# COLUNA 2: Cargo / Função %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :cargo, "Cargo / Função", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.select :cargo, 
+          ["Gerente", "Caixa", "Atendente", "Auxiliar de Cozinha", "Serviços Gerais"], 
+          { include_blank: "Selecione o Cargo..." }, 
+          { style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; background: #fff; font-weight: 500;" } %>
     </div>
-  </div>
 
-  <div style="margin-bottom: 40px;">
-    <%= f.label :password, "Senha Provisória", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.password_field :password, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;", placeholder: @funcionario.persisted? ? "Deixe em branco para não alterar" : "" %>
-  </div>
-
-  <div style="margin-bottom: 40px;">
-    <%= f.label :password_confirmation, "Confirme a Senha", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.password_field :password_confirmation, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" %>
-  </div>
-
-  <div style="margin-bottom: 40px;">
-    <%= f.label :unidade, "Unidade Habitual (Posto Fixo)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.select :unidade, 
-        Funcionario::UNIDADES, 
-        { include_blank: "Selecione a Unidade Padrão" }, 
-        { style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
-  </div>
-
-  <div style="margin-bottom: 40px;">
-    <%= f.label :turno, "Turno de Trabalho", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.select :turno, 
-        ["Manhã/Tarde", "Tarde/Noite", "Integral"], 
-        { include_blank: "Selecione o Turno" }, 
-        { style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
-    <p style="font-size: 13px; color: #666; margin-top: 8px;">* Define o horário de atuação do funcionário.</p>
-  </div>
-
-  <div style="margin-bottom: 40px;">
-    <%= f.label :cargo, "Cargo / Função", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.select :cargo, 
-        ["Gerente", "Caixa", "Atendente", "Auxiliar de Cozinha", "Serviços Gerais"], 
-        { include_blank: "Selecione o Cargo" }, 
-        { style: "width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; background: #fff;" } %>
-    <p style="font-size: 13px; color: #666; margin-top: 8px;">* Determina a função principal desempenhada na cantina.</p>
-  </div>
-
-  <div style="margin-bottom: 40px; padding: 15px; border: 1px dashed #D71920; border-radius: 8px; background-color: #fff;">
-    <%= f.label :admin, "Acesso de Administrador?", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <%= f.check_box :admin, id: "checkbox-admin", style: "width: 22px; height: 22px; cursor: pointer;" %>
-      <span style="color: #666; font-size: 14px;">(Permite visualizar faturamentos e gerenciar equipe)</span>
+    <%# COLUNA 1: Telefone %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :telefone, "Telefone (Somente Números)", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.text_field :telefone, id: "input-telefone", maxlength: 15, placeholder: "Ex: (71) 99999-9999", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
     </div>
+
+    <%# COLUNA 2: CPF %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :cpf, "CPF (Opcional)", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.text_field :cpf, id: "input-cpf", maxlength: 14, placeholder: "Ex: 000.000.000-00", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
+    </div>
+
+    <%# COLUNA 1: Data de Admissão %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :data_admissao, "Data de Admissão", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.date_field :data_admissao, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-family: sans-serif; background: #fff;" %>
+    </div>
+
+    <%# COLUNA 2: Data de Demissão %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :data_demissao, "Data de Demissão (Se houver)", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.date_field :data_demissao, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; font-family: sans-serif; background: #fff;" %>
+    </div>
+
+    <%# COLUNA 1: Senha Provisória %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :password, "Senha de Acesso", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.password_field :password, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b;", placeholder: @funcionario.persisted? ? "Deixe em branco para manter atual" : "Digite uma senha provisória" %>
+    </div>
+
+    <%# COLUNA 2: Confirme a Senha %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :password_confirmation, "Confirme a Senha", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.password_field :password_confirmation, style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b;", placeholder: "Confirme a senha digitada" %>
+    </div>
+
+    <%# COLUNA 1: Unidade Habitual %>
+<div style="display: flex; flex-direction: column;">
+  <%= f.label :unidade_id, "Unidade Habitual (Posto Fixo)", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+  <%= f.collection_select :unidade_id, 
+      Unidade.all, :id, :nome, 
+      { include_blank: "Selecione a Unidade Padrão..." }, 
+      { style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; background: #fff; font-weight: 500;" } %>
+</div>
+
+    <%# COLUNA 2: Turno de Trabalho %>
+    <div style="display: flex; flex-direction: column;">
+      <%= f.label :turno, "Turno de Trabalho", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= f.select :turno, 
+          ["Manhã/Tarde", "Tarde/Noite", "Integral"], 
+          { include_blank: "Selecione o Turno..." }, 
+          { style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box; color: #1e293b; background: #fff; font-weight: 500;" } %>
+    </div>
+
   </div>
 
-  <div style="margin-bottom: 40px; padding: 20px; border: 2px solid #D71920; border-radius: 8px; background-color: #fff; display: none;" id="bloco-codigo-autorizacao">
-    <%= f.label :codigo_autorizacao, "Código de Autorização (PIN do Gerente)", style: "display: block; font-weight: bold; color: #D71920; margin-bottom: 8px;" %>
-    <%= f.text_field :codigo_autorizacao, id: "input-codigo-autorizacao", maxlength: 6, placeholder: "Ex: 9876", style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px;" %>
-    <p style="font-size: 13px; color: #666; margin-top: 8px; margin-bottom: 0;">* Este código será exigido pelo sistema para validar operações restritas realizadas por funcionários comuns.</p>
+  <%# CONTROLES DE PERMISSÃO / ADMIN (FORA DO GRID) %>
+  <div style="margin-top: 30px;">
+    
+    <%# Checkbox de Acesso Administrador %>
+    <div style="padding: 18px; border: 1px dashed #cbd5e1; border-radius: 10px; background-color: #f8fafc; text-align: left; box-sizing: border-box; margin-bottom: 20px;">
+      <%= f.label :admin, "Nível de Acesso da Conta", style: "display: block; font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <%= f.check_box :admin, id: "checkbox-admin", style: "width: 22px; height: 22px; cursor: pointer;" %>
+        <span style="color: #334155; font-size: 14px; font-weight: 500;">Conceder privilégios de <strong>Administrador / Gerência</strong></span>
+      </div>
+    </div>
+
+    <%# Bloco Dinâmico do PIN do Gerente - CORRIGIDO PARA NÃO VAZAR A BORDA %>
+    <div style="padding: 22px; border: 2px solid #D71920; border-radius: 10px; background-color: #fff; display: none; text-align: left; box-sizing: border-box; box-shadow: 0 4px 10px rgba(215,25,32,0.03);" id="bloco-codigo-autorizacao">
+      <%= f.label :codigo_autorizacao, "Código de Autorização (PIN do Gerente)", style: "display: block; font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%# ADICIONADO 'box-sizing: border-box;' PARA TRAVAR O CAMPO DENTRO DA LINHA VERMELHA %>
+      <%= f.text_field :codigo_autorizacao, id: "input-codigo-autorizacao", maxlength: 6, placeholder: "Ex: 9876", style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; font-weight: bold; color: #1e293b; box-sizing: border-box;" %>
+      <p style="font-size: 12px; color: #64748b; margin-top: 8px; margin-bottom: 0; line-height: 1.4;">* Este código será exigido pelo sistema para validar operações restritas realizadas por funcionários comuns em outras telas.</p>
+    </div>
+
   </div>
 
-  <div style="margin-top: 50px;">
-    <%= f.submit @funcionario.persisted? ? "SALVAR ALTERAÇÕES" : "CADASTRAR FUNCIONÁRIO", class: "btn-quero", style: "width: 100%; padding: 12px;" %>
+  <%# BOTÃO DE SUBMIT PREMIUM NO RODAPÉ %>
+  <div style="margin-top: 35px; text-align: center;">
+    <%= f.submit @funcionario.persisted? ? "SALVAR ALTERAÇÕES" : "CADASTRAR FUNCIONÁRIO", 
+                 style: "background: #D71920; color: white; border: none; padding: 13px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; width: 100%; box-sizing: border-box;" %>
   </div>
 
 <% end %>
@@ -177,7 +197,7 @@ function aplicarMascarasDiretas() {
       } else if (v.length > 3) {
         e.target.value = `${v.slice(0,3)}.${v.slice(3)}`;
       } else if (v.length > 0) {
-        e.target.value = v; // CORREÇÃO: Permite digitar e exibir os 3 primeiros números na tela
+        e.target.value = v;
       } else {
         e.target.value = "";
       }

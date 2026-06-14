@@ -1,140 +1,135 @@
-<div class="card-principal" style="max-width: 98%; margin: 40px auto; text-align: center;">
-  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Histórico de Pedidos</h1>
-
-  <%# BARRA DE PESQUISA PARA PEDIDOS (JS) %>
-  <div style="margin-bottom: 20px; text-align: center;">
-    <input type="text" id="buscaPedidos" onkeyup="filtrarPedidos()" placeholder="🔍 Pesquisar por lanche ou local (Centro, Pavilhão...)" 
-           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+<div style="max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box; text-align: center;">
+  
+  <%# BOTÃO DE RETORNO SUPERIOR %>
+  <div style="margin-bottom: 25px; text-align: left;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+      ← VOLTAR PARA O PAINEL 
+    <% end %>
   </div>
 
-  <div style="margin-top: 10px; margin-bottom: 30px; text-align: center;">
-    <%= link_to "Anotar Novo Pedido", new_pedido_path, 
-        style: "background-color: #D71920; color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.1em; display: inline-block; box-shadow: 0 4px 8px rgba(215, 25, 32, 0.3);" %>
-  </div>
+  <%# CONTÊINER PRINCIPAL MOLDURA VERMELHA %>
+  <div class="card-principal" style="padding: 35px; background: #fff; border-radius: 12px; border: 2px solid #D71920 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.06); box-sizing: border-box;">
+    
+    <h1 style="color: #D71920; margin-top: 0; margin-bottom: 25px; font-size: 2em; font-weight: bold; letter-spacing: 0.5px;">
+      Histórico de Pedidos
+    </h1>
 
-  <table style="width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed;">
-    <thead>
-      <tr style="background-color: #D71920; color: white;">
-        <th style="padding: 12px; text-align: left; width: 14%;">Identificação</th>
-        <th style="padding: 12px; text-align: left; width: 13%;">Data / Hora</th>
-        <th style="padding: 12px; text-align: left; width: 26%;">Produtos / Detalhes</th>
-        <th style="padding: 12px; text-align: center; width: 11%;">Qtd Total</th>
-        <th style="padding: 12px; text-align: right; width: 12%;">Total do Pedido</th>
-        <th style="padding: 12px; text-align: center; width: 10%;">Pagamento</th>
-        <th style="padding: 12px; text-align: center; width: 10%;">Local</th>
-        <th style="padding: 12px; text-align: center; width: 14%;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
+    <%# BARRA DE PESQUISA ARREDONDADA %>
+    <div style="margin-bottom: 25px; text-align: center; box-sizing: border-box;">
+      <input type="text" id="buscaPedidos" onkeyup="filtrarPedidos()" placeholder="🔍 Pesquisar por lanche, cliente ou local (Centro, Pavilhão...)" 
+             style="width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 15px; color: #1a202c; font-weight: 500; transition: border-color 0.2s; box-sizing: border-box;"
+             onfocus="this.style.borderColor='#D71920'" onblur="this.style.borderColor='#cbd5e1'">
+    </div>
+
+    <%# CADASTRAR NOVO PEDIDO - ALINHAMENTO BLINDADO À DIREITA %>
+    <div style="margin-bottom: 25px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to new_pedido_path, 
+          style: "background-color: #D71920; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.18); text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + ANOTAR NOVO PEDIDO
+      <% end %>
+    </div>
+
+    <%# LISTAGEM EM FILAS DE LINHAS COMPACTAS %>
+    <div id="lista-historico-container" style="display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;">
       <% @pedidos.each do |pedido| %>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            <strong><%= pedido.cliente_nome.presence || "Não identificado" %></strong>
-          </td>
+        <div class="linha-pedido-card" style="border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #fff; text-align: left; box-sizing: border-box; transition: background 0.2s;" onmouseover="this.style.borderColor='#D71920'" onmouseout="this.style.borderColor='#cbd5e1'">
           
-          <td style="padding: 12px; text-align: left; color: #666; font-size: 0.95em;">
-            <%= pedido.created_at.strftime("%d/%m/%Y %H:%M") %>
-          </td>
+          <%# CABEÇALHO DO CARD %>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed #cbd5e1; padding-bottom: 10px; box-sizing: border-box;">
+            <div>
+              <span style="color: #4a5568; font-size: 0.85em; display: block; font-weight: bold;">Pedido #<%= pedido.id %></span>
+              <strong style="font-size: 1.15em; color: #1a202c; text-transform: uppercase;"><%= pedido.cliente_nome.presence || "CONSUMIDOR FINAL" %></strong>
+            </div>
+            <div style="text-align: right; box-sizing: border-box;">
+              <span style="color: #2d3748; font-size: 0.9em; display: block; font-weight: bold;"><%= pedido.created_at.strftime("%d/%m/%Y %H:%M") %></span>
+              <span style="font-size: 0.85em; background: #fef2f2; color: #b91c1c; padding: 3px 10px; border-radius: 12px; font-weight: bold; display: inline-block; margin-top: 4px; border: 1px solid #fee2e2; text-transform: uppercase; letter-spacing: 0.3px;">
+                 <%= pedido.unidade&.nome&.gsub('_', ' ') %>
+              </span>
+            </div>
+          </div>
 
-          <td style="padding: 12px; text-align: left; font-size: 0.95em;">
+          <%# CONTEÚDO / PRODUTOS %>
+          <div style="font-size: 0.95em; color: #1a202c; box-sizing: border-box;">
             <% if pedido.item_pedidos.any? %>
-              <ul style="margin: 0; padding-left: 20px; list-style-type: square;">
+              <ul style="margin: 0; padding-left: 15px; list-style-type: square; color: #1a202c;">
                 <% pedido.item_pedidos.each do |item| %>
                   <% 
-                    # Mapeia o fator multiplicador do preço com base no tamanho/peso selecionado
-                    fator = case item.tamanho.to_s.strip
-                            when "Copo 200ml"                 then 0.2
-                            when "Copo 300ml"                 then 0.3
-                            when "Copo 500ml"                 then 0.5
-                            when "Copo 700ml"                 then 0.7
-                            when "Jarra 1L", "Padrão"         then 1.0
-                            when "Porção 300g"                then 0.3
-                            when "Porção 500g"                then 0.5
-                            when "Por Peso / Balança (KG)"    then 1.0
-                            else 1.0
-                            end
-
-                    preco_un = ((item.produto&.preco_venda.to_f) * fator).round(2)
-                    
-                    # Se for por peso livre, aceitamos casas decimais na quantidade (ex: 0,450 kg), caso contrário mostra inteiro
-                    es_por_peso = item.tamanho.to_s.include?("Balança") || item.tamanho.to_s.include?("(KG)")
-                    qtd_exibida = es_por_peso ? sprintf("%.3f", item.quantidade.to_f).gsub('.', ',') : item.quantidade.to_i.to_s
+                    preco_un = item.preco_unitario.to_f > 0 ? item.preco_unitario.to_f : item.produto&.preco_venda.to_f
+                    es_por_peso = item.tamanho.to_s.downcase.include?("balança") || item.tamanho.to_s.downcase.include?("kg")
+                    qtd_exibida = es_por_peso ? number_with_precision(item.quantidade, precision: 3, separator: ",") : item.quantidade.to_i.to_s
                     unidade_texto = es_por_peso ? " kg" : "x"
                   %>
-                  
-                  <li>
-                    <%= item.produto&.nome %> 
-                    <%= "(#{item.tamanho})" if item.tamanho.present? %> 
-                    - <span style="color: #666;">
-                      <%= es_por_peso ? "#{qtd_exibida}#{unidade_texto}" : "#{qtd_exibida} #{unidade_texto}" %> de <%= number_to_currency(preco_un, unit: "R$ ") %>
+                  <li style="margin-bottom: 6px; line-height: 1.4;">
+                    <strong style="color: #1a202c; text-transform: uppercase;"><%= item.produto&.nome %></strong>
+                    <%= "<span style='color: #D71920; font-weight: bold;'>[#{item.tamanho}]</span>".html_safe if item.tamanho.present? %> 
+                    <span style="color: #2d3748; font-weight: 500;">
+                      - <%= es_por_peso ? "#{qtd_exibida}#{unidade_texto}" : "#{qtd_exibida} #{unidade_texto}" %> de <%= number_to_currency(preco_un, unit: "R$ ") %>
                     </span>
+
+                    <% if item.item_pedido_adicionais.any? %>
+                      <ul style="margin: 4px 0 0 0; padding: 4px 8px; list-style: none; font-size: 0.9em; color: #155724; background: #f0fdf4; border-radius: 4px; border: 1px solid #d1fae5; display: inline-block;">
+                        <% item.item_pedido_adicionais.each do |add| %>
+                          <li>
+                             Extra: <%= add.quantidade.to_i %>x <%= add.insumo&.nome&.upcase %> 
+                            (+ <%= number_to_currency(add.preco_unitario.to_f * add.quantidade.to_f, unit: "R$ ") %>)
+                          </li>
+                        <% end %>
+                      </ul>
+                    <% end %>
                   </li>
-                <% end %> <%# CORRETO: O loop fecha aqui, DEPOIS de renderizar a tag <li> %>
+                <% end %>
               </ul>
             <% else %>
-              <%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome : "Produto não registrado" %>
-              <span style="color: #666;">(Histórico legado)</span>
+              <span style="color: #2d3748; font-weight: bold;"><%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome.upcase : "Produto não registrado" %> (Legado)</span>
             <% end %>
-          </td>
+          </div>
 
-          <td style="padding: 12px; text-align: center; color: #666;">
-            <% 
-              total_qtd = pedido.item_pedidos.any? ? pedido.item_pedidos.sum(:quantidade).to_i : (pedido.respond_to?(:quantidade) ? pedido.quantidade.to_i : 1)
-            %>
-            <%= total_qtd %> <%= total_qtd == 1 ? "unidade" : "unidades" %>
-          </td>
-          
-          <td style="padding: 12px; text-align: right; font-weight: bold; color: #28a745;">
-            <%= number_to_currency(pedido.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %>
-          </td>
-
-          <td style="padding: 12px; text-align: center; font-size: 0.95em; color: #444;">
-            <% formas = [] %>
-            <% formas << "Dinheiro" if pedido.pago_dinheiro.present? && pedido.pago_dinheiro > 0 %>
-            <% formas << "Pix" if pedido.pago_pix.present? && pedido.pago_pix > 0 %>
-            <% formas << "Débito" if pedido.pago_cartao_debito.present? && pedido.pago_cartao_debito > 0 %>
-            <% formas << "Crédito" if pedido.pago_cartao_credito.present? && pedido.pago_cartao_credito > 0 %>
+          <%# RODAPÉ DO CARD %>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border-radius: 8px; margin-top: 4px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+            <div>
+              <strong style="color: #4a5568; font-size: 0.9em;">Forma: </strong>
+              <span style="font-size: 0.9em; font-weight: bold; color: #1a202c;">
+                <% formas = [] %>
+                <% formas << "Dinheiro" if pedido.pago_dinheiro.to_f > 0 %>
+                <% formas << "Pix" if pedido.pago_pix.to_f > 0 %>
+                <% formas << "Débito" if pedido.pago_cartao_debito.to_f > 0 %>
+                <% formas << "Crédito" if pedido.pago_cartao_credito.to_f > 0 %>
+                <%= formas.any? ? formas.join(" + ") : "Não informado" %>
+              </span>
+            </div>
             
-            <%= formas.any? ? formas.join(" + ") : "<span style='color: #999; font-style: italic;'>Não informado</span>".html_safe %>
-          </td>
-          
-          <td style="padding: 12px; text-align: center;"><%= pedido.unidade %></td>
-          
-          <td style="padding: 12px; text-align: center; white-space: nowrap;">
-            <%= link_to 'Detalhes', pedido_path(pedido), 
-             style: "color: #0000FF; text-decoration: underline; margin-right: 12px; font-family: sans-serif; font-weight: 500;" %>
+            <div style="display: flex; align-items: center; gap: 15px; box-sizing: border-box;">
+              <div>
+                <span style="color: #16a34a; font-weight: bold; font-size: 1.2em;">
+                  <%= number_to_currency(pedido.valor_total, unit: "R$ ") %>
+                </span>
+              </div>
+              
+              <%= link_to pedido_path(pedido), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                Detalhes
+              <% end %>
+            </div>
+          </div>
 
-            <% if current_funcionario.admin? %>
-              <%= link_to 'Editar', edit_pedido_path(pedido), 
-               style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: 500;" %>
-            <% end %>
-          </td>
-        </tr>
+        </div>
       <% end %>
-    </tbody>
-  </table>
+    </div>
+  </div>
 </div>
 
 <script>
 function filtrarPedidos() {
   var input = document.getElementById("buscaPedidos");
   var filter = input.value.toUpperCase();
-  var table = document.querySelector("table");
-  var tr = table.getElementsByTagName("tr");
+  var container = document.getElementById("lista-historico-container");
+  var cards = container.getElementsByClassName("linha-pedido-card");
 
-  for (var i = 1; i < tr.length; i++) {
-    var tdProduto = tr[i].getElementsByTagName("td")[2]; 
-    var tdLocal = tr[i].getElementsByTagName("td")[6];   
-    
-    if (tdProduto || tdLocal) {
-      var txtProduto = tdProduto ? (tdProduto.textContent || tdProduto.innerText) : "";
-      var txtLocal = tdLocal ? (tdLocal.textContent || tdLocal.innerText) : "";
-      
-      if (txtProduto.toUpperCase().indexOf(filter) > -1 || txtLocal.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
+  for (var i = 0; i < cards.length; i++) {
+    var textoCard = cards[i].textContent || cards[i].innerText;
+    if (textoCard.toUpperCase().indexOf(filter) > -1) {
+      cards[i].style.display = "";
+    } else {
+      cards[i].style.display = "none";
     }
   }
 }

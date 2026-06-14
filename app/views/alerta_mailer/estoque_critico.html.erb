@@ -1,0 +1,14 @@
+<div style="font-family: sans-serif; padding: 20px; border: 2px solid #D71920; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #D71920; margin-top: 0;"> Alerta de Estoque Crítico</h2>
+  <p>Olá, <strong><%= @admin.nome %></strong>,</p>
+  <p>O setor de suprimentos da <strong>Cantina Quero Lanches</strong> reporta que um insumo/produto atingiu quantidades abaixo do limite tolerável:</p>
+  
+  <div style="background-color: #fcebeb; border-left: 4px solid #D71920; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <p style="margin: 5px 0;"> <strong>Item:</strong> <%= @produto.nome %></p>
+    <p style="margin: 5px 0;"> <strong>Aviso:</strong> Este item necessita de compra ou remanejamento imediato para evitar a falta de lanches.</p>
+  </div>
+  
+  <p>Por favor, acesse a Central de Alertas para acionar o fornecedor via WhatsApp.</p>
+  <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+  <small style="color: #999;">Sistema Automático de Monitoramento Quero Lanches.</small>
+</div>

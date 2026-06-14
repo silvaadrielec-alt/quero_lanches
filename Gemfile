@@ -52,3 +52,4 @@ gem "devise-i18n", "~> 1.16"
 gem "chartkick"
 gem "groupdate"
 gem 'csv'
+gem 'twilio-ruby'

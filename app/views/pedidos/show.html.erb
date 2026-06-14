@@ -1,100 +1,94 @@
-<div style="max-width: 500px; margin: 40px auto;">
+<div style="max-width: 500px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="margin-bottom: 25px; text-align: left;" class="no-print">
+    <%= link_to pedidos_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O HISTÓRICO DE PEDIDOS
+    <% end %>
+  </div>
+
+  <%# Renderiza o partial do pedido %>
   <%= render @pedido %>
+
+  <%# --- BLOCO DE AÇÕES NA BASE (ALINHADOS LADO A LADO) --- %>
+  <div style="margin-top: 25px; padding-top: 15px; border-top: 1px dashed #cbd5e1; display: flex; gap: 12px; align-items: center; justify-content: space-between; box-sizing: border-box; width: 100%;" class="no-print">
+    
+    <%# 1. BOTÃO DE IMPRESSÃO PRETO EXECUTIVO %>
+    <%= link_to comprovante_pedido_path(@pedido), target: "_blank", 
+        style: "flex: 1; background-color: #1e293b; color: white; padding: 12px 15px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #0f172a; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; box-sizing: border-box; transition: background 0.2s; height: 45px;",
+        onmouseover: "this.style.background='#0f172a'", onmouseout: "this.style.background='#1e293b'" do %>
+       IMPRIMIR CUPOM
+    <% end %>
+
+    <%# 2. BOTÃO DE CANCELAMENTO VERMELHO ALERTA VIVO %>
+    <button onclick="solicitarCancelamentoComSeguranca()" 
+            style="flex: 1; background: #DC2626; border: 1px solid #B91C1C; color: white; padding: 12px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s; height: 45px; display: flex; align-items: center; justify-content: center;"
+            onmouseover="this.style.background='#ffee00'; this.style.color='#000'; this.style.borderColor='#f59e0b';" 
+            onmouseout="this.style.background='#DC2626'; this.style.color='white'; this.style.borderColor='#B91C1C';">
+       CANCELAR PEDIDO
+    </button>
+
+    <%# Link oculto nativo do Rails/Turbo para deleção segura %>
+    <%= link_to "Deletar", pedido_path(@pedido), 
+        id: "link-deletar-real-oculto", 
+        data: { turbo_method: :delete }, 
+        style: "display: none;" %>
+
+  </div>
+
 </div>
 
-<div style="max-width: 500px; margin: 20px auto; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center; font-family: sans-serif;">
-  
-  <%# 1. BOTÃO DE IMPRESSÃO %>
-  <%= link_to comprovante_pedido_path(@pedido), target: "_blank", 
-      style: "background-color: #333; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: flex; align-items: center; gap: 10px;" do %>
-    <span>Imprimir Cupom</span>
-  <% end %>
-
-  <%# 2. BOTÃO DE EDIÇÃO %>
-  <button onclick="autorizarAcao('editar')" 
-          style="background: none; border: none; color: #0000FF; text-decoration: underline; cursor: pointer; font-family: inherit; font-size: 1em;">
-    Editar este pedido
-  </button>
-
-  <%= link_to "Voltar aos pedidos", pedidos_path, style: "color: #0000FF; text-decoration: underline;" %>
-</div>
-
-<div style="max-width: 500px; margin: 30px auto; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-family: sans-serif;">
-  <%# 3. BOTÃO DE CANCELAMENTO %>
-  <button onclick="autorizarAcao('cancelar')" 
-          style="background: none; border: none; color: #d9534f; cursor: pointer; text-decoration: underline; font-size: 0.9em;">
-       Cancelar este pedido
-  </button>
-</div>
-
-<%# --- SCRIPT DE SEGURANÇA ATUALIZADO (VALIDAÇÃO DINÂMICA VIA BANCO DE DADOS) --- %>
+<%# --- SCRIPT DE SEGURANÇA REATIVO (VALIDAÇÃO SEM CONFLITO DE MEMÓRIA) --- %>
 <script>
-document.addEventListener("turbo:load", function() {
-  
-  // FUNÇÃO GLOBAL: Centraliza a chamada de API de segurança que pode ser reutilizada
-  window.solicitarAutorizacaoGerente = function(onSucesso) {
+(function() {
+  // Isola as funções do escopo global poluído pelo SPA
+  window.solicitarCancelamentoComSeguranca = function() {
     const ehAdmin = <%= current_funcionario&.admin? || false %>;
 
-    // Se o funcionário logado já for Administrador, o sistema libera a ação imediatamente
     if (ehAdmin) {
-      onSucesso();
+      dispararExclusaoTurbo();
     } else {
       const codigo = prompt("ESTA AÇÃO REQUER AUTORIZAÇÃO DO GERENTE.\nDigite o seu código de segurança:");
-      
-      if (codigo) {
-        // Dispara a requisição AJAX em segundo plano para a rota global segura do Rails
-        fetch("/autorizar_gerente", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-          },
-          body: JSON.stringify({ codigo: codigo })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.autorizado) {
-            onSucesso(); // Executa o bloco de código protegido (Callback)
-          } else {
-            alert("Código Inválido ou Usuário não é Administrador! Ação cancelada.");
-          }
-        })
-        .catch(() => alert("Erro ao processar a validação de segurança remota."));
-      }
-    }
-  };
+      if (!codigo) return;
 
-  // Controla o clique dos botões da tela utilizando o validador dinâmico
-  window.autorizarAcao = function(acao) {
-    if (acao === 'editar') {
-      solicitarAutorizacaoGerente(function() {
-        window.location.href = "<%= edit_pedido_path(@pedido) %>";
-      });
-    } else if (acao === 'cancelar') {
-      solicitarAutorizacaoGerente(function() {
-        if (confirm("Deseja realmente CANCELAR o Pedido #<%= @pedido.id %>?\nEsta ação não pode ser desfeita.")) {
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = "<%= pedido_path(@pedido) %>";
-          
-          const methodInput = document.createElement('input');
-          methodInput.type = 'hidden';
-          methodInput.name = '_method';
-          methodInput.value = 'delete';
-          
-          const tokenInput = document.createElement('input');
-          tokenInput.type = 'hidden';
-          tokenInput.name = 'authenticity_token';
-          tokenInput.value = "<%= form_authenticity_token %>";
-          
-          form.appendChild(methodInput);
-          form.appendChild(tokenInput);
-          document.body.appendChild(form);
-          form.submit();
+      fetch("/autorizar_gerente", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ codigo: codigo })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.autorizado) {
+          dispararExclusaoTurbo();
+        } else {
+          alert("Código Inválido ou Usuário não é Administrador! Ação negada.");
         }
-      });
+      })
+      .catch(() => alert("Erro ao processar a validação de segurança remota."));
     }
   };
 
-});
+  function dispararExclusaoTurbo() {
+    // Usamos o Swal.fire em vez do confirm() nativo
+    Swal.fire({
+      title: 'Você tem certeza?',
+      text: "Deseja realmente CANCELAR o Pedido #<%= @pedido.id %>?\nEsta ação não pode ser desfeita e estornará o estoque.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#DC2626', // Sua cor vermelha original
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sim, cancelar!',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      // Se o usuário clicar em "Sim, cancelar!"
+      if (result.isConfirmed) {
+        const gatilhoTurbo = document.getElementById("link-deletar-real-oculto");
+        if (gatilhoTurbo) gatilhoTurbo.click();
+      }
+    });
+  }
+})();
 </script>

@@ -1,0 +1,69 @@
+<% content_for :title, "Painel de Auditoria Financeira" %>
+
+<div style="max-width: 1100px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <%# --- BOTÃO VOLTAR --- %>
+  <div style="text-align: left; margin-bottom: 25px;">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
+
+  <%# MOLDURA PRINCIPAL COM BORDA VERMELHA (PADRÃO PREMIUM) %>
+  <div style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 12px; background: #fff; padding: 30px; border: 2px solid #D71920; box-sizing: border-box;">
+
+    <%# CABEÇALHO OFICIAL %>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #D71920; padding-bottom: 15px; margin-bottom: 20px;">
+      <h2 style="color: #D71920; margin: 0; font-size: 1.5em; font-weight: bold; text-transform: uppercase; letter-spacing: -0.5px;">
+        Painel de Auditoria e Compliance Financeiro
+      </h2>
+      <div style="text-align: right;">
+        <span style="background: #334155; color: white; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Trilha Forense Geral</span>
+        <%= link_to "RESUMO FINANCEIRO", relatorio_financeiro_index_path, style: "background: #f1f5f9; color: #0000FF; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: bold; text-decoration: none; border: 1px solid #cbd5e1;" %>
+      </div>
+    </div>
+    
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
+      Esta tela registra todas as modificações críticas, exclusões de despesas e cancelamentos de pedidos efetuados no sistema. Trata-se de um log imutável para segurança regulatória do fluxo de caixa.
+    </p>
+
+    <%# TABELA EXECUTIVA (CABECALHO VERMELHO) %>
+    <div style="overflow-x: auto; width: 100%; border-radius: 8px;">
+      <table style="width: 100%; border-collapse: collapse; background: white;">
+        <thead>
+          <tr style="background-color: #D71920; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+            <th style="padding: 14px 16px; border-top-left-radius: 6px;">Data/Hora</th>
+            <th style="padding: 14px 16px;">Responsável</th>
+            <th style="padding: 14px 16px;">Módulo</th>
+            <th style="padding: 14px 16px;">Ação</th>
+            <th style="padding: 14px 16px;">Descrição do Evento</th>
+            <th style="padding: 14px 16px; text-align: right; border-top-right-radius: 6px;">VALORES (ANTIGO → NOVO)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @auditorias.any? %>
+            <% @auditorias.each do |log| %>
+              <tr style="border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #1e293b;">
+                <td style="padding: 14px 16px; color: #64748b; white-space: nowrap;"><%= log.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+                <td style="padding: 14px 16px; font-weight: 600;"><%= log.funcionario&.nome || "Sistema" %></td>
+                <td style="padding: 14px 16px;"><span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;"><%= log.tabela_afetada %></span></td>
+                <td style="padding: 14px 16px;"><span style="background: #D71920; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;"><%= log.acao.upcase %></span></td>
+                <td style="padding: 14px 16px; color: #475569; max-width: 350px;"><%= log.descricao %></td>
+                <td style="padding: 14px 16px; text-align: right; font-weight: 600; white-space: nowrap;">
+                  <% if log.valor_anterior.present? %>
+                    R$ <%= number_with_precision(log.valor_anterior, precision: 2, separator: ',', delimiter: '.') %>
+                    <% if log.valor_novo.present? %>
+                      → <span style="color: #0000FF;">R$ <%= number_with_precision(log.valor_novo, precision: 2, separator: ',', delimiter: '.') %></span>
+                    <% else %>
+                      → <span style="color: #D71920;">NULO</span>
+                    <% end %>
+                  <% else %> - <% end %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

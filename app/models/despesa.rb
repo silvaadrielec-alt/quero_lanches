@@ -1,8 +1,7 @@
 class Despesa < ApplicationRecord
-  # ASSOCIAÇÃO
   belongs_to :funcionario
+  belongs_to :unidade
 
-  # SOLUÇÃO DEFINITIVA: Força o Rails a tratar os campos como Date puro, eliminando o erro de horas nas views
   attribute :data_pagamento, :date
   attribute :data_vencimento, :date
 
@@ -15,25 +14,51 @@ class Despesa < ApplicationRecord
     "Outros"
   ]
 
-  # VALIDAÇÕES
-  validates :descricao, :valor, :categoria, :data_pagamento, :unidade, :turno, presence: true
-  
-  # Trava de segurança contra duplicidade
+  validates :descricao, :valor, :categoria, :unidade, :turno, presence: true
+  validates :data_pagamento, presence: true, if: :pago?
+  validates :data_vencimento, presence: true, unless: :pago?
   validate :verificar_duplicidade, on: :create
+
+  def auditar_alteracao(funcionario_id)
+    # Garante que só audita se algo REALMENTE mudou
+    if saved_changes.slice(:valor, :descricao, :pago).any?
+      Auditorium.create!(
+        funcionario_id: funcionario_id,
+        tabela_afetada: 'Despesas',
+        registro_id: self.id,
+        unidade: self.unidade || 'GERAL',
+        acao: 'ALTERAÇÃO',
+        valor_anterior: saved_changes['valor']&.first || self.valor,
+        valor_novo: saved_changes['valor']&.last || self.valor,
+        descricao: "Despesa ##{self.id} ('#{self.descricao}') alterada. Status pago: #{self.pago}"
+      )
+    end
+  end
+
+  def auditar_exclusao(funcionario_id)
+    Auditorium.create!(
+      funcionario_id: funcionario_id,
+      tabela_afetada: 'Despesas',
+      registro_id: self.id,
+      unidade: self.unidade || 'GERAL',
+      acao: 'EXCLUSÃO',
+      valor_anterior: self.valor,
+      valor_novo: nil,
+      descricao: "ALERTA: Despesa ##{self.id} ('#{self.descricao}') de R$ #{self.valor} EXCLUÍDA."
+    )
+  end
 
   private
 
   def verificar_duplicidade
-    # 1. Limpamos a descrição: remove espaços nas pontas e deixa tudo em minúsculo
-    descricao_limpa = descricao.to_s.strip.downcase
+    return unless descricao.present?
     
-    # 2. Procuramos se já existe algo igual hoje nesta unidade
-    duplicada = Despesa.where(unidade: unidade, data_pagamento: data_pagamento, valor: valor)
-                       .where("LOWER(TRIM(descricao)) = ?", descricao_limpa)
+    # Busca apenas nos últimos 30 dias para não ficar lento
+    duplicada = Despesa.where(unidade: unidade, valor: valor)
+                       .where("created_at > ?", 30.days.ago)
+                       .where("LOWER(TRIM(descricao)) = ?", descricao.to_s.strip.downcase)
                        .exists?
 
-    if duplicada
-      errors.add(:base, "⚠️ ALERTA DE DUPLICIDADE: Já existe um lançamento de '#{descricao}' com o valor de R$ #{valor} para hoje nesta unidade. Verifique se a despesa já foi cadastrada por outro turno.")
-    end
+    errors.add(:base, "⚠️ ALERTA: Despesa duplicada detectada na mesma unidade.") if duplicada
   end
 end

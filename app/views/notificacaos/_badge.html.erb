@@ -1,0 +1,7 @@
+<%# app/views/notificacaos/_badge.html.erb %>
+<div id="badge-wrapper" style="display: inline-block;">
+  <% count = Notificacao.where(lida: false).count %>
+  <span class="badge-sininho" id="badge-notificacao" style="<%= 'display:none;' if count == 0 %>">
+    <%= count %>
+  </span>
+</div>

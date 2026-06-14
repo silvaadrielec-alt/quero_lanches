@@ -1,76 +1,127 @@
-<div style="max-width: 1200px; margin: 20px auto; font-family: sans-serif;">
-  
-  <h1 style="text-align: center; color: #D71920;">📊 Inteligência de Vendas - Quero Lanches</h1>
+<div style="max-width: 1200px; margin: 30px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
 
-  <div style="text-align: center; margin-bottom: 30px; display: flex; justify-content: center; gap: 10px;">
-  <% ['diario', 'semanal', 'mensal', 'anual'].each do |p| %>
-    <%= link_to p.upcase, faturamentos_path(periodo: p), 
-        style: "padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; 
-                background: #{(@periodo == p) ? '#D71920' : '#eee'}; 
-                color: #{(@periodo == p) ? '#fff' : '#333'}; border: 1px solid #ccc;" %>
-  <% end %>
-</div>
+  <%# --- 1. BOTÃO VOLTAR --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase;" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
 
-<div style="text-align: right; margin-bottom: 20px;">
-  <%= link_to exportar_faturamentos_path(periodo: @periodo, format: :csv), 
-      class: "no-print",
-      style: "background: #1D6F42; color: white; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" do %>
-    <span>📊 Baixar para Excel (.csv)</span>
-  <% end %>
-</div>
+  <%# --- CABEÇALHO --- %>
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #D71920; padding-bottom: 15px; margin-bottom: 25px;">
+    <h1 style="color: #1e293b; margin: 0; font-size: 1.8em; font-weight: bold;">Inteligência e Faturamento de Vendas</h1>
+    <%= link_to exportar_faturamentos_path(periodo: @periodo, format: :csv), class: "no-print", style: "background: #1D6F42; color: white; padding: 10px 18px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px;" do %>
+      <span> Baixar Planilha (.CSV)</span>
+    <% end %>
+  </div>
 
-<%# O gráfico de evolução diária agora usará a variável @vendas_geral_diaria filtrada %>
-<div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; border: 1px solid #ddd;">
-  <h3 style="color: #7D3C98; text-align: center;">Evolução de Vendas (<%= @periodo.capitalize %>)</h3>
-  <%= line_chart @vendas_geral_diaria, prefix: "R$ ", colors: ["#D71920"] %>
-</div>
+  <%# --- FILTROS --- %>
+  <div style="text-align: center; margin-bottom: 30px; display: flex; justify-content: center; gap: 10px;" class="no-print">
+    <% ['diario', 'semanal', 'mensal', 'anual'].each do |p| %>
+      <%= link_to p.upcase, faturamentos_path(periodo: p), 
+          id: "filtro-#{p}",
+          style: "padding: 8px 18px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 11px; background: #{(@periodo == p) ? '#D71920' : '#f1f5f9'}; color: #{(@periodo == p) ? '#fff' : '#475569'}; border: 1px solid #{(@periodo == p) ? '#D71920' : '#cbd5e1'};" %>
+    <% end %>
+  </div>
 
-<%# Gráfico Comparativo por Unidade %>
-<div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; border: 1px solid #ddd;">
-  <h3 style="color: #7D3C98; text-align: center;">Comparativo por Unidade</h3>
-  <%= column_chart @vendas_unidades_comparativo, prefix: "R$ ", stacked: true %>
-</div>
+  <%# --- 2. CARDS RESUMO --- %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+    <% @vendas_por_unidade.each do |unidade, total| %>
+      <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <h3 style="margin: 0; font-size: 0.75em; color: #64748b; font-weight: bold; text-transform: uppercase;"><%= unidade %></h3>
+        <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;"><%= number_to_currency(total, unit: "R$ ", separator: ",", delimiter: ".") %></p>
+      </div>
+    <% end %>
+  </div>
 
-    <%# 3. PARTICIPAÇÃO NO FATURAMENTO TOTAL %>
-    <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #ddd;">
-      <h3 style="color: #7D3C98; text-align: center;">Divisão por Unidade (Total)</h3>
-      <%= pie_chart @vendas_por_unidade, donut: true, prefix: "R$ " %>
+  <%# --- SELEÇÃO DE ABAS --- %>
+  <div style="display: flex; background: #f1f5f9; padding: 6px; border-radius: 10px; margin-bottom: 25px; gap: 5px;" class="no-print">
+    <button onclick="alternarAba('aba-geral')" id="btn-aba-geral" style="flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #fff; color: #D71920; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">EVOLUÇÃO GERAL</button>
+    <button onclick="alternarAba('aba-unidades')" id="btn-aba-unidades" style="flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: transparent; color: #64748b;">DESEMPENHO POR UNIDADE</button>
+  </div>
+
+  <%# --- ABA 1: GERAL --- %>
+  <div id="aba-geral" class="conteudo-aba" style="display: block;">
+    <div style="background: white; padding: 25px; border-radius: 12px; min-width: 600px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+      <h3 style="color: #475569; font-size: 14px; margin-bottom: 20px; font-weight: bold; text-transform: uppercase;">
+        <%= @titulo_evolucao %>
+      </h3>
+      <%= line_chart @vendas_geral_diaria, prefix: "R$ ", colors: ["#D71920"], height: "280px", library: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } %>
+    </div>
+    
+    <div style="background: white; padding: 25px; border-radius: 12px; min-width: 600px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+      <h3 style="color: #475569; font-size: 14px; margin-bottom: 20px; font-weight: bold; text-transform: uppercase;">
+        <%= @titulo_tendencia %>
+      </h3>
+      <%= area_chart @vendas_unidades_mensal, prefix: "R$ ", height: "280px", library: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } } } %>
     </div>
   </div>
 
-  <%# 4. EVOLUÇÃO MENSAL POR UNIDADE %>
-  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px;">
-  <h3 style="color: #7D3C98; text-align: center;">Desempenho Mensal por Unidade (Anual)</h3>
-  
-  <%# Use @vendas_unidades_mensal aqui para manter a visão fixa de 12 meses %>
-  <%= area_chart @vendas_unidades_mensal, prefix: "R$ ", xtitle: "Meses", ytitle: "Faturamento" %>
-  </div>
-
-  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #ddd; margin-bottom: 30px;">
-  <h3 style="color: #7D3C98; text-align: center;">Produtos Mais Vendidos (Top 5)</h3>
-  <%= bar_chart @itens_mais_vendidos, title: "Top 5 Produtos Mais Vendidos", colors: ["#D71920"] %>
-  </div>
-  
-  <%# GRIDS POR UNIDADE %>
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-    <div style="background: #FFF3CD; padding: 25px; border-radius: 12px; border: 1px solid #ffeeba;">
-      <h3 style="margin: 0; font-size: 0.8em; color: #856404;">UNIDADE 1</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.3em; color: #333;">Matriz Centro</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #856404;"><%= number_to_currency(@vendas_matriz, unit: "R$ ", separator: ",", delimiter: ".") %></p>
+  <%# --- ABA 2: UNIDADES --- %>
+  <div id="aba-unidades" class="conteudo-aba" style="display: none;">
+    <div style="background: white; padding: 25px; border-radius: 12px; min-width: 600px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
+      <h3 style="color: #475569; font-size: 14px; margin-bottom: 20px;">Comparativo por Unidade</h3>
+      <%= column_chart @vendas_unidades_comparativo, prefix: "R$ ", stacked: true, height: "280px", library: { scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } }, plugins: { legend: { position: 'bottom' } } } %>
     </div>
-
-    <div style="background: #D1ECF1; padding: 25px; border-radius: 12px; border: 1px solid #bee5eb;">
-      <h3 style="margin: 0; font-size: 0.8em; color: #0c5460;">UNIDADE 2</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.3em; color: #333;">Pavilhão Novo</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #0c5460;"><%= number_to_currency(@vendas_pavilhao_novo, unit: "R$ ", separator: ",", delimiter: ".") %></p>
-    </div>
-
-    <div style="background: #E2E3E5; padding: 25px; border-radius: 12px; border: 1px solid #d6d8db;">
-      <h3 style="margin: 0; font-size: 0.8em; color: #383d41;">UNIDADE 3</h3>
-      <p style="margin: 5px 0 0; font-weight: bold; font-size: 1.4em; color: #333;">Pavilhão Antigo</p>
-      <p style="font-size: 1.2em; margin-top: 10px; color: #383d41;"><%= number_to_currency(@vendas_pavilhao_antigo, unit: "R$ ", separator: ",", delimiter: ".") %></p>
+    <div style="background: white; padding: 25px; border-radius: 12px; min-width: 600px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+      <h3 style="color: #475569; font-size: 14px; margin-bottom: 20px;">Participação de Mercado</h3>
+      <%= pie_chart @vendas_por_unidade, donut: true, prefix: "R$ ", height: "280px", library: { plugins: { legend: { position: 'bottom' } } } %>
     </div>
   </div>
 
-  <%= link_to "← VOLTAR AO PAINEL", root_path, style: "display: inline-block; margin-top: 40px; color: #7D3C98; text-decoration: none; font-weight: bold;" %>
-</div>
+  <%# --- 4. RANKINGS (DESIGN CORPORATIVO) --- %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+    
+    <%# RANKING FUNCIONÁRIOS %>
+    <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <h3 style="font-size: 14px; margin-top: 0; color: #475569; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Desempenho da Equipe</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <% @ranking_funcionarios.each_with_index do |func, idx| %>
+          <tr style="border-bottom: 1px solid #f8fafc;">
+            <td style="padding: 10px 0; color: #64748b; font-size: 12px; width: 30px;"><%= idx + 1 %>º</td>
+            <td style="padding: 10px 0; font-weight: 600; color: #1e293b;"><%= func.nome %></td>
+            <td style="padding: 10px 0; text-align: right; color: #10b981; font-weight: bold;"><%= number_to_currency(func.total_vendas, unit: "R$ ") %></td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+
+    <%# TOP PRODUTOS %>
+    <div style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <h3 style="font-size: 14px; margin-top: 0; color: #475569; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Produtos Mais Vendidos</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <% @itens_mais_vendidos.each_with_index do |p, idx| %>
+          <tr style="border-bottom: 1px solid #f8fafc;">
+            <td style="padding: 10px 0; color: #64748b; font-size: 12px; width: 30px;"><%= idx + 1 %>º</td>
+            <td style="padding: 10px 0; font-weight: 600; color: #1e293b;"><%= p.nome %></td>
+            <td style="padding: 10px 0; text-align: right;">
+              <span style="background: #eff6ff; color: #2563eb; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: bold;"><%= p.total_vendido.to_i %> unidades</span>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+  </div>
+
+<script>
+  function alternarAba(abaId) {
+    document.querySelectorAll('.conteudo-aba').forEach(el => el.style.display = 'none');
+    document.getElementById(abaId).style.display = 'block';
+    if (window.dispatchEvent) window.dispatchEvent(new Event('resize'));
+  }
+
+  // Ajusta o título do gráfico de tendência conforme o período selecionado
+  document.addEventListener('DOMContentLoaded', function() {
+    const periodoAtual = "<%= @periodo %>";
+    const titulos = {
+      'diario': 'Tendência Diária',
+      'semanal': 'Tendência Semanal',
+      'mensal': 'Tendência Mensal',
+      'anual': 'Tendência Anual'
+    };
+    const elTitulo = document.getElementById('titulo-tendencia');
+    if (elTitulo && titulos[periodoAtual]) {
+      elTitulo.innerText = titulos[periodoAtual];
+    }
+  });
+</script>

@@ -1,31 +1,21 @@
 require_relative "boot"
 
+# Isto carrega todos os componentes do Rails (ActiveRecord, ActionController, etc.)
 require "rails/all"
 
-# Require the gems listed in Gemfile, including any gems
-# you've limited to :test, :development, or :production.
+# Requer as gems listadas no Gemfile
 Bundler.require(*Rails.groups)
 
 module QueroLanches
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
+    # Carrega os padrões da versão 8.1
     config.load_defaults 8.1
 
-    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    # Configurações de autocarga de código
     config.autoload_lib(ignore: %w[assets tasks])
     
-    # Configurações de Idioma e Horário
+    # Configurações de localização e tempo
     config.i18n.default_locale = "pt-BR"
-    config.time_zone = 'Brasilia'
-    
-    # FORÇA O ACTIVE RECORD A USAR O HORÁRIO DA BAHIA/BRASÍLIA NO BANCO DE DADOS
-     config.active_record.default_timezone = :local
-
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.eager_load_paths << Rails.root.join("extras")
+    config.time_zone = 'America/Bahia'
   end
 end

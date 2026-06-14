@@ -1,109 +1,195 @@
 class EstoquesController < ApplicationController
-  before_action :set_produto, only: [:edit, :update]
+  before_action :authenticate_funcionario!
+  before_action :set_item_repor, only: [:edit, :update]
 
+  # Exibe o painel geral de saldos físicos
   def index
-    @produtos_venda = Produto.where(categoria: "Venda")
-    @insumos = Produto.where(categoria: "Insumo")
+    @produtos_venda = Produto.where(categoria: ["Venda", nil], estoque_controlado: true)
+    @insumos = Insumo.all
   end
 
-  # NOVO: Abre a página de Nova Entrada por Lote
+  # Prepara a tela de compra/entrada futura em lote
   def lote
-    @produtos = Produto.order(:nome) # Carrega todos os produtos para os selects
+    @opcoes_estoque = []
+    
+    Produto.where(categoria: ["Venda", nil]).order(:nome).each do |p|
+      @opcoes_estoque << { id: "PRODUTO-#{p.id}", nome: p.codigo.present? ? "[#{p.codigo}] #{p.nome.upcase} (CARDÁPIO)" : "#{p.nome.upcase} (CARDÁPIO)" }
+    end
+
+    Insumo.order(:nome).each do |i|
+      @opcoes_estoque << { id: "INSUMO-#{i.id}", nome: "[INSUMO] #{i.nome.upcase}" }
+    end
   end
 
-  # NOVO: Processa a lista inteira enviada pela tela
+ # Processa a entrada de quantidades em lote sem recadastrar o item
+
   def processar_lote
+
     unidade = params[:unidade]
-    itens = params[:itens] # Recebe o array de produtos e quantidades
+
+    itens = params[:itens]
+
+
 
     if unidade.blank?
+
       flash[:alert] = "Por favor, selecione a unidade de destino."
+
       redirect_to lote_estoques_path and return
+
     end
 
-    if itens.blank? || itens.values.all? { |i| i[:produto_id].blank? || i[:quantidade].to_f <= 0 }
-      flash[:alert] = "Adicione pelo menos um produto com quantidade válida."
+
+
+    if itens.blank? || itens.values.all? { |i| i[:global_id].blank? || i[:quantidade].to_f <= 0 }
+
+      flash[:alert] = "Adicione pelo menos um item com quantidade válida."
+
       redirect_to lote_estoques_path and return
+
     end
+
+
 
     contador_sucesso = 0
 
-    # Abre uma transação no banco: ou salva tudo certo, ou não salva nada se der erro
+
+
     ActiveRecord::Base.transaction do
+
+      # 1. Blindagem: Tenta buscar pelo ID (se for numérico) ou pelo Nome (se for texto)
+
+       # 1. Blindagem: Como a view agora envia sempre o ID (1, 2 ou 3), buscamos diretamente por ele.
+      unidade_obj = Unidade.find_by(id: unidade)
+
+      # 2. Proteção: Se o ID não existir, interrompemos a operação imediatamente.
+      if unidade_obj.nil?
+        raise "Unidade com ID '#{unidade}' não encontrada no sistema. Verifique o cadastro."
+      end
+
+      
       itens.each_value do |item|
-        produto_id = item[:produto_id]
+
+        global_id = item[:global_id]
+
         quantidade = item[:quantidade].to_f
 
-        next if produto_id.blank? || quantidade <= 0
 
-        produto = Produto.find(produto_id)
 
-        # Atualiza a quantidade na unidade correspondente
-        case unidade
-        when 'centro'
-          produto.increment!(:estoque_centro, quantidade)
-        when 'pavilhao_novo'
-          produto.increment!(:estoque_pavilhao_novo, quantidade)
-        when 'pavilhao_antigo'
-          produto.increment!(:estoque_pavilhao_antigo, quantidade)
+        next if global_id.blank? || quantidade <= 0
+
+
+
+        tipo, id_real = global_id.split('-')
+
+        objeto_alvo = tipo == "PRODUTO" ? Produto.find(id_real) : Insumo.find(id_real)
+
+
+
+        # O case agora reconhece os IDs numéricos (como '2') e os nomes ('centro')
+
+        coluna = case unidade.to_s
+
+                 when '1', 'centro'          then :estoque_centro
+
+                 when '2', 'pavilhao_novo'   then :estoque_pavilhao_novo
+
+                 when '3', 'pavilhao_antigo' then :estoque_pavilhao_antigo
+
+                 end
+
+
+
+        if coluna && objeto_alvo.respond_to?(coluna)
+
+          novo_valor = (objeto_alvo.send(coluna).to_f + quantidade).round(3)
+
+          objeto_alvo.update_column(coluna, novo_valor)
+
         end
 
-        # Cria o log na tabela que você já possui
+
+
+        polymorphic_params = objeto_alvo.is_a?(Produto) ? { produto_id: objeto_alvo.id } : { insumo_id: objeto_alvo.id }
+
+
+
+        # Registra a trilha forense usando o objeto validado unidade_obj
+
         Movimentacao.create!(
-          produto: produto,
-          funcionario: current_funcionario,
-          quantidade: quantidade,
-          tipo_movimentacao: 'entrada',
-          unidade: unidade.upcase.gsub('_', ' ')
+
+          {
+
+            funcionario: current_funcionario,
+
+            quantidade: quantidade,
+
+            tipo_movimentacao: 'ENTRADA',
+
+            unidade: unidade_obj
+
+          }.merge(polymorphic_params)
+
         )
 
+
+
         contador_sucesso += 1
+
       end
+
     end
 
-    flash[:notice] = "Sucesso! Foram repostos #{contador_sucesso} itens no estoque do(a) #{unidade.upcase.gsub('_', ' ')}."
+
+
+    flash[:notice] = "Sucesso! Foram repostos #{contador_sucesso} itens na unidade #{unidade.upcase.gsub('_', ' ')}."
+
     redirect_to estoques_path
+
   rescue => e
+
     flash[:alert] = "Ocorreu um erro ao processar o lote: #{e.message}"
+
     redirect_to lote_estoques_path
-  end
 
-  def edit
-  end
+  end 
 
-  def update
-    if @produto.update(estoque_params)
-      redirect_to estoques_path, notice: "Quantidades do estoque updated com sucesso!"
-    else
-      render :edit
-    end
-  end
-
-  # Mantemos o repor antigo caso alguma outra tela ainda use ele de forma isolada
+  # Reposição rápida direto botão da tabela de estoque
   def repor
-    @produto = Produto.find(params[:produto_id])
     quantidade_adicional = params[:quantidade].to_f
-    unidade = params[:unidade]
+    unidade_nome = params[:unidade] || params[:unidade_destino]
+    
+    if params[:produto_id].present?
+      @item = Produto.find(params[:produto_id])
+      polymorphic_params = { produto_id: @item.id }
+    elsif params[:insumo_id].present?
+      @item = Insumo.find(params[:insumo_id])
+      polymorphic_params = { insumo_id: @item.id }
+    end
 
-    if quantidade_adicional > 0
-      case unidade
-      when 'centro'
-        @produto.increment!(:estoque_centro, quantidade_adicional)
-      when 'pavilhao_novo'
-        @produto.increment!(:estoque_pavilhao_novo, quantidade_adicional)
-      when 'pavilhao_antigo'
-        @produto.increment!(:estoque_pavilhao_antigo, quantidade_adicional)
-      end
+    if @item && quantidade_adicional > 0
+      coluna = case unidade_nome
+               when 'centro' then :estoque_centro
+               when 'pavilhao_novo' then :estoque_pavilhao_novo
+               when 'pavilhao_antigo' then :estoque_pavilhao_antigo
+               end
+
+      novo_valor = (@item.send(coluna).to_f + quantidade_adicional).round(3)
+      @item.update_column(coluna, novo_valor)
+
+      # CORREÇÃO AQUI: Buscamos o objeto unidade antes de criar a movimentação
+      unidade_obj = Unidade.find_by(nome: unidade_nome.gsub('_', ' ').titleize)
 
       Movimentacao.create!(
-        produto: @produto,
-        funcionario: current_funcionario,
-        quantidade: quantidade_adicional,
-        tipo_movimentacao: 'entrada',
-        unidade: unidade.upcase.gsub('_', ' ')
+        {
+          funcionario: current_funcionario,
+          quantidade: quantidade_adicional,
+          tipo_movimentacao: 'ENTRADA',
+          unidade: unidade_obj # Agora passamos o objeto (relação), não a string
+        }.merge(polymorphic_params)
       )
 
-      flash[:notice] = "Estoque de #{@produto.nome} abastecido com +#{quantidade_adicional} no #{unidade.upcase}!"
+      flash[:notice] = "Estoque de #{@item.nome.upcase} abastecido com +#{quantidade_adicional}!"
     else
       flash[:alert] = "Insira uma quantidade válida."
     end
@@ -111,17 +197,72 @@ class EstoquesController < ApplicationController
     redirect_to estoques_path
   end
 
+  def transferir
+    origem = params[:unidade_origem]
+    destino = params[:unidade_destino]
+    quantidade = params[:quantidade].to_f
+
+    if origem.blank? || destino.blank?
+      flash[:alert] = "Selecione origem e destino."
+      redirect_to estoques_path and return
+    end
+
+    # Identificar o item
+    if params[:produto_id].present?
+      @item = Produto.find(params[:produto_id])
+      polymorphic_params = { produto_id: @item.id }
+    elsif params[:insumo_id].present?
+      @item = Insumo.find(params[:insumo_id])
+      polymorphic_params = { insumo_id: @item.id }
+    end
+
+    if origem == destino
+      flash[:alert] = "Origem e destino iguais."
+    elsif @item && quantidade > 0
+      ActiveRecord::Base.transaction do
+        colunas = { 'centro' => :estoque_centro, 'pavilhao_novo' => :estoque_pavilhao_novo, 'pavilhao_antigo' => :estoque_pavilhao_antigo }
+
+        @item.update_column(colunas[origem], (@item.send(colunas[origem]).to_f - quantidade).round(3))
+        @item.update_column(colunas[destino], (@item.send(colunas[destino]).to_f + quantidade).round(3))
+
+        # CORREÇÃO AQUI: Buscamos os objetos para passar para a Movimentação
+        unidade_origem_obj = Unidade.find_by(nome: origem.gsub('_', ' ').titleize)
+        unidade_destino_obj = Unidade.find_by(nome: destino.gsub('_', ' ').titleize)
+
+        Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'SAIDA_TRANSFERENCIA', unidade: unidade_origem_obj))
+        Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'ENTRADA_TRANSFERENCIA', unidade: unidade_destino_obj))
+      end
+      flash[:notice] = "Transferência concluída!"
+    else
+      flash[:alert] = "Dados inválidos."
+    end
+    redirect_to estoques_path
+  end
+  
+  def edit
+    # Abre o formulário compacto para alteração/ajuste manual de saldos
+  end
+
+  def update
+    colunas = params.require(:item).permit(:estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo, :estoque_controlado)
+    if @item.update(colunas)
+      redirect_to estoques_path, notice: "Inventário atualizado com sucesso!"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   def auditoria
-    @movimentacoes = Movimentacao.all.order(created_at: :desc)
+    @movimentacoes = Movimentacao.includes(:produto, :insumo, :funcionario).all.order(created_at: :desc).limit(500)
   end
 
   private
 
-  def set_produto
-    @produto = Produto.find(params[:id])
-  end
-
-  def estoque_params
-    params.require(:produto).permit(:estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo)
+  def set_item_repor
+    if params[:tipo] == "Insumo"
+      @item = Insumo.find(params[:id])
+    else
+      @item = Produto.find(params[:id])
+    end
   end
 end

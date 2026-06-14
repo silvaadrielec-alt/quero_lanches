@@ -1,16 +1,25 @@
-<h2>Resend confirmation instructions</h2>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh; background-color: #fdf8f5; font-family: sans-serif; box-sizing: border-box; padding: 20px;">
+  <div class="card-principal" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); width: 100%; max-width: 450px; border: 2px solid #D71920 !important; text-align: center; box-sizing: border-box;">
+    
+    <div style="margin-bottom: 25px; text-align: center;">
+      <h2 style="color: #D71920; margin: 0; font-weight: bold; font-size: 1.6em; letter-spacing: 0.5px; text-transform: uppercase;">Reenviar Confirmação</h2>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "funcionarios/shared/error_messages", resource: resource %>
+    <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
+      <%= render "funcionarios/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %></p>
+      <div style="margin-bottom: 22px; text-align: left; display: flex; flex-direction: column;">
+        <%= f.label :email, "E-mail de Cadastro", style: "font-size: 12px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), style: "width: 100%; padding: 11px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; box-sizing: border-box;" %>
+      </div>
+
+      <div>
+        <%= f.submit "Reenviar instruções", style: "width: 100%; background: #D71920; color: white; border: none; padding: 13px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; box-sizing: border-box;" %>
+      </div>
+    <% end %>
+
+    <div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+      <%= render "funcionarios/shared/links" %>
+    </div>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Resend confirmation instructions" %>
-  </div>
-<% end %>
-
-<%= render "funcionarios/shared/links" %>
+</div>

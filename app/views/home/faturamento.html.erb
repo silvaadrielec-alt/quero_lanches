@@ -1,82 +1,94 @@
-<div style="margin-bottom: 30px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;" class="no-print">
+<%# BARRA DE FILTROS DE TEMPO %>
+<div style="margin-bottom: 30px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-family: sans-serif;" class="no-print">
   <%= link_to "DIÁRIO", faturamento_path(periodo: 'diario'), class: "btn-filtro" %>
   <%= link_to "SEMANAL", faturamento_path(periodo: 'semanal'), class: "btn-filtro" %>
   <%= link_to "MENSAL", faturamento_path(periodo: 'mensal'), class: "btn-filtro" %>
   <%= link_to "TRIMESTRAL", faturamento_path(periodo: 'trimestral'), class: "btn-filtro" %>
   <%= link_to "SEMESTRAL", faturamento_path(periodo: 'semestral'), class: "btn-filtro" %>
   <%= link_to "ANUAL", faturamento_path(periodo: 'anual'), class: "btn-filtro" %>
-<a href="javascript:void(0)" 
-   onclick="setTimeout(function(){ window.print(); }, 500);" 
-   data-turbo="false"
-   class="no-print" 
-   style="background: #333; color: white; padding: 10px 25px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; border: 2px solid #555;">
-    GERAR PDF / IMPRIMIR
-</a>
+  
+  <a href="javascript:void(0)" 
+     onclick="setTimeout(function(){ window.print(); }, 500);" 
+     data-turbo="false"
+     class="no-print" 
+     style="background: #333; color: white; padding: 10px 25px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-left: 10px; display: inline-block; cursor: pointer; border: 2px solid #555; font-size: 14px;">
+      GERAR PDF / IMPRIMIR
+  </a>
 </div>
 
 <div style="text-align: center; margin-top: 30px; font-family: sans-serif;">
-  <h1 style="color: #D71920;">Resumo de Faturamento - Hoje</h1>
+  
+  <%# 🌟 TÍTULO DINÂMICO: Atualiza o texto na tela de acordo com o botão clicado %>
+  <h1 style="color: #D71920; font-weight: bold;">
+    Resumo de Faturamento - <%= params[:periodo].present? ? params[:periodo].to_s.upcase.gsub('DIARIO', 'HOJE') : 'HOJE' %>
+  </h1>
 
-   <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap;">
-    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-top: 8px solid #2196f3;">
-      <span style="color: #666; font-weight: bold;">TOTAL VENDIDO</span>
-      <h2 style="color: #0d47a1; font-size: 2.2em; margin: 15px 0;"><%= number_to_currency(@total_faturado, unit: "R$ ", separator: ",", delimiter: ".") %></h2>
-      <p style="color: #666;"><%= @vendas_hoje.count %> pedidos realizados</p>
+  <%# CARDS DE VALORES COMPACTOS %>
+  <div style="display: flex; gap: 20px; justify-content: center; margin-top: 40px; flex-wrap: wrap;">
+    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.04); border-top: 8px solid #2196f3; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+      <span style="color: #64748b; font-weight: bold; font-size: 12px; letter-spacing: 0.5px;">TOTAL VENDIDO</span>
+      <h2 style="color: #0d47a1; font-size: 2.2em; margin: 15px 0; font-weight: bold;"><%= number_to_currency(@total_faturado, unit: "R$ ", separator: ",", delimiter: ".") %></h2>
+      <p style="color: #475569; font-weight: 500; font-size: 14px;"><%= @vendas_hoje.count %> pedidos realizados</p>
     </div>
 
-    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-top: 8px solid #4caf50;">
-      <span style="color: #666; font-weight: bold;">LUCRO ESTIMADO</span>
-      <h2 style="color: #1b5e20; font-size: 2.2em; margin: 15px 0;"><%= number_to_currency(@lucro_estimado, unit: "R$ ", separator: ",", delimiter: ".") %></h2>
+    <div style="background: white; border-radius: 15px; padding: 25px; width: 280px; box-shadow: 0 8px 16px rgba(0,0,0,0.04); border-top: 8px solid #4caf50; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+      <span style="color: #64748b; font-weight: bold; font-size: 12px; letter-spacing: 0.5px;">LUCRO ESTIMADO</span>
+      <h2 style="color: #1b5e20; font-size: 2.2em; margin: 15px 0; font-weight: bold;"><%= number_to_currency(@lucro_estimado, unit: "R$ ", separator: ",", delimiter: ".") %></h2>
       <% margem = (@total_faturado > 0) ? ((@lucro_estimado / @total_faturado) * 100).round(1) : 0 %>
-      <p style="color: #4caf50; font-weight: bold;">Margem de <%= margem %>%</p>
+      <p style="color: #4caf50; font-weight: bold; font-size: 14px;">Margem de <%= margem %>%</p>
     </div>
   </div>
 
-  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin: 30px auto; max-width: 1000px;" class="no-print">
-  <h3 style="color: #D71920; margin-bottom: 20px; text-align: center;">📈 Evolução das Vendas</h3>
-  
-  <% if @vendas_por_dia.any? %>
-    <%= line_chart @vendas_por_dia, prefix: "R$ ", download: {filename: "grafico_vendas"}, library: { backgroundColor: "#ffffff" } %>
-  <% else %>
-    <p style="text-align: center; color: #999; padding: 20px;">Sem dados de vendas para exibir o gráfico neste período.</p>
-  <% end %>
-</div>
+  <%# SEÇÃO DO GRÁFICO CHARTKICK %>
+  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin: 30px auto; max-width: 1000px; border: 1px solid #e2e8f0;" class="no-print">
+    <h3 style="color: #D71920; margin-bottom: 20px; text-align: center; font-weight: bold;"> Evolução das Vendas</h3>
+    
+    <% if @vendas_por_dia.any? %>
+      <%= line_chart @vendas_por_dia, prefix: "R$ ", download: {filename: "grafico_vendas"}, library: { backgroundColor: "#ffffff" } %>
+    <% else %>
+      <p style="text-align: center; color: #94a3b8; padding: 30px; font-weight: 500;">Sem dados de vendas para exibir o gráfico neste período.</p>
+    <% end %>
+  </div>
 
-<div style="max-width: 600px; margin: 40px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" class="no-print">
-  <h3 style="color: #D71920; border-bottom: 2px solid #f2f2f2; padding-bottom: 10px;">🏆 Itens Mais Vendidos (<%= params[:periodo]&.capitalize || "Hoje" %>)</h3>
-  <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-    <% if @mais_vendidos.any? %>
-      <% @mais_vendidos.each do |item| %>
-        <tr style="border-bottom: 1px solid #eee;">
-          <%# O &.nome evita erro se o produto tiver sido deletado do banco %>
-          <td style="padding: 10px; text-align: left; font-weight: bold;"><%= item.produto&.nome || "Produto não encontrado" %></td>
-          <td style="padding: 10px; text-align: right; color: #666;"><%= item.total_qtd.to_i %> vendidos</td>
+  <%# RANKING DE ITENS MAIS VENDIDOS %>
+  <div style="max-width: 600px; margin: 40px auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;" class="no-print">
+    <h3 style="color: #D71920; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-top: 0; font-weight: bold;">
+       Itens Mais Vendidos (<%= params[:periodo].present? ? params[:periodo].to_s.capitalize : "Hoje" %>)
+    </h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <% if @mais_vendidos.any? %>
+        <% @mais_vendidos.each do |item| %>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 10px; text-align: left; font-weight: bold; color: #1e293b;">
+              <%= item.produto.present? ? item.produto.nome.upcase : "PRODUTO REMOVIDO" %>
+            </td>
+            <td style="padding: 12px 10px; text-align: right; color: #475569; font-weight: bold; font-size: 15px;">
+              <%= item.total_qtd.to_i %> <span style="font-size: 12px; color: #94a3b8; font-weight: normal;">unidades</span>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="2" style="padding: 30px; color: #94a3b8; text-align: center; font-weight: 500;">Nenhuma venda registrada neste período.</td>
         </tr>
       <% end %>
-    <% else %>
-      <tr>
-        <td colspan="2" style="padding: 20px; color: #999; text-align: center;">Nenhuma venda registrada neste período.</td>
-      </tr>
-    <% end %>
-  </table>
-</div>
+    </table>
+  </div>
 
-  <div style="margin-top: 50px;">
-    <%= link_to "VOLTAR AO PAINEL", root_path, style: "text-decoration: none; padding: 12px 25px; background: #666; color: white; border-radius: 10px; font-weight: bold;" %>
+  <div style="margin-top: 50px;" class="no-print">
+    <%= link_to "VOLTAR AO PAINEL", root_path, style: "text-decoration: none; padding: 12px 30px; background: #475569; color: white; border-radius: 10px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" %>
   </div>
 </div>
 
 <style>
-  .btn-filtro { text-decoration: none; background: #f2f2f2; color: #333; padding: 8px 15px; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-  .btn-filtro:hover { background: #D71920; color: white; }
+  .btn-filtro { text-decoration: none; background: #f1f5f9; color: #334155; padding: 10px 18px; border-radius: 8px; font-weight: bold; transition: 0.2s; font-size: 13px; border: 1px solid #cbd5e1; }
+  .btn-filtro:hover { background: #D71920; color: white; border-color: #D71920; }
 
- @media print {
-    /* Esconde o menu de botões e navegação no PDF */
+  @media print {
     .no-print, nav, .navbar, .navbar-quero, .btn-filtro { 
       display: none !important; 
     }
     
-    /* FORÇA AS CORES, FUNDOS E O GRÁFICO EM TUDO */
     * { 
       -webkit-print-color-adjust: exact !important; 
       print-color-adjust: exact !important; 
@@ -87,20 +99,17 @@
       background-color: white !important;
     }
 
-    /* Garante que o gráfico (SVG ou Canvas) seja tratado como prioridade */
     canvas, svg {
-    display: block !important;
-    position: relative !important;
-    width: 100% !important;
-  }
+      display: block !important;
+      position: relative !important;
+      width: 100% !important;
+    }
   
-  /* ADICIONE ESTE BLOCO AQUI: */
- .chart-container, div[id^="chart-"], .chartkick-chart {
-   display: block !important;
-  visibility: visible !important;
-   opacity: 1 !important;
-   page-break-inside: avoid !important;
-  }
-  }
+    .chart-container, div[id^="chart-"], .chartkick-chart {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      page-break-inside: avoid !important;
+    }
   }
 </style>

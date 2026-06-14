@@ -1,7 +1,21 @@
-<p>Hello <%= @email %>!</p>
+<div style="font-family: sans-serif; max-width: 550px; margin: 0 auto; padding: 20px; border: 2px solid #D71920; border-radius: 12px;">
+  <h2 style="color: #D71920; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 0;">Alteração de E-mail de Acesso</h2>
+  
+  <p style="color: #334155; font-size: 15px; line-height: 1.5;">
+    Olá, <strong><%= @email %></strong>!
+  </p>
+  
+  <% if @resource.try(:unconfirmed_email?) %>
+    <p style="color: #475569; font-size: 14px; line-height: 1.5;">
+      Estamos entrando em contato para notificar que o seu e-mail de acesso ao sistema está em processo de mudança para: <strong style="color: #D71920;"><%= @resource.unconfirmed_email %></strong>.
+    </p>
+  <% else %>
+    <p style="color: #475569; font-size: 14px; line-height: 1.5;">
+      Estamos entrando em contato para confirmar que o seu e-mail de acesso ao sistema foi alterado com sucesso para: <strong style="color: #1e293b;"><%= @resource.email %></strong>.
+    </p>
+  <% end %>
 
-<% if @resource.try(:unconfirmed_email?) %>
-  <p>We're contacting you to notify you that your email is being changed to <%= @resource.unconfirmed_email %>.</p>
-<% else %>
-  <p>We're contacting you to notify you that your email has been changed to <%= @resource.email %>.</p>
-<% end %>
+  <p style="color: #64748b; font-size: 12px; margin-top: 25px;">
+    Se você não reconhece essa alteração, fale imediatamente com a Gerência da Cantina.
+  </p>
+</div>

@@ -1,26 +1,45 @@
 class Movimentacao < ApplicationRecord
-  belongs_to :produto
-  belongs_to :funcionario
+  # Define que este model usa a tabela 'movimentacaos'
+  self.table_name = 'movimentacaos'
 
-  # Comentamos a linha abaixo para que as unidades sejam independentes por enquanto.
-  # after_create :processar_transferencia
+  # Relacionamentos
+  belongs_to :funcionario
+  belongs_to :produto, optional: true
+  belongs_to :insumo, optional: true
+  belongs_to :unidade, optional: true
+  
+  # Validação para garantir que o log nunca seja criado sem nenhum destino
+  validate :deve_ter_produto_ou_insumo
+
+  # --- MÉTODOS DE CÁLCULO FINANCEIRO ---
+
+  def valor_custo
+  # Garante que compara com string minúscula para não falhar
+  if insumo.present? && tipo_movimentacao.to_s.downcase == 'entrada'
+    (quantidade.to_f * insumo.preco_custo.to_f)
+  elsif produto.present? && tipo_movimentacao.to_s.downcase == 'entrada'
+    (quantidade.to_f * produto.valor_unitario.to_f)
+  else
+    0.0
+  end
+end
+
+def valor_receita
+  # Ajustado para aceitar várias formas de saída
+  if produto.present? && (tipo_movimentacao.to_s.downcase.include?('saida') || tipo_movimentacao.to_s.downcase == 'venda')
+    (quantidade.to_f * produto.preco_venda.to_f)
+  elsif insumo.present? && (tipo_movimentacao.to_s.downcase.include?('saida') || tipo_movimentacao.to_s.downcase == 'adicional')
+    (quantidade.to_f * insumo.preco_venda.to_f)
+  else
+    0.0
+  end
+end
 
   private
 
-  # Comentamos todo o método para que ele não seja executado ao criar uma movimentação.
-  # def processar_transferencia
-  #   # 1. Retira do estoque do Centro
-  #   novo_estoque_centro = self.produto.estoque_centro.to_i - self.quantidade
-  #   self.produto.update(estoque_centro: novo_estoque_centro)
-  #
-  #   # 2. Adiciona na unidade de destino
-  #   case self.destino
-  #   when "Pavilhão Novo"
-  #     novo_valor = self.produto.estoque_pavilhao_novo.to_i + self.quantidade
-  #     self.produto.update(estoque_pavilhao_novo: novo_valor)
-  #   when "Pavilhão Antigo"
-  #     novo_valor = self.produto.estoque_pavilhao_antigo.to_i + self.quantidade
-  #     self.produto.update(estoque_pavilhao_antigo: novo_valor)
-  #   end
-  # end
+  def deve_ter_produto_ou_insumo
+    if produto_id.blank? && insumo_id.blank?
+      errors.add(:base, "A movimentação de estoque deve estar vinculada a um Produto ou a um Insumo.")
+    end
+  end
 end

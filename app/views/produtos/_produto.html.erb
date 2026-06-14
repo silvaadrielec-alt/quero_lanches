@@ -1,16 +1,46 @@
-<div id="<%= dom_id produto %>" style="margin-bottom: 15px; font-size: 1.1em;">
-  <p>
-    <strong>Item:</strong>
-    <%= produto.nome %>
-  </p>
+<div id="<%= dom_id produto %>" style="margin-bottom: 15px; font-size: 15px; font-family: sans-serif; text-align: left; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;">
+  
+  <%# 1. NOME DO ITEM %>
+  <div>
+    <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Item Cadastrado</span>
+    <strong style="font-size: 1.2em; color: #1e293b; text-transform: uppercase;"><%= produto.nome %></strong>
+  </div>
 
-  <p>
-    <strong>Preço:</strong>
-    <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
-  </p>
+  <%# 2. CUSTO DE PRODUÇÃO COM REGRA INTERNA %>
+  <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+    <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Custo de Produção</span>
+    <% 
+      custo_exibido = produto.valor_unitario.to_f > 0 ? produto.valor_unitario.to_f : produto.composicoes.sum { |c| 
+        qtd = c.quantidade.to_f
+        preco_insumo = c.insumo.preco_venda.to_f 
+        unidade = c.unidade_medida_uso.to_s.downcase
+        
+        if ['gramas', 'ml'].include?(unidade)
+          (qtd / 1000.0) * preco_insumo
+        elsif ['unidade', 'fatia', 'rodela', 'folha'].include?(unidade)
+          fator = c.insumo.media_unidades_kg.to_f > 0 ? c.insumo.media_unidades_kg.to_f : 1.0
+          (qtd / fator) * preco_insumo
+        else
+          qtd * preco_insumo
+        end
+      }
+    %>
+    <strong style="font-size: 1.15em; color: #b45309;"><%= number_to_currency(custo_exibido, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+  </div>
 
-  <p>
-    <strong>Em estoque:</strong>
-    <%= produto.estoque %> unidades
-  </p>
+  <%# 🌟 3. AJUSTADO: QUANTIDADE GLOBAL DINÂMICA OU SELEÇÃO DE FLUXO %>
+  <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+    <span style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 3px; letter-spacing: 0.3px;">Rastreamento de Saldo</span>
+    <% if produto.composicoes.any? %>
+      <strong style="font-size: 1.1em; color: #64748b; font-style: italic; font-weight: 600;">
+        Fluido por Matéria-Prima
+      </strong>
+    <% else %>
+      <% total_filiais = produto.estoque_centro.to_f + produto.estoque_pavilhao_novo.to_f + produto.estoque_pavilhao_antigo.to_f %>
+      <strong style="font-size: 1.1em; color: #1e293b;">
+        <%= number_with_precision(total_filiais, precision: 0) %> 
+        <span style="font-size: 13px; font-weight: normal; color: #475569;"><%= produto.unidade_medida.present? ? produto.unidade_medida : 'unidades' %> globais</span>
+      </strong>
+    <% end %>
+  </div>
 </div>

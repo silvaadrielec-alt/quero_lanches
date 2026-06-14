@@ -2,105 +2,247 @@
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-<%# CORREÇÃO CSS: Força o Tom Select a ignorar o limite da tabela e ficar por cima de tudo %>
 <style>
-  /* Garante que a tabela ou as linhas não cortem o menu suspenso */
   #tabela-lote, .linha-item, td {
     overflow: visible !important;
   }
-  
-  /* Garante que o menu suspenso do Tom Select flutue acima de qualquer outro elemento */
   .ts-dropdown {
     z-index: 9999 !important;
     position: absolute !important;
   }
+  .ts-control {
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    border: 1px solid #ccc !important;
+    font-size: 14px !important;
+    background: #fff !important;
+    color: #1e293b !important;
+    font-weight: 500 !important;
+  }
 </style>
 
-<div class="container-estoque" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
-  
-  <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <%= link_to "← Voltar para Estoque", estoques_path, style: "color: #0000FF; text-decoration: underline; font-weight: bold;" %>
+<%# --- MODAL DE AUTORIZAÇÃO FINANCEIRA PREMIUM --- %>
+<div id="modal-autorizacao-lote" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; box-sizing: border-box; padding: 0 15px;">
+  <div style="background: white; padding: 35px 30px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); width: 100%; max-width: 400px; text-align: center; font-family: sans-serif; box-sizing: border-box; border: 1px solid #e2e8f0;">
+    <h3 style="color: #D71920; margin-top: 0; margin-bottom: 8px; font-weight: bold; font-size: 1.2em; text-transform: uppercase; letter-spacing: 0.5px;">Autorização do Gerente</h3>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 25px; line-height: 1.4;">Confirme seu código de segurança de administrador para desbloquear a troca de unidade do lote:</p>
+    
+    <div style="position: relative; margin-bottom: 25px; width: 100%;">
+      <input type="password" id="input-pin-lote" maxlength="6" placeholder="••••••" style="width: 100%; padding: 12px 75px 12px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1.5em; text-align: center; letter-spacing: 5px; outline: none; box-sizing: border-box; background: #f8fafc; color: #1e293b; font-weight: bold;">
+      <button type="button" onclick="alternarVisibilidadePinLote()" id="btn-olhinho-lote" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 11px; font-weight: bold; color: #64748b; cursor: pointer; padding: 0; line-height: 1; outline: none; text-transform: uppercase; letter-spacing: 0.5px;">
+        Mostrar
+      </button>
+    </div>
+    
+    <div style="display: flex; gap: 12px; justify-content: center; align-items: stretch; width: 100%; box-sizing: border-box;">
+      <button type="button" onclick="fecharModalLote()" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 11px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Cancelar</button>
+      <button type="button" onclick="processarPinLote()" style="background: #D71920; color: white; border: none; padding: 11px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; font-size: 13px; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.18); text-transform: uppercase; letter-spacing: 0.5px;">Confirmar</button>
+    </div>
   </div>
+</div>
 
-  <h2 style="color: #333; font-weight: bold; border-bottom: 2px solid #D71920; padding-bottom: 10px; text-align: left;">
-    Nova Entrada de Estoque (Por Lote)
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 850px; margin: 20px auto 15px auto; padding: 0 10px; box-sizing: border-box; text-align: left; font-family: sans-serif;">
+  <%= link_to estoques_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← VOLTAR PARA REPOSIÇÃO
+  <% end %>
+</div>
+
+<%# CARD DE LOTE COM BORDA VERMELHA OFICIAL CORPORATIVA %>
+<div class="card-principal" style="max-width: 850px; margin: 0 auto 40px auto; padding: 35px; border-radius: 12px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important;">
+  
+  <h2 style="color: #1e293b; font-weight: bold; border-bottom: 2px solid #D71920; padding-bottom: 12px; text-align: left; margin-top: 0; font-size: 1.6em; text-transform: uppercase; letter-spacing: 0.5px;">
+    Entrada de Estoque por Lote
   </h2>
   
-  <p style="color: #666; font-size: 0.95em; margin-bottom: 25px; text-align: left;">
-    Use esta tela para dar entrada em várias mercadorias de uma só vez (ex: compras com fornecedores). Selecione a unidade de destino e liste os produtos abaixo.
-  </p>
+  <%# 🌟 ORIENTAÇÃO DE CADASTRO COLETIVO %>
+  <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 15px 18px; border-radius: 8px; margin-top: 15px; margin-bottom: 25px; text-align: left; box-sizing: border-box;">
+    <strong style="color: #14532d; font-size: 13px; display: block; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;">
+        MOVIMENTAÇÃO COLETIVA DE FORNECEDORES
+    </strong>
+    <p style="margin: 0; font-size: 12px; color: #166534; font-style: italic; font-weight: 500; line-height: 1.4;">
+      Utilize esta tela para dar **entrada em massa de Notas Fiscais ou compras de insumos/produtos**. Selecione a unidade destino e liste as quantidades de entrada para registrar as movimentações financeiras e de estoque em lote.
+    </p>
+  </div>
 
-  <%= form_with url: processar_lote_estoques_path, method: :post, local: true do |f| %>
+  <%= form_with url: processar_lote_estoques_path, method: :post, id: "form-lote-geral", local: true do |f| %>
     
-    <%# --- Caixinha Destacada em Roxo/Lilás Original --- %>
-    <div style="background: #f5eef8; padding: 20px; border-radius: 12px; border-left: 6px solid #9b59b6; margin-bottom: 25px; text-align: left;">
-      <%= f.label :unidade, "Unidade de Destino (Para onde vão esses produtos?)", style: "display: block; font-weight: bold; color: #7D3C98; margin-bottom: 8px;" %>
-      <%= f.select :unidade, [
-            ['Matriz Centro', 'centro'],
-            ['Pavilhão Novo', 'pavilhao_novo'],
-            ['Pavilhão Antigo', 'pavilhao_antigo']
-          ], { prompt: "Selecione a unidade de destino..." }, 
-          required: true,
-          style: "width: 100%; max-width: 400px; padding: 12px; border-radius: 8px; border: 2px solid #9b59b6; font-size: 15px; font-weight: bold;" %>
+    <%# 🔒 BLOCO DE UNIDADE INTELIGENTE WITH DEFENSA CONTRA ERROS %>
+    <% unidade_padrao = current_funcionario&.unidade || "centro" %>
+
+    <div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 6px solid #D71920; margin-bottom: 35px; text-align: left; border-top: 1px solid #ffedd5; border-right: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5; box-sizing: border-box; border-bottom-width: 2px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; width: 100%;">
+        <%= f.label :unidade, "Unidade / Posto de Destino", style: "font-size: 11px; color: #D71920; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; margin: 0;" %>
+        <button type="button" onclick="solicitarTrocaUnidadeLote()" style="background: none; border: none; color: #007bff; text-decoration: none; font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; padding: 0; outline: none; letter-spacing: 0.3px;">[ Alterar Unidade ]</button>
+      </div>
+
+      <%# Box cinza travado de visualização premium %>
+      <div id="box-lote-travado" style="width: 100%; max-width: 450px; padding: 11px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; background-color: #f1f5f9; color: #1e293b; font-weight: bold; text-transform: uppercase; display: block; border-bottom: 2px solid #cbd5e1;">
+        <span id="txt-lote-unidade"><%= unidade_padrao.respond_to?(:nome) ? unidade_padrao.nome.to_s.humanize : unidade_padrao.to_s.humanize %></span><span style="font-weight: normal; color: #64748b; font-size: 13px; text-transform: none;">(Unidade Vinculada)</span>
+      </div>
+
+      <%# Campo oculto real %>
+      <%= f.hidden_field :unidade, id: "hidden-lote-unidade-input", value: unidade_padrao.respond_to?(:id) ? unidade_padrao.id : unidade_padrao %>
+
+      <%# Seletor ocultado destravável usando select_tag alternativo para evitar colisão %>
+      <div id="wrapper-lote-select" style="display: none; width: 100%;">
+        <%= select_tag :unidade_lote_temporaria, options_for_select([['Matriz Centro', 1], ['Pavilhão Novo', 2], ['Pavilhão Antigo', 3]], unidade_padrao), id: "select-lote-real", onchange: "sincronizarLoteUnidade(this.value)", style: "width: 100%; max-width: 450px; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; font-weight: bold; background: #fff; height: 41px; box-sizing: border-box; outline: none; color: #1e293b;" %>
+      </div>
     </div>
 
-    <%# --- GRADE DE ITENS (O LOTE) --- %>
-    <h3 style="color: #333; font-size: 1.1em; font-weight: bold; margin-bottom: 10px; text-align: left;">Itens do Lote</h3>
+    <%# --- GRADE DE ITENS --- %>
+    <h3 style="color: #1e293b; font-size: 13px; font-weight: bold; margin-bottom: 15px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Itens do Lote</h3>
     
-    <table id="tabela-lote" style="width: 100%; border-collapse: collapse; margin-bottom: 15px; text-align: left; overflow: visible !important;">
-      <thead>
-        <tr style="background: #D71920; color: white;">
-          <th style="padding: 12px; width: 65%; border-top-left-radius: 8px;">Produto / Insumo (Digite Nome ou Código)</th>
-          <th style="padding: 12px; width: 25%;">Qtd. Entrada</th>
-          <th style="padding: 12px; width: 10%; text-align: center; border-top-right-radius: 8px;">Ação</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="linha-item" style="border-bottom: 1px solid #eee;">
-          <td style="padding: 15px 10px; overflow: visible !important;">
-            <select name="itens[0][produto_id]" class="select-busca-inteligente" required style="width: 100%;">
-              <option value="">Digite o nome ou código...</option>
-              <% @produtos.each do |p| %>
-                <option value="<%= p.id %>">
-                  <%= p.codigo.present? ? "[#{p.codigo}] #{p.nome}" : p.nome %>
-                </option>
-              <% end %>
-            </select>
-          </td>
-          <td style="padding: 15px 10px; vertical-align: middle;">
-            <%= number_field_tag "itens[0][quantidade]", nil, step: :any, min: 0.01, required: true, placeholder: "0.00", style: "width: 90%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; height: 36px; box-sizing: border-box;" %>
-          </td>
-          <td style="padding: 15px 10px; text-align: center; vertical-align: middle;">
-            <button type="button" class="btn-remover" onclick="removerLinha(this)" style="background: none; border: none; color: #ff4444; font-size: 1.2em; cursor: pointer; display: none;">❌</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="overflow: visible !important; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 25px;">
+      <table id="tabela-lote" style="width: 100%; border-collapse: collapse; text-align: left; overflow: visible !important; box-sizing: border-box; background: white;">
+        <thead>
+          <tr style="background: #D71920; color: white; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <th style="padding: 14px 15px; width: 65%; font-weight: bold; padding-left: 20px; border-top-left-radius: 6px;">Produto / Insumo (Nome ou Código)</th>
+            <th style="padding: 14px 15px; width: 23%; font-weight: bold; text-align: center;">Qtd. Entrada</th>
+            <th style="padding: 14px 15px; width: 12%; text-align: center; font-weight: bold; padding-right: 20px; border-top-right-radius: 6px;">Remover</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="linha-item" style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 14px 15px; padding-left: 20px; overflow: visible !important; vertical-align: middle;">
+              <select name="itens[0][global_id]" class="select-busca-inteligente" required style="width: 100%;">
+                <option value="">Digite o nome ou código...</option>
+                <% @opcoes_estoque.each do |opt| %>
+                  <option value="<%= opt[:id] %>"><%= opt[:nome] %></option>
+                <% end %>
+              </select>
+            </td>
+            <td style="padding: 14px 15px; vertical-align: middle; text-align: center;">
+              <%= number_field_tag "itens[0][quantidade]", nil, step: :any, min: 0.001, required: true, placeholder: "0,000", style: "width: 100%; max-width: 140px; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; height: 40px; box-sizing: border-box; font-size: 14px; outline: none; text-align: center; font-weight: bold; color: #1e293b; background: #fff;" %>
+            </td>
+            <td style="padding: 14px 15px; padding-right: 20px; text-align: center; vertical-align: middle;">
+              <button type="button" class="btn-remover" onclick="removerLinha(this)" style="background: none; border: none; color: #dc2626; font-size: 12px; cursor: pointer; display: none; font-weight: bold; padding: 0; text-transform: uppercase; letter-spacing: 0.3px;">Excluir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <%# Botão para Adicionar Nova Linha no Lote %>
-    <div style="text-align: left; margin-bottom: 40px;">
-      <button type="button" id="btn-adicionar" style="background: #f4f6f7; color: #555; border: 1px solid #ccc; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9em;">
-        ➕ Adicionar outro item ao lote
+    <%# BOTÃO EXECUTIVO EM CAIXA CINZA %>
+    <div style="text-align: left; margin-bottom: 35px; box-sizing: border-box;">
+      <button type="button" id="btn-adicionar" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+         + ADICIONAR OUTRO ITEM AO LOTE
       </button>
     </div>
 
-    <%# --- BOTÃO DE SALVAMENTO FINAL --- %>
-    <div style="background: #fafafa; padding: 20px; border-radius: 12px; border-top: 1px solid #eee; text-align: right;">
-      <%= f.submit "PROCESSAR ENTRADA DE ESTOQUE", style: "background: #28a745; color: white; border: none; padding: 15px 35px; border-radius: 30px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(40,167,69,0.2);" %>
+    <%# BOTÃO DE FINALIZAÇÃO VERMELHO PREMIUM %>
+    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: right; box-sizing: border-box; display: flex; justify-content: flex-end; border-bottom: 2px solid #cbd5e1;">
+      <%= f.submit "PROCESSAR REPOSIÇÃO DE ESTOQUE", style: "background: #16a34a; color: white; border: none; padding: 13px 35px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22,163,74,0.18); text-transform: uppercase; letter-spacing: 0.5px;" %>
     </div>
 
   <% end %>
 </div>
 
 <script>
+  // Sincronizações e funções do Modal permanecem intocadas para preservar o PIN e endpoints do controller...
+  function sincronizarLoteUnidade(valor) {
+    const hiddenInput = document.getElementById("hidden-lote-unidade-input");
+    if (hiddenInput) hiddenInput.value = valor;
+  }
+
+  window.solicitarTrocaUnidadeLote = function() {
+    const modal = document.getElementById("modal-autorizacao-lote");
+    if (modal) {
+      modal.style.display = "flex";
+      const inputPin = document.getElementById("input-pin-lote");
+      if (inputPin) {
+        inputPin.value = "";
+        inputPin.type = "password";
+        inputPin.focus();
+      }
+    }
+  };
+
+  window.fecharModalLote = function() {
+    const modal = document.getElementById("modal-autorizacao-lote");
+    if (modal) modal.style.display = "none";
+  };
+
+  window.alternarVisibilidadePinLote = function() {
+    const inputPin = document.getElementById("input-pin-lote");
+    const btnOlhinho = document.getElementById("btn-olhinho-lote");
+    if (!inputPin) return;
+
+    if (inputPin.type === "password") {
+      inputPin.type = "text";
+      inputPin.style.letterSpacing = "normal";
+      if (btnOlhinho) btnOlhinho.innerText = "Ocultar";
+    } else {
+      inputPin.type = "password";
+      inputPin.style.letterSpacing = "5px";
+      if (btnOlhinho) btnOlhinho.innerText = "Mostrar";
+    }
+  };
+
+  window.processarPinLote = function() {
+    const inputPin = document.getElementById("input-pin-lote");
+    const codigo = inputPin ? inputPin.value : "";
+
+    if (!codigo) {
+      alert("Por favor, informe o código de autorização.");
+      return;
+    }
+
+    fetch("/autorizar_gerente", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ codigo: codigo })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.autorizado) {
+        fecharModalLote();
+        document.getElementById("box-lote-travado").style.display = "none";
+        document.getElementById("wrapper-lote-select").style.display = "block";
+        
+        const selectReal = document.getElementById("select-lote-real");
+        if (selectReal) sincronizarLoteUnidade(selectReal.value);
+        
+       // Alerta elegante de sucesso
+        Swal.fire({
+          title: "Liberado!",
+          text: "Seleção de Unidade para Entrada de Lote liberada com sucesso!",
+          icon: "success",
+          confirmButtonColor: "#16a34a"
+        });
+      } else {
+        // Alerta elegante de erro
+        Swal.fire({
+          title: "Acesso Negado",
+          text: "Código Inválido ou Usuário não é Administrador!",
+          icon: "error",
+          confirmButtonColor: "#D71920"
+        });
+        fecharModalLote();
+      }
+    })
+    .catch(() => {
+      Swal.fire({
+        title: "Erro",
+        text: "Erro ao processar a validação de segurança remota.",
+        icon: "error",
+        confirmButtonColor: "#64748b"
+      });
+      fecharModalLote();
+    });
+  };
+
   function aplicarTomSelect(elemento) {
     if (typeof TomSelect !== "undefined" && !elemento.classList.contains("tomselected")) {
       new TomSelect(elemento, {
         create: false,
         sortField: { field: "text", direction: "asc" },
         placeholder: "Digite o nome ou código...",
-        maxOptions: 100,
-        dropdownParent: 'body' // CORREÇÃO MASTER: Renderiza o menu no body para descolar da tabela
+        maxOptions: 150,
+        dropdownParent: 'body'
       });
     }
   }
@@ -127,22 +269,22 @@
     btnAdicionar.addEventListener("click", function() {
       const novaLinha = document.createElement("tr");
       novaLinha.className = "linha-item";
-      novaLinha.style.borderBottom = "1px solid #eee";
+      novaLinha.style.borderBottom = "1px solid #f1f5f9";
       
       const selectOriginal = document.querySelector(".select-busca-inteligente");
       const htmlOpcoes = selectOriginal ? selectOriginal.innerHTML : "";
 
       novaLinha.innerHTML = `
-        <td style="padding: 15px 10px; overflow: visible !important;">
-          <select name="itens[${contadorItens}][produto_id]" class="select-busca-inteligente" required style="width: 100%;">
+        <td style="padding: 14px 15px; padding-left: 20px; overflow: visible !important; vertical-align: middle;">
+          <select name="itens[${contadorItens}][global_id]" class="select-busca-inteligente" required style="width: 100%;">
             ${htmlOpcoes}
           </select>
         </td>
-        <td style="padding: 15px 10px; vertical-align: middle;">
-          <input type="number" name="itens[${contadorItens}][quantidade]" step="any" min="0.01" required="required" placeholder="0.00" style="width: 90%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; height: 36px; box-sizing: border-box;">
+        <td style="padding: 14px 15px; vertical-align: middle; text-align: center;">
+          <input type="number" name="itens[${contadorItens}][quantidade]" step="any" min="0.001" required="required" placeholder="0,000" style="width: 100%; max-width: 140px; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; height: 40px; box-sizing: border-box; font-size: 14px; outline: none; text-align: center; font-weight: bold; color: #1e293b; background: #fff;">
         </td>
-        <td style="padding: 15px 10px; text-align: center; vertical-align: middle;">
-          <button type="button" class="btn-remover" onclick="removerLinha(this)" style="background: none; border: none; color: #ff4444; font-size: 1.2em; cursor: pointer;">❌</button>
+        <td style="padding: 14px 15px; padding-right: 20px; text-align: center; vertical-align: middle;">
+          <button type="button" class="btn-remover" onclick="removerLinha(this)" style="background: none; border: none; color: #dc2626; font-size: 12px; cursor: pointer; font-weight: bold; padding: 0; text-transform: uppercase; letter-spacing: 0.3px;">Excluir</button>
         </td>
       `;
 

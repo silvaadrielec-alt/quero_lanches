@@ -1,81 +1,147 @@
-<div class="card-principal" style="max-width: 900px; margin: 40px auto; font-family: sans-serif;">
-  <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-bottom: 30px;">
+<%# (Os links e estilos css do Tom Select permanecem idênticos ao seu cabeçalho) %>
+
+<div style="max-width: 850px; margin: 30px auto 0 auto; padding: 0 20px; box-sizing: border-box;">
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
+</div>
+
+<div class="card-principal" style="max-width: 850px; margin: 10px auto 40px auto; padding: 35px; border-radius: 12px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important; overflow: visible !important;">
+  
+  <h1 style="color: #D71920; text-align: center; font-weight: bold; margin-bottom: 30px; font-size: 2.2em; letter-spacing: 0.5px;">
     Gerenciar Fichas Técnicas (Receitas)
   </h1>
 
-  <%# --- SELETOR DE PRODUTO --- %>
-  <div style="background: #f9f9f9; padding: 20px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 30px;">
-    <label style="font-weight: bold; color: #333; display: block; margin-bottom: 10px;">Selecione o Produto para ver ou editar a Receita:</label>
+  <% if notice.present? %>
+    <p style="color: #16a34a; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 14px;"><%= notice %></p>
+  <% elsif alert.present? %>
+    <p style="color: #dc2626; font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 14px;"><%= alert %></p>
+  <% end %>
+
+  <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 35px; box-sizing: border-box; text-align: left; overflow: visible !important;">
+    <label style="font-size: 0.85em; color: #64748b; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">Selecione ou Digite o Produto de Venda</label>
     <%= form_with url: gerenciar_composicoes_path, method: :get, local: true, id: "form-selecionar-produto" do |f| %>
-      <%= f.select :produto_id, @produtos.map { |p| [p.nome, p.id] }, 
-                   { prompt: "--- Escolha um Produto de Venda ---", selected: params[:produto_id] }, 
-                   { class: "input-estilizado", style: "width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 1em;", onchange: "this.form.submit();" } %>
+      <%= f.select :produto_id, @produtos.map { |p| [p.nome.upcase, p.id] }, 
+                   { prompt: "Digite o nome do lanche para buscar...", selected: params[:produto_id] }, 
+                   { id: "select-produto-busca", style: "width: 100%; box-sizing: border-box;" } %>
     <% end %>
   </div>
 
   <% if @produto_selecionado.present? %>
-    <%# --- EXIBIÇÃO DA RECEITA ATUAL --- %>
-    <h3 style="color: #7D3C98; border-bottom: 2px solid #7D3C98; padding-bottom: 5px; margin-bottom: 20px;">
-      Receita Atual de: <%= @produto_selecionado.nome %>
+    <h3 style="color: #333; border-bottom: 2px solid #D71920; padding-bottom: 10px; margin-bottom: 25px; text-align: left; font-weight: bold; font-size: 1.3em; text-transform: uppercase; letter-spacing: 0.5px;">
+      Ingredientes: <span style="color: #D71920;"><%= @produto_selecionado.nome.upcase %></span>
     </h3>
 
     <% if @composicoes.any? %>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.04); box-sizing: border-box; background: white;">
         <thead>
-          <tr style="background: #D71920; color: white; text-align: left;">
-            <th style="padding: 12px;">Insumo</th>
-            <th style="padding: 12px;">Qtd. Gasta</th>
-            <th style="padding: 12px;">Medida Uso</th>
-            <th style="padding: 12px; text-align: center;">Ações</th>
+          <tr style="background: #D71920; color: white; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
+            <th style="padding: 14px; padding-left: 15px; font-weight: bold; width: 40%;">Insumo / Matéria-Prima</th>
+            <th style="padding: 14px; text-align: center; font-weight: bold; width: 18%;">Qtd. Gasta</th>
+            <th style="padding: 14px; text-align: center; font-weight: bold; width: 22%;">Medida na Receita</th>
+            <th style="padding: 14px; text-align: center; padding-right: 15px; font-weight: bold; width: 20%;">Ações</th>
           </tr>
         </thead>
         <tbody>
           <% @composicoes.each do |comp| %>
-            <tr style="border-bottom: 1px solid #eee; background: #fff;">
-              <td style="padding: 12px; font-weight: bold; color: #555;"><%= comp.insumo.nome %></td>
-              <td style="padding: 12px; color: #333;"><%= comp.quantidade %></td>
-              <td style="padding: 12px;"><span style="background: #e0f2f1; color: #00796b; padding: 4px 10px; border-radius: 15px; font-size: 0.85em; font-weight: bold;"><%= comp.unidade_medida_uso %></span></td>
-              <td style="padding: 12px; text-align: center;">
-                <%= link_to "Remover", composicoes_path(comp), data: { turbo_method: :delete, turbo_confirm: "Tem certeza que deseja retirar este insumo da receita?" }, style: "color: #ff4444; text-decoration: none; font-weight: bold; font-size: 0.9em;" %>
+            <tr style="border-bottom: 1px solid #f1f5f9; background: #fff; font-size: 14px;">
+              <td style="padding: 14px; padding-left: 15px; font-weight: bold; color: #1e293b; text-align: left; vertical-align: middle;">
+                <%= comp.insumo.present? ? comp.insumo.nome.upcase : "⚠️ INSUMO INVÁLIDO" %>
+              </td>
+              
+              <td style="padding: 14px; color: #D71920; text-align: center; font-weight: bold; font-size: 15px; vertical-align: middle;">
+                <%= number_with_precision(comp.quantidade, precision: 3, separator: ',', strip_insignificant_zeros: true) %>
+              </td>
+              
+              <td style="padding: 14px; text-align: center; vertical-align: middle;">
+                <span style="background: #f1f5f9; color: #334155; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; border: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 0.3px;">
+                  <%= comp.unidade_medida_uso.present? ? comp.unidade_medida_uso.upcase : 'UNIDADE' %>
+                </span>
+              </td>
+              
+              <td style="padding: 14px; text-align: center; padding-right: 15px; vertical-align: middle;">
+                <% # 🌟 CORRIGIDO PARA O SINGULAR (Restabelece a rota contábil padrão REST do Rails) %>
+                <%= link_to "Remover", composicoes_path(comp), data: { turbo_method: :delete, turbo_confirm: "Tem certeza que deseja retirar este insumo da receita?" }, style: "color: #0000FF; text-decoration: underline; font-weight: bold; font-size: 13px;" %>
               </td>
             </tr>
           <% end %>
         </tbody>
       </table>
     <% else %>
-      <p style="background: #fff8e1; color: #f57f17; padding: 15px; border-radius: 10px; border-left: 5px solid #ffb300; margin-bottom: 30px;">
-        💡 Este produto ainda não possui ingredientes cadastrados na ficha técnica. Use o formulário abaixo para adicionar!
-      </p>
+      <div style="background: #FFF8F0; color: #b45309; padding: 15px 20px; border-radius: 8px; border-left: 5px solid #f59e0b; margin-bottom: 40px; text-align: left; font-size: 14px; font-weight: 500; border-top: 1px solid #fef3c7; border-right: 1px solid #fef3c7; border-bottom: 1px solid #fef3c7; box-sizing: border-box;">
+          ⚠️ Este lanche ainda não possui ingredientes na receita. Use o painel abaixo para estruturar a ficha técnica.
+      </div>
     <% end %>
 
-    <%# --- FORMULÁRIO DE ADIÇÃO CENTRALIZADO --- %>
-    <div style="background: #fff; padding: 25px; border-radius: 15px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-      <h4 style="margin-top: 0; color: #333; font-weight: bold; margin-bottom: 15px;">Adicionar Insumo à Receita</h4>
+    <div style="background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); box-sizing: border-box;">
+      <h4 style="margin-top: 0; color: #333; font-weight: bold; margin-bottom: 20px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Adicionar Insumo à Receita
+      </h4>
       
       <%= form_with(model: @nova_composicao, url: composicoes_path, local: true) do |f| %>
         <%= f.hidden_field :produto_id, value: @produto_selecionado.id %>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
-          <div>
-            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Insumo</label>
-            <%= f.collection_select :insumo_id, @insumos_disponiveis, :id, :nome, { prompt: "Selecione um insumo..." }, { class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end; width: 100%; box-sizing: border-box;">
+          <div style="text-align: left;">
+            <label style="font-weight: bold; font-size: 11px; color: #64748b; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Insumo / Ingrediente</label>
+            <%= f.collection_select :insumo_id, @insumos_disponiveis, :id, :nome, { prompt: "Selecione..." }, { class: "select-insumo-busca", style: "width: 100%; height: 42px;" } %>
+          </div>
+
+          <div style="text-align: left;">
+            <label style="font-weight: bold; font-size: 11px; color: #64748b; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Qtd. Gasta</label>
+            <%= f.number_field :quantidade, step: :any, placeholder: "Ex: 0,050", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; height: 42px; box-sizing: border-box; color: #1e293b; outline: none; font-weight: bold; text-align: center;", lang: "pt-BR" %>
+          </div>
+
+          <div style="text-align: left;">
+            <label style="font-weight: bold; font-size: 11px; color: #64748b; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Unidade de Corte</label>
+            <%= f.select :unidade_medida_uso, [["Unidade (UN)", "unidade"], ["Fatia (FAT)", "fatia"], ["Rodela (ROD)", "rodela"], ["Folha (FLH)", "folha"], ["Quilo (KG)", "kg"], ["Gramas (G)", "gramas"], ["Mililitros (ML)", "ml"]], { prompt: "Selecione..." }, { style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; height: 42px; background: #fff; box-sizing: border-box; color: #1e293b; outline: none; font-weight: 500;" } %>
           </div>
 
           <div>
-            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Qtd.</label>
-            <%= f.number_field :quantidade, step: :any, class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" %>
-          </div>
-
-          <div>
-            <label style="font-weight: bold; font-size: 0.85em; color: #555; display: block; margin-bottom: 5px;">Medida Uso</label>
-            <%= f.select :unidade_medida_uso, [["unidade", "unidade"], ["fatia", "fatia"], ["rodela", "rodela"], ["folha", "folha"], ["kg", "kg"], ["gramas", "gramas"], ["ml", "ml"]], { prompt: "Selecione" }, { class: "input-estilizado", style: "width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc;" } %>
-          </div>
-
-          <div>
-            <%= f.submit "Adicionar", style: "background: #28a745; color: white; border: none; padding: 11px 25px; border-radius: 10px; font-weight: bold; cursor: pointer;" %>
+            <%= f.submit "Adicionar", style: "background: #D71920; color: white; border: none; padding: 0 25px; border-radius: 8px; font-weight: bold; cursor: pointer; height: 42px; font-size: 13px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.3px;" %>
           </div>
         </div>
       <% end %>
     </div>
   <% end %>
 </div>
+
+<%# (O Bloco script com a escuta "turbo:load" permanece idêntico e intocado) %>
+
+<script>
+  function inicializarBuscaComposicoes() {
+    // 1. Inicializa a busca digitável no seletor principal de produtos
+    const selectProduto = document.getElementById("select-produto-busca");
+    if (selectProduto && !selectProduto.classList.contains("tomselected")) {
+      new TomSelect(selectProduto, {
+        create: false,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Digite o nome do produto...",
+        maxOptions: 100,
+        onChange: function(value) {
+          if(value) {
+            document.getElementById("form-selecionar-produto").submit();
+          }
+        }
+      });
+    }
+
+    // 2. Inicializa também o select de ingredientes no rodapé para facilitar o cadastro
+    const selectInsumo = document.querySelector(".select-insumo-busca");
+    if (selectInsumo && !selectInsumo.classList.contains("tomselected")) {
+      new TomSelect(selectInsumo, {
+        create: false,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Buscar ingrediente...",
+        maxOptions: 100
+      });
+    }
+  }
+
+  // Executa de forma segura tanto em carregamentos normais quanto com Turbo/Hotwire
+  document.addEventListener("turbo:load", inicializarBuscaComposicoes);
+  document.addEventListener("DOMContentLoaded", inicializarBuscaComposicoes);
+  setTimeout(inicializarBuscaComposicoes, 100);
+</script>

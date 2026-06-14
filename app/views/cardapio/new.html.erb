@@ -1,36 +1,160 @@
-<h1 style="text-align: center; color: #333; font-weight: bold; margin-top: 40px; font-family: sans-serif;">Novo Item no Cardápio</h1>
+<%# BARRA DE RETORNO SUPERIOR - BOTÃO EXECUTIVO COMPACTO %>
+<div style="max-width: 750px; margin: 30px auto 15px auto; padding: 0 20px; box-sizing: border-box; text-align: left;">
+  <%= link_to cardapio_index_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← VOLTAR PARA O CARDÁPIO
+  <% end %>
+</div>
 
-<div class="card-principal" style="max-width: 600px; margin: 20px auto 40px auto; padding: 30px; border: 1px solid #ddd; border-radius: 15px; background: white; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+<%# CARD PRINCIPAL DE CADASTRO COM MOLDURA VERMELHA %>
+<div class="card-principal" style="max-width: 750px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; border: 2px solid #D71920 !important; box-sizing: border-box;">
+  
+  <h1 style="color: #D71920; margin-top: 0; margin-bottom: 30px; font-size: 1.8em; text-align: center; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; letter-spacing: 0.5px;">
+    Novo Item no Cardápio
+  </h1>
+
+  <%# 🌟 ORIENTAÇÃO DE CADASTRO COMERCIAL DE CARDÁPIO %>
+  <div style="background-color: #f0f9ff; border: 1px solid #e0f2fe; border-left: 4px solid #0284c7; padding: 15px 18px; border-radius: 8px; margin-bottom: 25px; text-align: left; box-sizing: border-box;">
+    <strong style="color: #0369a1; font-size: 13px; display: block; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;">
+        O QUE CADASTRAR NESTA TELA?
+    </strong>
+    <p style="margin: 0; font-size: 12px; color: #075985; font-style: italic; font-weight: 500; line-height: 1.4;">
+      Cadastre aqui **todos os lanches feitos na própria cantina** (ex: pastéis, hambúrgueres, sucos naturais) e os preços comerciais praticados no caixa. Itens complexos usarão a Ficha Técnica abaixo para abater o estoque dos ingredientes brutos.
+    </p>
+  </div>
+
   <%= form_with(model: @produto, url: cardapio_index_path, local: true) do |form| %>
     
-    <div style="margin-bottom: 20px; text-align: left;">
-      <%= form.label :nome, "Nome do Lanche", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
-      <%= form.text_field :nome, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", required: true, placeholder: "Ex: X-Burguer Especial" %>
-    </div>
-
-    <%# CAMPO DE CUSTO - IMPORTANTE PARA O LUCRO %>
-    <div style="margin-bottom: 20px; text-align: left;">
-      <%= form.label :valor_unitario, "Custo de Produção (Compra ou Produção)", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
-      <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", placeholder: "0,00" %>
-    </div>
-
-    <div style="margin-bottom: 20px; text-align: left;">
-      <%= form.label :preco_venda, "Preço de Venda", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
-      <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em;", required: true, placeholder: "0,00" %>
-    </div>
-
-    <%# UNIDADE DE MEDIDA - PARA NÃO CONFUNDIR KG COM UNIDADE %>
-    <div style="margin-bottom: 25px; text-align: left;">
-      <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold; margin-bottom: 8px; color: #333;" %>
-      <%= form.select :unidade_medida, ['unidade', 'fatia', 'kg', 'gramas', 'ml'], { selected: 'unidade' }, { style: "width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em; background: white;" } %>
-    </div>
-
-    <div style="text-align: center; margin-top: 30px;">
-      <%= form.submit "SALVAR NO CARDÁPIO", style: "background-color: #D71920; color: white; font-weight: bold; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-size: 1.05em; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" %>
+    <%# GRID DE DOIS CAMPOS POR LINHA %>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; text-align: left; box-sizing: border-box; margin-bottom: 35px;">
       
-      <div style="margin-top: 25px;">
-        <%= link_to "← Voltar para o Cardápio", cardapio_index_path, style: "color: #0000FF; text-decoration: underline;" %>
+      <div style="display: flex; flex-direction: column; grid-column: span 2;">
+        <%= form.label :nome, "Nome do Lanche / Item", style: "font-size: 11px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+        <%= form.text_field :nome, style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;", required: true, placeholder: "Ex: X-Burguer Especial" %>
       </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <%= form.label :valor_unitario, "Custo de Produção (Compra/Fabricação R$)", style: "font-size: 11px; font-weight: bold; color: #b45309; margin-bottom: 6px; text-transform: uppercase;" %>
+        <%= form.number_field :valor_unitario, step: 0.01, style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b;", placeholder: "0,00" %>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <%= form.label :preco_venda, "Preço de Venda do Item (R$)", style: "font-size: 11px; font-weight: bold; color: #15803d; margin-bottom: 6px; text-transform: uppercase;" %>
+        <%= form.number_field :preco_venda, step: 0.01, style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b;", placeholder: "0,00" %>
+      </div>
+
+      <div style="display: flex; flex-direction: column; grid-column: span 2;">
+        <%= form.label :unidade_medida, "Unidade de Medida comercial", style: "font-size: 11px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase;" %>
+        <%= form.select :unidade_medida, [['Unidade (UN)', 'unidade'], ['Fatia (FT)', 'fatia'], ['Quilo (KG)', 'kg'], ['Gramas (G)', 'gramas'], ['Mililitros (ML)', 'ml']], { selected: 'unidade' }, { style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; background-color: white; color: #1e293b;" } %>
+      </div>
+    </div>
+
+    <%# 🌟 TRANSFERIDO: PERMITIR ADICIONAIS EXTRA %>
+    <div style="margin-bottom: 25px; background: #f0fdf4; border: 1px solid #dcfce7; padding: 18px; border-radius: 8px; border-left: 4px solid #16a34a; text-align: left; box-sizing: border-box;">
+      <label style="display: flex; align-items: flex-start; gap: 14px; font-weight: bold; color: #14532d; cursor: pointer; margin: 0;">
+        <%= form.check_box :aceita_adicional, style: "width: 20px; height: 20px; cursor: pointer; accent-color: #16a34a; margin-top: 2px;" %>
+        <div style="flex: 1;">
+          <span style="font-size: 14px; display: block; text-transform: uppercase; letter-spacing: 0.3px; font-weight: bold;">Permitir Adicionais no Carrinho de Vendas?</span>
+          <small style="color: #365314; font-weight: normal; font-size: 12px; display: block; margin-top: 4px; line-height: 1.4;">Marque se o atendente puder embutir extras (ex: queijo, presunto, ovo, bacon) neste lanche durante a operação do Caixa.</small>
+        </div>
+      </label>
+    </div>
+
+    <%# 🌟 TRANSFERIDO: VARIAÇÕES DE TAMANHO %>
+    <div style="margin-bottom: 40px; background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 8px; text-align: left; box-sizing: border-box; border-bottom: 2px solid #cbd5e1;">
+      <h3 style="color: #1e293b; margin-top: 0; font-size: 13px; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Precificação Especial por Tamanho / Volume</h3>
+      <p style="font-size: 12px; color: #64748b; margin-top: 8px; margin-bottom: 20px; font-style: italic;">* Defina os volumes de venda deste lanche ou suco (ex: Copo 300ml, Copo 500ml). Deixe vazio para usar o preço padrão configurado acima.</p>
+      
+      <div id="container-variacoes" style="box-sizing: border-box;">
+        <% options_tamanhos = ["Copo 200ml", "Copo 300ml", "Copo 500ml", "Copo 700ml", "Jarra 1L", "Porção 300g", "Porção 500g", "Por Peso / Balança (KG)"] %>
+        <%= form.fields_for :variacao_produtos do |v_form| %>
+          <div class="linha-variacao" style="display: flex; gap: 15px; margin-bottom: 18px; align-items: center; box-sizing: border-box;">
+            <%= v_form.hidden_field :_destroy, class: "destroy-flag", value: "false" %>
+            <div style="flex: 2;">
+              <%= v_form.select :tamanho, options_tamanhos, { prompt: "Selecione o Tamanho..." }, { style: "width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff; box-sizing: border-box; color: #1e293b; font-size: 14px;" } %>
+            </div>
+            <div style="flex: 1;">
+              <%= v_form.number_field :preco_venda, step: 0.01, placeholder: "Preço R$", style: "width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; height: 40px; box-sizing: border-box; color: #1e293b; font-weight: bold; font-size: 14px;" %>
+            </div>
+            <div>
+              <button type="button" onclick="removerVariacao(this)" style="background: #dc2626; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px; font-size: 14px;">✕</button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <button type="button" id="btn-add-variacao" style="background-color: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 11px; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+        + Adicionar Tamanho e Preço
+      </button>
+    </div>
+
+<%# 🌟 CONTROLE DE ESTOQUE ATIVADO %>
+<div style="margin-bottom: 25px; background: #fff1f2; border: 1px solid #fda4af; padding: 18px; border-radius: 8px; border-left: 4px solid #e11d48; text-align: left; box-sizing: border-box;">
+  <label style="display: flex; align-items: flex-start; gap: 14px; font-weight: bold; color: #9f1239; cursor: pointer; margin: 0;">
+    <%= form.check_box :estoque_controlado, style: "width: 20px; height: 20px; cursor: pointer; accent-color: #e11d48; margin-top: 2px;" %>
+    <div style="flex: 1;">
+      <span style="font-size: 14px; display: block; text-transform: uppercase; letter-spacing: 0.3px; font-weight: bold;">Controlar Estoque Físico Manualmente?</span>
+      <small style="color: #881337; font-weight: normal; font-size: 12px; display: block; margin-top: 4px; line-height: 1.4;">
+        Marque para monitorar saldos físicos e permitir ajustes de auditoria neste item. Se desmarcado, este produto será considerado apenas produção.
+      </small>
+    </div>
+  </label>
+</div>
+
+    <%# BOTÃO SALVAR PREMIUM %>
+    <div style="text-align: center;">
+      <%= form.submit "SALVAR DADOS NO CARDÁPIO", style: "background-color: #D71920; color: white; padding: 13px; cursor: pointer; border: none; width: 100%; font-weight: bold; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.18); text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" %>
     </div>
   <% end %>
 </div>
+
+<script>
+  window.removerVariacao = function(botao) {
+    const linha = botao.closest(".linha-variacao");
+    const flagDestruicao = linha.querySelector(".destroy-flag");
+    if (flagDestruicao) {
+      flagDestruicao.value = "true";
+      linha.style.display = "none";
+    } else {
+      linha.remove();
+    }
+  }
+
+  function inicializarEventosVariacoes() {
+    const btnAdd = document.getElementById("btn-add-variacao");
+    if (btnAdd) {
+      const novoBtn = btnAdd.cloneNode(true);
+      btnAdd.parentNode.replaceChild(novoBtn, btnAdd);
+      novoBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        const container = document.getElementById("container-variacoes");
+        const tempoIndex = new Date().getTime();
+        const novaLinhaHTML = `
+          <div class="linha-variacao" style="display: flex; gap: 15px; margin-bottom: 18px; align-items: center; box-sizing: border-box;">
+            <div style="flex: 2;">
+              <select name="produto[variacao_produtos_attributes][${tempoIndex}][tamanho]" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff; box-sizing: border-box; color: #1e293b; font-size: 14px;">
+                <option value="">Selecione o Tamanho...</option>
+                <option value="Copo 200ml">Copo 200ml</option>
+                <option value="Copo 300ml">Copo 300ml</option>
+                <option value="Copo 500ml">Copo 500ml</option>
+                <option value="Copo 700ml">Copo 700ml</option>
+                <option value="Jarra 1L">Jarra 1L</option>
+                <option value="Porção 300g">Porção 300g</option>
+                <option value="Porção 500g">Porção 500g</option>
+                <option value="Por Peso / Balança (KG)">Por Peso / Balança (KG)</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <input type="number" step="0.01" name="produto[variacao_produtos_attributes][${tempoIndex}][preco_venda]" placeholder="0,00" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; height: 40px; box-sizing: border-box; color: #1e293b; font-weight: bold; font-size: 14px;">
+            </div>
+            <div>
+              <button type="button" onclick="removerVariacao(this)" style="background: #dc2626; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px; font-size: 14px;">✕</button>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', novaLinhaHTML);
+      });
+    }
+  }
+  document.addEventListener("turbo:load", inicializarEventosVariacoes);
+  document.addEventListener("DOMContentLoaded", inicializarEventosVariacoes);
+</script>

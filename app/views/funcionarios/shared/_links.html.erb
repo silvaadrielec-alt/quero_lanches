@@ -1,13 +1,13 @@
-<%- if controller_name != 'sessions' %>
-  <p style="margin: 10px 0;">
-    <%= link_to "Voltar para o Login", new_session_path(resource_name), 
-        style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
-  </p>
-<% end %>
+<div style="display: flex; flex-direction: column; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;">
+  <%- if controller_name != 'sessions' %>
+    <%= link_to new_session_path(resource_name), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; width: auto;" do %>
+      VOLTAR PARA O LOGIN
+    <% end %>
+  <% end %>
 
-<%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
-  <p style="margin: 10px 0;">
-    <%= link_to "Esqueceu sua senha?", new_password_path(resource_name), 
-        style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
-  </p>
-<% end %>
+  <%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+    <%= link_to new_password_path(resource_name), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; width: auto;" do %>
+      Esqueceu sua senha?
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,61 @@
+<div style="max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>
+
+  <h1 style="color: #D71920; border-bottom: 2px solid #D71920; padding-bottom: 10px; margin-top: 0; margin-bottom: 30px; font-weight: bold; font-size: 2.2em; letter-spacing: 0.5px;">
+    Central de Alertas e Notificações
+  </h1>
+
+  <% if @notificacoes.any? %>
+    <% @notificacoes.each do |notificacao| %>
+      <div style="background: <%= notificacao.lida ? '#f9f9f9' : '#fff' %>; 
+                  border: 1px solid <%= notificacao.lida ? '#ddd' : '#D71920' %>; 
+                  padding: 20px; 
+                  border-radius: 8px; 
+                  margin-bottom: 20px; 
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                  position: relative;
+                  box-sizing: border-box;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 15px;">
+          <div style="flex: 1; min-width: 250px;">
+            <h3 style="margin: 0 0 10px 0; color: #333; font-size: 18px; font-weight: bold;">
+              <%= notificacao.titulo %>
+              <% unless notificacao.lida %>
+                <span style="background: #D71920; color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 20px; margin-left: 10px; vertical-align: middle; font-weight: bold;">Novo</span>
+              <% end %>
+            </h3>
+            <p style="margin: 0; color: #555; line-height: 1.5; font-size: 14px;"><%= notificacao.mensagem %></p>
+            <small style="color: #999; display: block; margin-top: 10px; font-size: 12px;">Gerado em: <%= notificacao.created_at.strftime('%d/%m/%Y às %H:%M') %></small>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <% if notificacao.tipo == "financeiro" %>
+              <% 
+                # Monta o link wa.me com a mensagem codificada para a URL
+                texto_whatsapp = ERB::Util.url_encode(" *Alerta da Cantina Quero Lanches*\n#{notificacao.mensagem}")
+                link_wa = "https://wa.me/5571999473677?text=#{texto_whatsapp}" 
+              %>
+              <a href="<%= link_wa %>" target="_blank" style="background: #25D366; color: white; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.3px; box-shadow: 0 2px 4px rgba(37,211,102,0.15);">
+                 WhatsApp
+              </a>
+            <% end %>
+
+            <% unless notificacao.lida %>
+              <%= button_to marcar_como_lida_notificacao_path(notificacao), method: :patch, style: "background: #1e293b; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                Concluído
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="text-align: center; color: #64748b; font-size: 15px; margin-top: 50px; font-style: italic;">🎉 Tudo limpo por aqui! Nenhuma notificação pendente.</p>
+  <% end %>
+</div>

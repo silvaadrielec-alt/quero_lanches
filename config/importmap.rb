@@ -9,3 +9,4 @@ pin "imask" # @7.6.1
 pin "tom-select" # @2.6.1
 pin "@orchidjs/sifter", to: "@orchidjs--sifter.js" # @1.1.0
 pin "@orchidjs/unicode-variants", to: "@orchidjs--unicode-variants.js" # @1.1.2
+pin "sweetalert2" # @11.26.25

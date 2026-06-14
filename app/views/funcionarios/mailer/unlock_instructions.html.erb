@@ -1,7 +1,23 @@
-<p>Hello <%= @resource.email %>!</p>
+<div style="font-family: sans-serif; max-width: 550px; margin: 0 auto; padding: 20px; border: 2px solid #D71920; border-radius: 12px;">
+  <h2 style="color: #D71920; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 0;">Conta Bloqueada por Segurança</h2>
+  
+  <p style="color: #334155; font-size: 15px; line-height: 1.5;">
+    Olá, <strong><%= @resource.email %></strong>!
+  </p>
+  
+  <p style="color: #dc2626; font-size: 14px; font-weight: bold;">
+    ⚠️ Seu acesso foi temporariamente bloqueado devido a um número excessivo de tentativas de login incorretas.
+  </p>
+  
+  <p style="color: #475569; font-size: 14px; margin-bottom: 25px;">
+    Se foi você e deseja liberar o seu usuário agora mesmo, clique no botão de liberação abaixo:
+  </p>
 
-<p>Your account has been locked due to an excessive number of unsuccessful sign in attempts.</p>
+  <div style="text-align: center; margin: 25px 0;">
+    <%= link_to 'DESTRAVAR MINHA CONTA', unlock_url(@resource, unlock_token: @token), 
+        style: "background-color: #D71920; color: white; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 14px; text-decoration: none; display: inline-block; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(215,25,32,0.15);" %>
+  </div>
 
-<p>Click the link below to unlock your account:</p>
-
-<p><%= link_to 'Unlock my account', unlock_url(@resource, unlock_token: @token) %></p>
+  <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 30px;">
+  <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 0;">* Proteção Digital da Rede Quero Lanches.</p>
+</div>

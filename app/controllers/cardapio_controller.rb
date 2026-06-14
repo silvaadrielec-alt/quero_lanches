@@ -1,34 +1,31 @@
 class CardapioController < ApplicationController
-
+  before_action :authenticate_funcionario!
   before_action :verificar_admin, except: [:index, :show]
 
+  # Lista todos os lanches disponíveis para venda
   def index
-    @produtos = Produto.where(categoria: 'Venda')
+    @produtos = Produto.where(categoria: 'Venda').order(:nome)
   end
 
-  def new
-    @produto = Produto.new(categoria: 'Venda')
+  def show
+    @produto = Produto.find(params[:id])
   end
+
+  # No seu app/controllers/cardapio_controller.rb
+def new
+  @produto = Produto.new(categoria: 'Venda', estoque_controlado: false)
+end
 
   def create
-  @produto = Produto.new(produto_params)
-  @produto.categoria = 'Venda'
-  
-  # GARANTIA: Se o campo estiver vazio no formulário, ele salva como 0
-  @produto.estoque_centro ||= 0
-  @produto.estoque_pavilhao_novo ||= 0
-  @produto.estoque_pavilhao_antigo ||= 0
-  @produto.preco_venda ||= 0
-  @produto.unidade_medida ||= 'unidade'
+    @produto = Produto.new(produto_params)
+    @produto.categoria = 'Venda' # Força a categoria para aparecer no PDV
 
-  if @produto.save
-    redirect_to cardapio_index_path, notice: 'Lanche cadastrado com sucesso!'
-  else
-    # Se der erro, isso vai mostrar no terminal o porquê
-    puts @produto.errors.full_messages 
-    render :new, status: :unprocessable_entity
+    if @produto.save
+      redirect_to cardapio_index_path, notice: 'Lanche cadastrado no cardápio com sucesso!'
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
-end
 
   def edit
     @produto = Produto.find(params[:id])
@@ -37,7 +34,7 @@ end
   def update
     @produto = Produto.find(params[:id])
     if @produto.update(produto_params)
-      redirect_to cardapio_index_path, notice: 'Lanche atualizado!'
+      redirect_to cardapio_index_path, notice: 'Lanche atualizado com sucesso!'
     else
       render :edit, status: :unprocessable_entity
     end
@@ -45,23 +42,25 @@ end
 
   def destroy
     @produto = Produto.find(params[:id])
-    @produto.destroy
-    redirect_to cardapio_index_path, notice: 'Removido com sucesso!'
-  end
-
-  def show
-    @produto = Produto.find(params[:id])
-  end
-
-  private # <-- Tudo abaixo daqui é "protegido"
-
-  def verificar_admin
-    unless current_funcionario.admin?
-      redirect_to cardapio_index_path, alert: "Acesso negado! Apenas administradores podem alterar o cardápio."
+    
+    # Impede a exclusão se o lanche já foi vendido antes, protegendo o banco
+    if @produto.destroy
+      redirect_to cardapio_index_path, notice: 'Lanche removido do cardápio.'
+    else
+      redirect_to cardapio_index_path, alert: 'Não é possível remover: este lanche possui histórico de vendas.'
     end
   end
 
+  private
+
+  def verificar_admin
+    unless current_funcionario.admin?
+      redirect_to cardapio_index_path, alert: "Acesso negado! Apenas administradores alteram o cardápio."
+    end
+  end
+
+  # Permite apenas os dados comerciais e de identificação do lanche
   def produto_params
-    params.require(:produto).permit(:nome, :preco_venda, :valor_unitario, :quantidade, :categoria, :unidade_medida, :estoque_centro, :estoque_pavilhao_novo, :estoque_pavilhao_antigo)
+    params.require(:produto).permit(:nome, :preco_venda, :codigo, :unidade_medida, :aceita_adicional, :custo_producao, :estoque_controlado, :categoria)
   end
 end

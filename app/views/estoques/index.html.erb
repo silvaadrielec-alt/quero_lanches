@@ -1,41 +1,157 @@
-<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
-  <h1 style="color: #D71920; margin-bottom: 20px; font-family: sans-serif; font-weight: bold;">
-    Gestão de Quantidades (Estoque)
-  </h1>
-
-  <%# CORREÇÃO: Botão mudado de #7D3C98 para o Vermelho Padrão #D71920 %>
-  <div style="margin-bottom: 25px; text-align: center;">
-    <%= link_to "Dar Entrada por Lote (Fornecedores)", lote_estoques_path, 
-        style: "background: #D71920; color: white; text-decoration: none; padding: 12px 25px; border-radius: 25px; font-weight: bold; font-size: 0.95em; display: inline-block; box-shadow: 0 4px 10px rgba(215,25,32,0.2); transition: background 0.2s;" %>
+<div style="max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box; text-align: center;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
   </div>
 
-  <div style="margin-bottom: 30px; text-align: center;">
-    <%# Padronizando com ID e função de estoque, mas com o visual azul largo %>
-    <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Pesquisar no estoque..." 
-           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+  <%# MOLDURA VERMELHA OFICIAL CORPORATIVA %>
+  <div class="card-principal" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 12px; background: #fff; padding: 35px; border: 2px solid #D71920 !important; box-sizing: border-box;">
+    
+    <h1 style="color: #D71920; margin-top: 0; margin-bottom: 25px; font-weight: bold; text-align: center; font-size: 2.2em; letter-spacing: 0.5px;">
+      Gestão de Quantidades (Estoque)
+    </h1>
+
+    <%# 🌟 ORIENTAÇÃO DE CONTROLE DE BALANÇO DE ESTOQUE %>
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #64748b; padding: 15px 18px; border-radius: 8px; margin-bottom: 25px; text-align: left; box-sizing: border-box;">
+      <strong style="color: #334155; font-size: 13px; display: block; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;">
+          CENTRAL DE MONITORAMENTO DE SALDOS
+      </strong>
+      <p style="margin: 0; font-size: 12px; color: #475569; font-style: italic; font-weight: 500; line-height: 1.4;">
+        Acompanhe abaixo o balanço físico fracionado por unidade. Os valores são atualizados automaticamente a cada venda ou compra. **Lembre-se:** Lanches de fabricação interna (Cardápio) realizam a baixa automática do estoque diretamente sobre as Matérias-Primas (Insumos) listadas na segunda tabela.
+      </p>
+    </div>
+
+    <%# BOTÃO DE ENTRADA POR LOTE PADRONIZADO E ALINHADO À DIREITA %>
+    <div style="margin-bottom: 25px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to lote_estoques_path, 
+          style: "background: #D71920; color: white; text-decoration: none; padding: 10px 22px; border-radius: 8px; font-weight: bold; font-size: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + DAR ENTRADA POR LOTE (FORNECEDORES)
+      <% end %>
+    </div>
+
+    <%# BARRA DE PESQUISA ELEGANTE %>
+    <div style="margin-bottom: 40px; text-align: center; box-sizing: border-box;">
+      <input type="text" id="buscaEstoque" onkeyup="filtrarEstoque()" placeholder="🔍 Buscar item de venda ou matéria-prima no estoque..." 
+             style="width: 100%; max-width: 650px; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 15px; color: #1e293b; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box;">
+    </div>
+
+    <%# --- SEÇÃO DE PRODUTOS PARA VENDA --- %>
+    <h2 style="color: #1e293b; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 10px; font-size: 1.3em; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">
+      Itens de Venda (Geral)
+    </h2>
+    <div style="margin-bottom: 45px; width: 100%; box-sizing: border-box;">
+      <%= render 'tabela_estoque', colecao: @produtos_venda, tipo_item: 'Produto' %>
+    </div>
+
+    <%# --- SEÇÃO DE INSUMOS --- %>
+    <h2 style="color: #1e293b; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 10px; font-size: 1.3em; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 0.5px;">
+      Matéria-Prima e Adicionais (Insumos)
+    </h2>
+    <div style="width: 100%; box-sizing: border-box;">
+      <%= render 'tabela_estoque', colecao: @insumos, tipo_item: 'Insumo' %>
+    </div>
+
   </div>
+</div>
 
-  <%# --- SEÇÃO DE PRODUTOS PARA VENDA --- %>
-  <h2 style="color: #D71920; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 5px;">Itens de Venda</h2>
-  <%= render 'tabela_estoque', colecao: @produtos_venda %>
+<%# MODAL ÚNICO E DINÂMICO %>
+<div id="modal-estoque" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+  <div style="background: white; padding: 25px; border-radius: 12px; width: 400px;">
+    <h3 id="modal-titulo" style="color: #D71920;">Ação</h3>
+    <form id="form-estoque" action="" method="POST">
+      <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+      <input type="hidden" name="tipo" id="tipo-item">
+      <input type="hidden" name="produto_id" id="produto-id">
+      <input type="hidden" name="insumo_id" id="insumo-id">
+      
+      <div id="campos-unidade-origem" style="display:none;">
+        <label>Origem:</label>
+        <select name="unidade_origem" class="form-control" style="width: 100%; margin-bottom: 10px;">
+          <option value="centro">Matriz Centro</option>
+          <option value="pavilhao_novo">Pavilhão Novo</option>
+          <option value="pavilhao_antigo">Pavilhão Antigo</option>
+        </select>
+      </div>
 
-  <div style="margin: 60px 0;"></div>
+      <label id="label-unidade_destino">Unidade:</label>
+      <select name="unidade_destino" id="select-unidade" class="form-control" style="width: 100%; margin-bottom: 10px;">
+        <option value="centro">Matriz Centro</option>
+        <option value="pavilhao_novo">Pavilhão Novo</option>
+        <option value="pavilhao_antigo">Pavilhão Antigo</option>
+      </select>
 
-  <%# --- SEÇÃO DE INSUMOS --- %>
-  <h2 style="color: #D71920; text-align: left; border-bottom: 2px solid #D71920; padding-bottom: 5px;">Matéria-Prima (Insumos)</h2>
-  <%= render 'tabela_estoque', colecao: @insumos %>
+      <label>Quantidade:</label>
+      <input type="number" name="quantidade" step="0.001" required style="width: 100%; margin-bottom: 20px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;">
 
+      <button type="submit" id="btn-submit" style="background: #D71920; color: white; padding: 10px; border: none; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer;">CONFIRMAR</button>
+      <button type="button" onclick="document.getElementById('modal-estoque').style.display='none'" style="width: 100%; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer;">CANCELAR</button>
+    </form>
+  </div>
 </div>
 
 <script>
-  // Função de filtro atualizada para funcionar com as duas tabelas
+  // Função que gerencia os dois modais
+ function abrirModal(acao, tipo, id, nome) {
+  const modal = document.getElementById('modal-estoque');
+  const form = document.getElementById('form-estoque');
+  const titulo = document.getElementById('modal-titulo');
+  const labelUnidade = document.getElementById('label-unidade_destino');
+  
+  // Seta o tipo e IDs
+  document.getElementById('tipo-item').value = tipo;
+  if(tipo === 'Produto') { 
+    document.getElementById('produto-id').value = id; 
+    document.getElementById('insumo-id').value = ''; 
+  } else { 
+    document.getElementById('insumo-id').value = id; 
+    document.getElementById('produto-id').value = ''; 
+  }
+
+  // Configura conforme a ação
+  if(acao === 'transferir') {
+    titulo.innerText = "Transferir " + nome;
+    form.action = "<%= transferir_estoques_path %>";
+    document.getElementById('campos-unidade-origem').style.display = 'block';
+    if(labelUnidade) labelUnidade.innerText = "Destino:";
+  } else {
+    titulo.innerText = "Repor " + nome;
+    form.action = "<%= repor_estoque_path %>";
+    document.getElementById('campos-unidade-origem').style.display = 'none';
+    if(labelUnidade) labelUnidade.innerText = "Unidade:";
+  }
+  
+  modal.style.display = 'flex';
+}
+
+  // Sua função de filtro original
   function filtrarEstoque() {
     var input = document.getElementById("buscaEstoque");
     var filter = input.value.toUpperCase();
     var rows = document.querySelectorAll(".linha-estoque");
-    rows.forEach(row => {
-      var text = row.querySelector("td").textContent.toUpperCase();
-      row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+    rows.forEach(function(row) {
+      var textContent = row.textContent || row.innerText;
+      if (textContent) {
+        row.style.display = textContent.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+      }
+    });
+  }
+</script>
+
+<script>
+  function filtrarEstoque() {
+    var input = document.getElementById("buscaEstoque");
+    var filter = input.value.toUpperCase();
+    var rows = document.querySelectorAll(".linha-estoque");
+    
+    rows.forEach(function(row) {
+      // Varre o conteúdo completo da linha inteira (permitindo achar por Código, Nome ou ID)
+      var textContent = row.textContent || row.innerText;
+      if (textContent) {
+        row.style.display = textContent.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+      }
     });
   }
 </script>

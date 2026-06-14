@@ -1,49 +1,43 @@
 class ProdutosController < ApplicationController
   before_action :authenticate_funcionario!
-  before_action :verificar_admin, only: [:destroy, :edit, :update] # Protege ações críticas
+  before_action :verificar_admin, only: [:destroy, :edit, :update]
   before_action :set_produto, only: %i[ show edit update destroy ]
 
-  # GET /produtos or /produtos.json
   def index
-  if params[:query].present?
-    termo = "%#{params[:query].downcase}%"
-    base = Produto.where("lower(nome) LIKE ?", termo)
-  else
-    base = Produto.all
+    if params[:query].present?
+      termo = "%#{params[:query].downcase}%"
+      base = Produto.where("lower(nome) LIKE ?", termo)
+    else
+      base = Produto.all
+    end
+
+    # Traz apenas os itens destinados ao cardápio de vendas direto
+    @produtos_venda = base.where(categoria: "Venda")
   end
 
-  # Agora dividimos o resultado da busca (ou a lista completa) em dois
-  @produtos_venda = base.where(categoria: "Venda")
-  @insumos = base.where(categoria: "Insumo")
-end
-
-  # GET /produtos/1 or /produtos/1.json
   def show
-  @produto = Produto.find(params[:id])
-
-  respond_to do |format|
-    format.html # Abre a página normal
-    format.json { 
-      render json: @produto.as_json(include: { composicoes: { include: :insumo } }) 
-    }
+    @produto = Produto.find(params[:id])
+    
+    respond_to do |format|
+      format.html 
+      format.json { 
+        render json: @produto.as_json(include: { composicoes: { include: :insumo } }) 
+      }
+    end
   end
-end
-  # GET /produtos/new
+
   def new
     @produto = Produto.new
   end
 
-  # GET /produtos/1/edit
   def edit
   end
 
-  # POST /produtos or /produtos.json
   def create
     @produto = Produto.new(produto_params)
 
     respond_to do |format|
       if @produto.save
-        # Volta sempre para o 'Mostrar Produto' do estoque
         format.html { redirect_to @produto, notice: "Produto cadastrado com sucesso!" }
         format.json { render :show, status: :created, location: @produto }
       else
@@ -53,41 +47,43 @@ end
     end
   end
 
-   def update
+  def update
     if @produto.update(produto_params)
-    # Força o retorno para a lista de estoque, ignorando a tela de 'show' que está dando erro
-    redirect_to produtos_path, notice: "Produto atualizado com sucesso!"
-   else
-    render :edit, status: :unprocessable_entity
+      redirect_to produtos_path, notice: "Produto atualizado com sucesso!"
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
-end
 
   def destroy
-    @produto.destroy!
+    # Trata de forma segura o impedimento de remoção caso haja vendas vinculadas
+    if @produto.destroy
+      flash[:notice] = "Produto excluído com sucesso!"
+    else
+      flash[:alert] = "Não é possível excluir: este produto possui registros de vendas ativos no histórico contábil."
+    end
 
     respond_to do |format|
-      # Volta sempre para a lista geral de estoque
-      format.html { redirect_to produtos_path, notice: "Produto excluído com sucesso!", status: :see_other }
+      format.html { redirect_to produtos_path, status: :see_other } # Corrigido rota fantasma
       format.json { head :no_content }
     end
   end
 
-private
+  private
 
   def set_produto
     @produto = Produto.find(params[:id])
   end
 
   def produto_params
-  params.require(:produto).permit(
-    :nome, :valor_unitario, :preco_venda, :categoria, :unidade_medida, 
-    :media_unidades_kg, :codigo, :estoque_minimo, :limite_centro, 
-    :limite_pavilhao_novo, :limite_pavilhao_antigo,
-    variacao_produtos_attributes: [:id, :tamanho, :preco_venda, :_destroy]
-  )
-end
+    params.require(:produto).permit(
+      :nome, :preco_venda, :categoria, :unidade_medida, :valor_unitario,
+      :codigo, :aceita_adicional,
+      :limite_centro, :limite_pavilhao_novo, :limite_pavilhao_antigo, # Incluídos para o controle de alertas mínimos
+      variacao_produtos_attributes: [:id, :tamanho, :preco_venda, :_destroy]
+    )
+  end
 
-  # Adicione o método aqui, antes do último 'end'
   def verificar_admin
     unless current_funcionario.admin?
       redirect_to root_path, alert: "Acesso negado! Você não tem permissão de Administrador."

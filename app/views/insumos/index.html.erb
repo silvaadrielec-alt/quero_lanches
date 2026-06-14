@@ -1,0 +1,163 @@
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box; text-align: center;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>  
+
+  <h1 style="color: #D71920; margin-bottom: 30px; font-weight: bold; font-size: 2.2em; letter-spacing: 0.5px;">Controle de Insumos e Adicionais</h1>
+
+  <%# 🌟 ORIENTAÇÃO DE CADASTRO TÉCNICO DE INSUMOS %>
+  <div style="background-color: #fff7ed; border: 1px solid #ffedd5; border-left: 4px solid #ea580c; padding: 15px 18px; border-radius: 8px; margin-bottom: 25px; text-align: left; box-sizing: border-box; font-family: sans-serif; margin-left: auto; margin-right: auto; max-width: 1000px;">
+    <strong style="color: #c2410c; font-size: 13px; display: block; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;">
+        O QUE ENCONTRAR NESTA TELA?
+    </strong>
+    <p style="margin: 0; font-size: 12px; color: #9a3412; font-style: italic; font-weight: 500; line-height: 1.4;">
+      Gerencie aqui as **matérias-primas e ingredientes brutos** das receitas. O saldo atual exibido abaixo é calculado de forma automatizada em tempo real com base no histórico de movimentações (entradas de notas e baixas do caixa).
+    </p>
+  </div>
+
+  <%# BARRA DE PESQUISA ARREDONDADA %>
+  <div style="margin-bottom: 25px; text-align: center; box-sizing: border-box; max-width: 600px; margin-left: auto; margin-right: auto;">
+    <input type="text" id="buscaInsumos" onkeyup="filtrarInsumos()" placeholder="🔍 Pesquisar insumo pelo nome..." 
+           style="width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 15px; box-sizing: border-box; font-weight: 500; color: #1e293b;">
+  </div>
+
+  <%# BOTÃO DE CRIAÇÃO POSICIONADO NO TOPO SUPERIOR DIREITO %>
+  <% if current_funcionario.admin? %>
+    <div style="margin-bottom: 20px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to new_insumo_path, 
+          style: "background-color: #D71920; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 12px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + CADASTRAR NOVO INSUMO / ADICIONAL
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# NOTIFICAÇÕES DE SUCESSO CORRENTE %>
+  <% if notice.present? %>
+    <p style="color: #16a34a; font-weight: bold; margin-bottom: 20px; font-size: 14px;"><%= notice %></p>
+  <% end %>
+
+  <%# MOLDURA VERMELHA OFICIAL CORPORATIVA %>
+  <div class="card-principal" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 12px; background: #fff; padding: 30px; border: 2px solid #D71920 !important; box-sizing: border-box;">
+    <h2 style="text-align: left; margin-top: 0; margin-bottom: 20px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-weight: bold; font-size: 1.5em; letter-spacing: 0.3px;">Matéria-Prima Cadastrada</h2>
+    
+    <table style="width: 100%; border-collapse: collapse; text-align: left; box-sizing: border-box;" id="tabelaInsumos">
+      <thead>
+        <tr style="background-color: #D71920; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+          <th style="padding: 12px 15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 20px; width: 8%;">ID</th>
+          <th style="padding: 12px 15px; width: 22%;">Nome do Insumo</th>
+          <th style="padding: 12px 15px; text-align: center; width: 22%;">Estoque Atual Real</th>
+          <th style="padding: 12px 15px; text-align: center; width: 13%;">Custo Compra</th>
+          <th style="padding: 12px 15px; text-align: center; width: 13%;">Preço Extra</th>
+          <th style="padding: 12px 15px; text-align: center; width: 10%;">Rendimento</th>
+          <th style="padding: 12px 15px; text-align: center; border-top-right-radius: 6px; border-bottom-right-radius: 6px; width: 12%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @insumos.each do |insumo| %>
+          <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+            
+            <%# ID %>
+            <td style="padding: 15px; padding-left: 20px; font-family: monospace; font-weight: bold; color: #64748b; font-size: 14px; vertical-align: middle;">
+              #<%= insumo.id %>
+            </td>
+            
+            <%# NOME %>
+            <td style="padding: 15px; color: #1e293b; font-size: 14px; vertical-align: middle;">
+              <strong style="text-transform: uppercase;"><%= insumo.nome %></strong>
+              <small style="color: #64748b; display: block; font-size: 11px; margin-top: 2px; font-weight: bold; text-transform: uppercase;">
+                Unidade Base: <%= insumo.unidade_medida.to_s.upcase %>
+              </small>
+            </td>
+            
+           <%# 🌟 COLUNA DE ESTOQUE - PADRÃO CORPORATIVO (IGUAL A PRODUTOS) %>
+              <td style="padding: 15px; text-align: center; vertical-align: middle;">
+  <% 
+    # 1. DEFINIÇÃO DAS VARIÁVEIS (Isso estava faltando!)
+    centro = insumo.estoque_centro.to_f
+    p_novo = insumo.estoque_pavilhao_novo.to_f
+    p_antg = insumo.estoque_pavilhao_antigo.to_f
+
+    alerta_c  = centro < insumo.limite_centro.to_f
+    alerta_pn = p_novo < insumo.limite_pavilhao_novo.to_f
+    alerta_pa = p_antg < insumo.limite_pavilhao_antigo.to_f
+  %>
+
+  <%# 2. DIV QUE USA AS VARIÁVEIS ACIMA %>
+  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_c ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_c ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_c ? '#FDE68A' : '#bae6fd' %>;">
+      M: <%= number_with_precision(centro, precision: 0) %>
+    </span>
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_pn ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_pn ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_pn ? '#FDE68A' : '#bae6fd' %>;">
+      PN: <%= number_with_precision(p_novo, precision: 0) %>
+    </span>
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_pa ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_pa ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_pa ? '#FDE68A' : '#bae6fd' %>;">
+      PA: <%= number_with_precision(p_antg, precision: 0) %>
+    </span>
+  </div>
+</td>
+            
+            <%# CUSTO COMPRA %>
+            <td style="padding: 15px; text-align: center; color: #475569; font-weight: bold; font-size: 14px; vertical-align: middle;">
+              <%= number_to_currency(insumo.preco_custo, unit: "R$ ", separator: ",", delimiter: ".") %>
+            </td>
+
+            <%# PREÇO ADICIONAL %>
+            <td style="padding: 15px; text-align: center; color: #16a34a; font-weight: bold; font-size: 14px; vertical-align: middle;">
+              <%= number_to_currency(insumo.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %>
+            </td>
+
+            <%# RENDIMENTO %>
+            <td style="padding: 15px; text-align: center; color: #475569; font-size: 14px; font-weight: 500; vertical-align: middle;">
+              <%= number_with_precision(insumo.media_unidades_kg, precision: 1, separator: ",") %> un
+            </td>
+            
+            <%# AÇÕES %>
+            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+              <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                <%= link_to insumo_path(insumo), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                  Detalhes
+                <% end %>
+                
+                <% if current_funcionario.admin? %>
+                  <%= link_to edit_insumo_path(insumo), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                    Editar
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+        
+        <% if @insumos.empty? %>
+          <tr>
+            <td colspan="7" style="padding: 40px; color: #64748b; text-align: center; font-size: 14px; font-style: italic;">Nenhum insumo cadastrado no sistema.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filtrarInsumos() {
+  var input = document.getElementById("buscaInsumos");
+  var filter = input.value.toUpperCase();
+  var rows = document.querySelectorAll("#tabelaInsumos tbody tr");
+
+  rows.forEach(function(row) {
+    var tdNome = row.getElementsByTagName("td")[1];
+    if (tdNome) {
+      var nomeTxt = tdNome.textContent || tdNome.innerText;
+      if (nomeTxt.toUpperCase().indexOf(filter) > -1) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    }
+  });
+}
+</script>

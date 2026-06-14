@@ -1,70 +1,152 @@
-<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center; font-family: sans-serif;">
-  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px; font-weight: bold;">Cardápio de Vendas</h1>
+<div style="max-width: 1100px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box; text-align: center;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
+  </div>  
 
-  <%# BARRA DE PESQUISA %>
-  <div style="margin-bottom: 20px;">
-    <input type="text" id="buscaCardapio" onkeyup="filtrarCardapio()" placeholder="🔍 Pesquisar lanche..." 
-           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 1em;">
+  <h1 style="color: #D71920; margin-bottom: 30px; font-weight: bold; font-size: 2.2em; letter-spacing: 0.5px;">Cardápio de Vendas</h1>
+
+  <%# BARRA DE PESQUISA COM A PALETA DO NOVO HISTÓRICO %>
+  <div style="margin-bottom: 30px; text-align: center; position: relative; max-width: 600px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
+    <input type="text" id="buscaCardapio" onkeyup="filtrarCardapio()" placeholder="🔍 Pesquisar lanche ou bebida pelo nome..." 
+           style="width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 15px; box-sizing: border-box; color: #1e293b; font-weight: 500; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
   </div>
 
+  <%# BOTÃO EXECUTIVO CADASTRAR NOVO ITEM NO CARDÁPIO À DIREITA %>
   <% if current_funcionario.admin? %>
-    <div style="margin-top: -10px; margin-bottom: 30px;">
-      <%= link_to "Cadastrar Novo Item no Cardápio", new_cardapio_path, 
-          style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" %>
+    <div style="margin-bottom: 25px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to new_cardapio_path, 
+          style: "background-color: #D71920; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 12px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + CADASTRAR NOVO ITEM NO CARDÁPIO
+      <% end %>
     </div>
   <% end %>
 
-  <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-    <thead>
-      <tr style="background: #D71920; color: white;">
-        <th style="padding: 15px; text-align: left; padding-left: 30px;">LANCHE / BEBIDA</th>
-        <th style="padding: 15px; text-align: center;">PREÇO</th>
-        <th style="padding: 15px; text-align: center;">AÇÕES</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @produtos.each do |produto| %>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 15px; text-align: left; padding-left: 30px;">
-            <strong style="font-size: 1.1em; color: #333;"><%= produto.nome %></strong>
-          </td>
-          
-          <%# EXIBIÇÃO DE PREÇOS LOCALIZADOS COM DUAS CASAS DECIMAIS E VARIANTES DE TAMANHO %>
-          <td style="padding: 15px; text-align: center; font-weight: bold;">
-            <% if produto.variacao_produtos.any? %>
-              <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
-                <% produto.variacao_produtos.each do |v| %>
-                  <span style="font-size: 13px; font-weight: normal; color: #555;">
-                    <%= v.tamanho %>: <strong style="color: #28a745;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+  <%# ALERTA DE SUCESSO %>
+  <% if notice.present? %>
+    <p style="color: #16a34a; font-weight: bold; margin-bottom: 20px; font-size: 14px;"><%= notice %></p>
+  <% end %>
+
+  <%# CONTÊINER DE TABELA COM MOLDURA VERMELHA OFICIAL %>
+  <div class="card-principal" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 12px; background: #fff; padding: 30px; border: 2px solid #D71920 !important; box-sizing: border-box;">
+    <h2 style="text-align: left; margin-top: 0; margin-bottom: 20px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-weight: bold; font-size: 1.5em;">Produtos no Cardápio</h2>
+    
+    <table style="width: 100%; border-collapse: collapse; text-align: left; box-sizing: border-box;" id="tabelaCardapio">
+      <thead>
+        <tr style="background-color: #D71920; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+          <th style="padding: 12px 15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 20px; width: 35%;">Lanche / Bebida</th>
+          <th style="padding: 12px 15px; text-align: center; width: 25%;">Estoque por Unidade</th>
+          <th style="padding: 12px 15px; text-align: center; width: 20%;">Preço do Item</th>
+          <th style="padding: 12px 15px; text-align: center; border-top-right-radius: 6px; border-bottom-right-radius: 6px; width: 20%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @produtos.each do |produto| %>
+          <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+            
+            <%# COLUNA 1: NOME E TIPO DO PRODUTO %>
+            <td style="padding: 15px; padding-left: 20px; color: #1e293b; font-size: 14px; vertical-align: middle;">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <strong style="font-size: 15px;"><%= produto.nome.upcase %></strong>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <% if produto.composicoes.any? %>
+                    <span style="font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #fef2f2; color: #D71920; border: 1px solid #fee2e2; text-transform: uppercase; letter-spacing: 0.3px;">
+                      Ficha Técnica Ativa
+                    </span>
+                  <% end %>
+                  <% if produto.variacao_produtos.any? %>
+                    <span style="font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #f8fafc; color: #475569; border: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 0.3px;">
+                      Múltiplos Tamanhos
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+            </td>
+            
+            <%# COLUNA 2: MONITOR DE ESTOQUE INTEGRADO %>
+            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+              <% if produto.composicoes.any? %>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600; font-style: italic;">
+                  Abate insumos na produção
+                </span>
+              <% else %>
+                <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                  <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" title="Estoque na Matriz Centro">
+                    M: <%= number_with_precision(produto.estoque_centro || 0, precision: 0) %>
                   </span>
+                  <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" title="Estoque no Pavilhão Novo">
+                    PN: <%= number_with_precision(produto.estoque_pavilhao_novo || 0, precision: 0) %>
+                  </span>
+                  <span style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" title="Estoque no Pavilhão Antigo">
+                    PA: <%= number_with_precision(produto.estoque_pavilhao_antigo || 0, precision: 0) %>
+                  </span>
+                </div>
+              <% end %>
+            </td>
+            
+            <%# COLUNA 3: PREÇO %>
+            <td style="padding: 15px; text-align: center; font-weight: bold; font-size: 14px; vertical-align: middle;">
+              <% if produto.variacao_produtos.any? %>
+                <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center;">
+                  <% produto.variacao_produtos.each do |v| %>
+                    <span style="font-size: 11px; font-weight: normal; color: #475569;">
+                      <%= v.tamanho.upcase %>: <strong style="color: #16a34a;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+                    </span>
+                  <% end %>
+                </div>
+              <% else %>
+                <span style="color: #16a34a; font-size: 15px;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
+              <% end %>
+            </td>
+
+            <%# COLUNA 4: AÇÕES %>
+            <td style="padding: 15px; text-align: center; white-space: nowrap; width: 1%; vertical-align: middle;">
+              <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                <%= link_to cardapio_path(produto), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                  Detalhes
+                <% end %>
+                
+                <% if current_funcionario.admin? %>
+                  <%= link_to edit_cardapio_path(produto), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                    Editar
+                  <% end %>
+                  <%= botao_excluir cardapio_path(produto), texto: 'EXCLUIR', mensagem: 'Tem certeza que deseja excluir este item do cardápio?' %>
                 <% end %>
               </div>
-            <% else %>
-              <span style="color: #28a745; font-size: 1.1em;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
-            <% end %>
-          </td>
+            </td>
 
-          <td style="text-align: center; padding: 15px;">
-            <%= link_to 'Detalhes', cardapio_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 15px; font-weight: bold;" %>
+          </tr>
+        <% end %>
 
-            <% if current_funcionario.admin? %>
-              <%= link_to 'Editar', edit_cardapio_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 15px;" %>
-              <%= link_to 'Excluir', cardapio_path(produto), data: { turbo_method: :delete, turbo_confirm: 'Tem certeza que deseja excluir este item do cardápio?' }, style: "color: #D71920; text-decoration: underline;" %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+        <% if @produtos.empty? %>
+          <tr>
+            <td colspan="4" style="padding: 30px; color: #64748b; text-align: center; font-size: 14px; font-style: italic;">Nenhum produto cadastrado no cardápio de vendas.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
 function filtrarCardapio() {
-  var input = document.getElementById("buscaCardapio").value.toUpperCase();
-  var rows = document.querySelector("table tbody").rows;
-  for (var i = 0; i < rows.length; i++) {
-    var nome = rows[i].cells[0].textContent.toUpperCase();
-    rows[i].style.display = nome.includes(input) ? "" : "none";
-  }
+  var input = document.getElementById("buscaCardapio");
+  var filter = input.value.toUpperCase();
+  var rows = document.querySelectorAll("#tabelaCardapio tbody tr");
+
+  rows.forEach(function(row) {
+    var tdNome = row.getElementsByTagName("td")[0];
+    if (tdNome) {
+      var nomeTxt = tdNome.textContent || tdNome.innerText;
+      if (nomeTxt.toUpperCase().indexOf(filter) > -1) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    }
+  });
 }
 </script>

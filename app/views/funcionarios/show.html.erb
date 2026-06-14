@@ -1,93 +1,99 @@
-<p style="color: green; text-align: center;"><%= notice %></p>
+<% if notice.present? %>
+  <p style="color: #16a34a; font-weight: bold; text-align: center; margin-top: 20px; font-size: 14px;"><%= notice %></p>
+<% end %>
 
-<div style="max-width: 600px; margin: 40px auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<div style="max-width: 750px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box;">
   
-  <%# Link de Voltar no topo ajustado para o azul %>
+  <%# LINHA DE NAVEGAÇÃO DE TOPO - BOTÃO EXECUTIVO VOLTAR %>
   <div style="margin-bottom: 20px; text-align: left;">
-    <%= link_to "← Voltar para Funcionários", funcionarios_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold; font-size: 0.9em;" %>
+    <%= link_to funcionarios_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+      ← VOLTAR PARA O ESTOQUE
+    <% end %>
   </div>
 
-  <%# Cartão de Perfil %>
-  <div style="background: white; border: 2px solid #D71920; border-radius: 25px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; overflow: hidden;">
-    
-    <%# Detalhe decorativo no topo do card %>
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: #D71920;"></div>
+  <%# CARD PRINCIPAL COM A MOLDURA VERMELHA OFICIAL %>
+  <div class="card-principal" style="background: white; border: 2px solid #D71920 !important; border-radius: 12px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); position: relative; box-sizing: border-box;">
 
-    <%# Cabeçalho do Perfil com Avatar Inicial %>
-    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
-      <div style="background: #FFF0F0; color: #D71920; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: bold; border: 2px solid #D71920;">
+    <%# CABEÇALHO DO PERFIL COM AVATAR INICIAL %>
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">
+      <div style="background: #FFF0F0; color: #D71920; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: bold; border: 2px solid #D71920; flex-shrink: 0;">
         <%= @funcionario.nome.to_s.first&.upcase %>
       </div>
       <div style="text-align: left;">
-        <h2 style="margin: 0; color: #333; font-size: 1.6em;"><%= @funcionario.nome %></h2>
-        <span style="display: inline-block; background: <%= @funcionario.admin? ? '#D71920' : '#28a745' %>; color: white; padding: 3px 12px; border-radius: 50px; font-size: 0.8em; font-weight: bold; margin-top: 5px;">
-          <%= @funcionario.admin? ? "ADMINISTRADOR" : "FUNCIONÁRIO" %>
+        <h2 style="margin: 0; color: #1e293b; font-size: 1.6em; font-weight: bold; text-transform: uppercase;"><%= @funcionario.nome %></h2>
+        <span style="display: inline-block; background: <%= @funcionario.admin? ? '#D71920' : '#28a745' %>; color: white; padding: 4px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-top: 6px; letter-spacing: 0.5px;">
+          <%= @funcionario.admin? ? "GERÊNCIA / ADMIN" : "OPERACIONAL" %>
         </span>
       </div>
     </div>
 
-    <%# Grid de Informações do Cadastro Atualizado %>
-    <div style="display: grid; grid-template-columns: 1fr; gap: 20px; text-align: left;">
+    <%# GRID DE INFORMAÇÕES DO CADASTRO EM 2 COLUNAS %>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; text-align: left; box-sizing: border-box;">
       
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">E-MAIL DE ACESSO</label>
-        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.email %></span>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">E-mail de Acesso</label>
+        <span style="font-size: 14px; color: #1e293b; font-weight: 600;"><%= @funcionario.email %></span>
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CARGO / FUNÇÃO</label>
-        <span style="font-size: 1.1em; color: #333; font-weight: bold; text-transform: uppercase;"><%= @funcionario.cargo.presence || "NÃO INFORMADO" %></span>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Cargo / Função</label>
+        <span style="font-size: 14px; color: #D71920; font-weight: bold; text-transform: uppercase;"><%= @funcionario.cargo.presence || "NÃO INFORMADO" %></span>
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">TELEFONE</label>
-        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.telefone.presence || "NÃO CADASTRADO" %></span>
-      </div>
-
-      <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">CPF</label>
-        <span style="font-size: 1.1em; color: #333; font-weight: 500;"><%= @funcionario.cpf.presence || "NÃO INFORMADO" %></span>
-      </div>
-
-      <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">UNIDADE PADRÃO</label>
-        <span style="display: inline-block; background: #FFF0F0; color: #D71920; padding: 4px 10px; border-radius: 6px; font-size: 0.95em; font-weight: bold; border: 1px solid #FFDCDC;">
-          <%= @funcionario.unidade.present? ? @funcionario.unidade.to_s.humanize.upcase : "NÃO VINCULADA" %>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Data de Nascimento</label>
+        <span style="font-size: 14px; color: #1e293b; font-weight: 500;">
+          <%= @funcionario.data_nascimento.present? ? @funcionario.data_nascimento.strftime("%d/%m/%Y") : "NÃO INFORMADA" %>
         </span>
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">TURNO PADRÃO</label>
-        <span style="font-size: 1.1em; color: #333; font-weight: 500; background: #f4f4f4; padding: 4px 10px; border-radius: 6px; font-weight: bold;">
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Telefone / Contato</label>
+        <span style="font-size: 14px; color: #1e293b; font-weight: 500;"><%= @funcionario.telefone.presence || "NÃO CADASTRADO" %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">CPF do Colaborador</label>
+        <span style="font-size: 14px; color: #1e293b; font-weight: 500;"><%= @funcionario.cpf.presence || "NÃO INFORMADO" %></span>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Turno Alocado</label>
+        <span style="display: inline-block; background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #cbd5e1; text-transform: uppercase;">
           <%= @funcionario.turno.present? ? @funcionario.turno.upcase : "NÃO DEFINIDO" %>
         </span>
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #888; font-weight: bold; margin-bottom: 3px;">DATA DE ADMISSÃO</label>
-        <span style="display: inline-block; background: #e8f4fd; color: #1d8cf8; padding: 4px 10px; border-radius: 6px; font-size: 0.95em; font-weight: bold; border: 1px solid #b3d7ff;">
-           <%= @funcionario.data_admissao.present? ? @funcionario.data_admissao.strftime("%d/%m/%Y") : "NÃO INFORMADA" %>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Unidade Padrão</label>
+        <span style="display: inline-block; background: #FFF0F0; color: #D71920; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #FFDCDC; text-transform: uppercase;">
+          <%= @funcionario.unidade.nome.present? ? @funcionario.unidade.nome.to_s.humanize.upcase : "NÃO VINCULADA" %>
         </span>
       </div>
 
       <div>
-        <label style="display: block; font-size: 0.85em; color: #aaa; font-weight: bold; margin-bottom: 3px;">CONTA CRIADA EM</label>
-        <span style="font-size: 0.9em; color: #999; font-style: italic;"><%= @funcionario.created_at&.strftime("%d/%m/%Y às %H:%M") %></span>
+        <label style="display: block; font-size: 11px; color: #64748b; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px;">Data de Admissão</label>
+        <span style="display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #bae6fd; text-transform: uppercase;">
+           <%= @funcionario.data_admissao.present? ? @funcionario.data_admissao.strftime("%d/%m/%Y") : "NÃO INFORMADA" %>
+        </span>
       </div>
 
     </div>
 
-    <%# Ações no rodapé do Cartão (Editar e Excluir) %>
-    <div style="margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-      
-      <%# Botão de Excluir Destacado %>
-      <%= button_to "Excluir Conta", @funcionario, method: :delete, 
-                    data: { confirm: "Tem certeza absoluta que deseja apagar o cadastro de #{@funcionario.nome}?" }, 
-                    style: "background: none; border: none; color: #ff4444; text-decoration: underline; cursor: pointer; font-weight: bold; font-size: 0.9em;" %>
+    <%# SEÇÃO DE METADADOS INFERIORES %>
+    <div style="margin-top: 25px; padding: 10px 0; border-top: 1px dashed #e2e8f0; text-align: left;">
+      <label style="font-size: 11px; color: #94a3b8; font-weight: bold; text-transform: uppercase;">Conta criada no sistema em:</label>
+      <span style="font-size: 12px; color: #94a3b8; font-style: italic; margin-left: 5px;"><%= @funcionario.created_at&.strftime("%d/%m/%Y às %H:%M") %></span>
+    </div>
 
-      <%# Botão de Editar Estilizado %>
+    <%# AÇÕES EXECUTIVAS NO RODAPÉ DO CARTÃO %>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+      
+      <%= botao_excluir @funcionario, texto: 'Excluir Conta', mensagem: "Tem certeza absoluta que deseja apagar o cadastro de #{@funcionario.nome}?" %>
+
+      <%# Botão de Editar Oficial Premium %>
       <%= link_to "Editar Cadastro", edit_funcionario_path(@funcionario), 
-                  style: "background: #D71920; color: white; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9em; box-shadow: 0 4px 12px rgba(215, 25, 32, 0.2);" %>
+                  style: "background: #D71920; color: white; padding: 11px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.18); text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;" %>
     </div>
 
   </div>

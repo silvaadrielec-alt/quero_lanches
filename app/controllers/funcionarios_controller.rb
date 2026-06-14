@@ -15,27 +15,30 @@ class FuncionariosController < ApplicationController
   end
 
   def confirmar_checkin
-    unidade = params[:unidade]
-    turno = params[:turno]
-    codigo = params[:codigo_gerente]
+  # O params[:unidade_id] agora vem como string ("2"), precisamos converter para integer
+  unidade_id = params[:unidade_id].to_i 
+  turno = params[:turno]
+  codigo = params[:codigo_gerente]
 
-    # --- SENSOR DE COMPLIANCE DE TURNO E UNIDADE ---
-    # Se mudar de unidade OU se mudar de turno, exige o PIN de um Admin ativo no banco
-    if unidade != current_funcionario.unidade || turno != current_funcionario.turno
-      gerente_autorizou = Funcionario.where(admin: true, codigo_autorizacao: codigo).exists?
-      
-      unless gerente_autorizou
-        redirect_to checkin_path, alert: "Código de autorização inválido ou ausente! É necessária autorização do Gerente para alterar posto ou turno."
-        return # Interrompe a execução para impedir o salvamento da sessão inválida
-      end
-    end
-
-    # Se estiver tudo certo (ou no posto padrão), salva o novo estado operacional na sessão
-    session[:unidade_atual] = unidade
-    session[:turno_atual] = turno
+  # --- SENSOR DE COMPLIANCE DE TURNO E UNIDADE ---
+  # Comparamos o ID da unidade selecionada com o ID da unidade habitual do funcionário
+  # Comparamos o turno com a string gravada no funcionário
+  if unidade_id.to_i != current_funcionario.unidade_id || turno != current_funcionario.turno
+    gerente_autorizou = Funcionario.where(admin: true, codigo_autorizacao: codigo).exists?
     
-    redirect_to root_path, notice: "Entrada confirmada! Bom trabalho, #{current_funcionario.nome}."
+    unless gerente_autorizou
+      redirect_to checkin_path, alert: "Código de autorização inválido ou ausente! É necessária autorização do Gerente para alterar posto ou turno."
+      return 
+    end
   end
+
+  # Se estiver tudo certo, salva na sessão. 
+  # Recomendação: Salve o ID, pois é o identificador único e imutável.
+  session[:unidade_atual] = unidade_id
+  session[:turno_atual] = turno
+  
+  redirect_to root_path, notice: "Entrada confirmada! Bom trabalho, #{current_funcionario.nome}."
+end
 
   # --- FIM DOS MÉTODOS DE CHECK-IN ---
 
@@ -76,7 +79,7 @@ class FuncionariosController < ApplicationController
     end
 
     if sucesso
-      redirect_to funcionarios_path, notice: "Informações updated com sucesso!"
+      redirect_to funcionarios_path, notice: "Informações atualizadas com sucesso!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -96,8 +99,8 @@ class FuncionariosController < ApplicationController
   def funcionario_params
     # ATUALIZADO: Adicionado :telefone, :data_admissao e :data_demissao para persistência segura
     params.require(:funcionario).permit(
-      :nome, :email, :password, :password_confirmation, :admin, 
-      :unidade, :turno, :cargo, :codigo_autorizacao,
+      :nome, :data_nascimento, :email, :password, :password_confirmation, :admin, 
+      :unidade_id, :turno, :cargo, :codigo_autorizacao,
       :telefone, :data_admissao, :data_demissao, :cpf
     )
   end

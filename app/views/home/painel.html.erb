@@ -1,59 +1,80 @@
-<% if @produtos_criticos.any? %>
-  <div style="background-color: #F4EEFF; border: 2px solid #7D3C98; padding: 20px; margin: 20px auto; max-width: 1200px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #D2B4DE; padding-bottom: 10px;">
-      <span style="font-size: 1.8em;">⚠️</span>
-      <h3 style="color: #D71920; margin: 0; font-weight: 900; text-transform: uppercase; font-size: 1.3em;">
-        Produtos com Estoque Crítico
+<%# --- BLOCO DE ALERTA DE REPOSIÇÃO (INSUMOS + PRODUTOS) --- %>
+<% if @insumos_criticos.any? || (@produtos_criticos.present? && @produtos_criticos.any?) %>
+  <div style="background-color: #FFF5F5; border: 2px solid #D71920; padding: 15px 25px; margin: 20px auto; max-width: 1200px; border-radius: 12px; box-shadow: 0 4px 12px rgba(215,25,32,0.05);">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 1px solid #FFE6E6; padding-bottom: 8px;">
+      <span style="font-size: 1.5em;">⚠️</span>
+      <h3 style="color: #D71920; margin: 0; font-weight: 900; text-transform: uppercase; font-size: 1.1em; font-family: sans-serif; letter-spacing: 0.5px;">
+        Atenção: Itens que Requerem Reposição Imediata
       </h3>
     </div>
     
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      <% @produtos_criticos.each do |p| %>
-        <%# Fundo alterado para branco para facilitar a leitura %>
-        <div style="background-color: #ffffff; border: 1px solid #D2B4DE; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+      <%# 1. LOOP DE INSUMOS CRÍTICOS %>
+      <% @insumos_criticos.each do |insumo| %>
+        <div style="background: white; border: 1px solid #D71920; color: #333; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; font-family: sans-serif; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <span style="color: #D71920;">🔴</span>
+          <strong><%= insumo.nome.upcase %> <span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal;">(INSUMO)</span></strong>
           
-          <%# Nome do Produto em Roxo %>
-          <strong style="color: #7D3C98; font-size: 1.1em; min-width: 150px;"><%= p.nome %></strong>
-          
-          <%# Quantidades em linha em Vermelho %>
-          <div style="display: flex; gap: 20px; flex-grow: 1; justify-content: flex-end; color: #D71920; font-size: 0.95em;">
-            <% if p.estoque_centro_baixo? %>
-              <span>Matriz: <strong><%= p.estoque_centro %></strong></span>
+          <span style="color: #666; font-weight: normal; font-size: 0.9em; border-left: 1px solid #ddd; padding-left: 8px; display: inline-flex; gap: 10px;">
+            <% if insumo.estoque_centro_baixo? %>
+              <span>Matriz: <strong style="color: #D71920;"><%= insumo.estoque_centro %></strong></span>
             <% end %>
-            <% if p.estoque_pavilhao_novo_baixo? %>
-              <span>Pav. Novo: <strong><%= p.estoque_pavilhao_novo %></strong></span>
+            <% if insumo.estoque_pavilhao_novo_baixo? %>
+              <span>Pav. Novo: <strong style="color: #D71920;"><%= insumo.estoque_pavilhao_novo %></strong></span>
             <% end %>
-            <% if p.estoque_pavilhao_antigo_baixo? %>
-              <span>Pav. Antigo: <strong><%= p.estoque_pavilhao_antigo %></strong></span>
+            <% if insumo.estoque_pavilhao_antigo_baixo? %>
+              <span>Pav. Antigo: <strong style="color: #D71920;"><%= insumo.estoque_pavilhao_antigo %></strong></span>
             <% end %>
-          </div>
-          
+          </span>
         </div>
+      <% end %>
+
+      <%# 2. LOOP DE PRODUTOS CRÍTICOS OTIMIZADO %>
+      <% if @produtos_criticos.present? %>
+        <% @produtos_criticos.each do |produto| %>
+          <div style="background: white; border: 1px solid #ff9800; color: #333; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; font-family: sans-serif; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <span style="color: #ff9800;">🔸</span>
+            <strong><%= produto.nome.upcase %> <span style="font-size: 0.8em; color: #7f8c8d; font-weight: normal;">(PRODUTO)</span></strong>
+            
+            <span style="color: #666; font-weight: normal; font-size: 0.9em; border-left: 1px solid #ddd; padding-left: 8px; display: inline-flex; gap: 10px;">
+              <% if produto.estoque_centro_baixo? %>
+                <span>Matriz: <strong style="color: #D71920;"><%= produto.estoque_centro %></strong></span>
+              <% end %>
+              <% if produto.estoque_pavilhao_novo_baixo? %>
+                <span>Pav. Novo: <strong style="color: #D71920;"><%= produto.estoque_pavilhao_novo %></strong></span>
+              <% end %>
+              <% if produto.estoque_pavilhao_antigo_baixo? %>
+                <span>Pav. Antigo: <strong style="color: #D71920;"><%= produto.estoque_pavilhao_antigo %></strong></span>
+              <% end %>
+            </span>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>
 <% end %>
 
-<div style="text-align: center; margin-top: 50px;">
-  <h1 style="color: #D71920;">Painel de Controle - Quero Lanche's</h1>
+<% # --- MENU DE ACESSO RÁPIDO DO PAINEL --- %>
+<div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+  <h1 style="color: #D71920; font-weight: bold;">Painel de Controle - Quero Lanche's</h1>
 
   <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px;">
     
-    <% ["Unidade 1 - Matriz Centro", "Unidade 2 - Pavilhão Novo", "Unidade 3 - Pavilhão Antigo"].each do |unidade| %>
-      <div class="card-principal" style="width: 250px; padding: 30px; border: 1px solid #ccc; border-radius: 10px;">
-        <h2 style="color: #D71920;"><%= unidade %></h2>
-        <p>Gestão de Vendas e Caixa</p>
-        <%= link_to "Acessar Área", pedidos_path, class: "btn-anotar", style: "text-decoration: none; display: block; margin-top: 15px; background-color: #D71920; color: white; padding: 10px; border-radius: 5px;" %>
-      </div>
-    <% end %>
+    <%# Buscamos todas as unidades do banco para garantir que temos os IDs reais %>
+<% unidades_do_banco = Unidade.all %>
 
-    <% if current_funcionario.admin? %>
-      <div class="card-principal" style="width: 250px; padding: 30px; border: 2px solid #FFC107; border-radius: 10px;">
-        <h2 style="color: #333;">Estoque Geral</h2>
-        <p>Controle de Produtos</p>
-        <%= link_to "Gerenciar", produtos_path, class: "btn-anotar", style: "background-color: #FFC107; color: #333; text-decoration: none; display: block; margin-top: 15px; padding: 10px; border-radius: 5px;" %>
-      </div>
-    <% end %>
-
+<% unidades_do_banco.each do |unidade| %>
+  <%# Só mostramos se for Admin OU se for a unidade do funcionário %>
+  <% if current_funcionario.admin? || current_funcionario.unidade_id == unidade.id %>
+    <div class="card-principal" ...>
+      <h2><%= unidade.nome %></h2>
+      <p>Gestão de Vendas e Caixa</p>
+      
+      <%# Aqui está a correção: enviamos unidade_id: unidade.id %>
+      <%= link_to "ACESSAR ÁREA", pedidos_path(unidade_id: unidade.id), class: "btn-anotar",  style: "text-decoration: none; display: block; margin-top: 15px; background-color: #D71920; color: white; padding: 10px; border-radius: 5px; font-weight: bold; text-align: center;" %>
+    </div>
+  <% end %>
+<% end %>
+    
   </div>
 </div>

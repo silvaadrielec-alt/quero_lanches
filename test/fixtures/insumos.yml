@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  nome: MyString
+  preco_venda: 9.99
+  estoque_centro: 9.99
+  estoque_pavilhao_novo: 9.99
+  estoque_pavilhao_antigo: 9.99
+  media_unidades_kg: 9.99
+
+two:
+  nome: MyString
+  preco_venda: 9.99
+  estoque_centro: 9.99
+  estoque_pavilhao_novo: 9.99
+  estoque_pavilhao_antigo: 9.99
+  media_unidades_kg: 9.99

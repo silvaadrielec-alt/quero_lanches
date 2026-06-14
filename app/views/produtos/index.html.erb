@@ -1,105 +1,136 @@
-<div class="card-principal" style="max-width: 1100px; margin: 40px auto; text-align: center;">
-  <h1 style="color: var(--vermelho-quero); margin-bottom: 30px;">Cadastro de Produtos e Insumos</h1>
-
-  <div style="margin-bottom: 30px; text-align: center;">
-    <input type="text" id="buscaProdutos" onkeyup="filtrarProdutos()" placeholder="🔍 Pesquisar por código ou nome..." 
-           style="width: 80%; padding: 12px; border-radius: 20px; border: 1px solid #007bff; outline: none; font-size: 16px;">
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; box-sizing: border-box; text-align: center;">
+  
+  <%# --- 🌟 PADRÃO DO SISTEMA: BOTÃO VOLTAR REPOSICIONADO NO TOPO --- %>
+  <div style="text-align: left; margin-bottom: 20px;" class="no-print">
+    <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+      ← VOLTAR PARA O PAINEL
+    <% end %>
   </div>
 
+  <h1 style="color: #D71920; margin-bottom: 30px; font-weight: bold; font-size: 2.2em; letter-spacing: 0.5px;">Cadastro de Produtos para Venda</h1>
+
+  <%# BARRA DE PESQUISA COM ACABAMENTO PROFISSONAL %>
+  <div style="margin-bottom: 30px; text-align: center; max-width: 600px; margin-left: auto; margin-right: auto;">
+    <input type="text" id="buscaProdutos" onkeyup="filtrarProdutos()" placeholder="🔍 Pesquisar por código ou nome..." 
+           style="width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 15px; box-sizing: border-box; color: #1e293b; font-weight: 500;">
+  </div>
+
+  <%# BOTÃO EXECUTIVO CADASTRAR NOVO PRODUTO À DIREITA %>
   <% if current_funcionario.admin? %>
-    <div style="margin-bottom: 30px;">
-      <%= link_to "Novo Produto/Insumo", new_produto_path, 
-          style: "background-color: #D71920; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block;" %>
+    <div style="margin-bottom: 25px; text-align: right; box-sizing: border-box; width: 100%;">
+      <%= link_to new_produto_path, 
+          style: "background-color: #D71920; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 12px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px;" do %>
+        + CADASTRAR NOVO PRODUTO
+      <% end %>
     </div>
   <% end %>
 
- <div class="card-principal">
-  <%# --- SEÇÃO 1: ITENS DE VENDA (COM EXIBIÇÃO DE VARIANTES) --- %>
-  <h2 style="text-align: left; margin-left: 20px; color: #D71920; border-bottom: 2px solid #D71920;">Produtos para Venda (Lanches e Bebidas)</h2>
-  <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;" id="tabelaVendas">
-    <thead>
-      <tr style="background-color: #D71920; color: white;">
-        <th style="padding: 10px; text-align: left; padding-left: 20px;">Código</th>
-        <th style="padding: 10px; text-align: left;">Nome</th>
-        <th style="padding: 10px;">Custo Base</th>
-        <th style="padding: 10px;">Preço de Venda</th>
-        <th style="padding: 10px; text-align: center;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @produtos_venda.each do |produto| %>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="text-align: left; padding-left: 20px; font-family: monospace; font-weight: bold; color: #555;">
-            <%= produto.codigo.present? ? produto.codigo : "---" %>
-          </td>
-          <td style="text-align: left;"><strong><%= produto.nome %></strong></td>
-          <td><%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
-          
-          <%# MOTOR DE VERIFICAÇÃO DE VARIANTES %>
-          <td>
-            <% if produto.variacao_produtos.any? %>
-              <div style="display: flex; flex-direction: column; gap: 4px; text-align: center;">
-                <% produto.variacao_produtos.each do |v| %>
-                  <span style="font-size: 12px; display: block;">
-                    <%= v.tamanho %>: <strong style="color: #28a745;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
-                  </span>
+  <%# CONTÊINER DE TABELA COM MOLDURA VERMELHA OFICIAL %>
+  <div class="card-principal" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 12px; background: #fff; padding: 30px; border: 2px solid #D71920 !important; box-sizing: border-box;">
+    <h2 style="text-align: left; margin-top: 0; margin-bottom: 20px; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-weight: bold; font-size: 1.5em;">Produtos Cadastrados</h2>
+    
+    <table style="width: 100%; border-collapse: collapse; text-align: left; box-sizing: border-box;" id="tabelaVendas">
+      <thead>
+        <tr style="background-color: #D71920; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+          <%# 🌟 LARGURAS RECALIBRADAS PARA DAR ESPAÇO AO PREÇO %>
+          <th style="padding: 12px 15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 20px; width: 10%;">Código</th>
+          <th style="padding: 12px 15px; width: 25%;">Nome</th>
+          <th style="padding: 12px 15px; text-align: center; width: 20%;">Estoque Físico Atual</th>
+          <th style="padding: 12px 15px; text-align: center; width: 12%;">Custo Base</th>
+          <th style="padding: 12px 15px; text-align: center; width: 18%;">Preço Venda</th>
+          <th style="padding: 12px 15px; text-align: center; border-top-right-radius: 6px; border-bottom-right-radius: 6px; width: 15%;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @produtos_venda.each do |produto| %>
+          <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+            
+            <%# CÓDIGO %>
+            <td style="padding: 15px; padding-left: 20px; font-family: monospace; font-weight: bold; color: #64748b; font-size: 14px; vertical-align: middle;">
+              <%= produto.codigo.present? ? produto.codigo.upcase : "---" %>
+            </td>
+            
+            <%# NOME %>
+            <td style="padding: 15px; color: #1e293b; font-size: 14px; vertical-align: middle;">
+              <strong style="font-size: 14px; display: block; text-transform: uppercase;"><%= produto.nome %></strong>
+              <% if produto.composicoes.any? %>
+                <span style="font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; background-color: #fef2f2; color: #D71920; border: 1px solid #fee2e2; text-transform: uppercase; display: inline-block; margin-top: 4px;">Ficha Técnica Ativa</span>
+              <% end %>
+            </td>
+            
+           <td style="padding: 15px; text-align: center; vertical-align: middle;">
+  <% 
+    # 1. DEFINIÇÃO DAS VARIÁVEIS (Isso estava faltando!)
+    centro = produto.estoque_centro.to_f
+    p_novo = produto.estoque_pavilhao_novo.to_f
+    p_antg = produto.estoque_pavilhao_antigo.to_f
+
+    alerta_c  = centro < produto.limite_centro.to_f
+    alerta_pn = p_novo < produto.limite_pavilhao_novo.to_f
+    alerta_pa = p_antg < produto.limite_pavilhao_antigo.to_f
+  %>
+
+  <%# 2. DIV QUE USA AS VARIÁVEIS ACIMA %>
+  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_c ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_c ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_c ? '#FDE68A' : '#bae6fd' %>;">
+      M: <%= number_with_precision(centro, precision: 0) %>
+    </span>
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_pn ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_pn ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_pn ? '#FDE68A' : '#bae6fd' %>;">
+      PN: <%= number_with_precision(p_novo, precision: 0) %>
+    </span>
+    <span style="font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background-color: <%= alerta_pa ? '#FEF3C7' : '#e0f2fe' %>; color: <%= alerta_pa ? '#B45309' : '#0369a1' %>; border: 1px solid <%= alerta_pa ? '#FDE68A' : '#bae6fd' %>;">
+      PA: <%= number_with_precision(p_antg, precision: 0) %>
+    </span>
+  </div>
+</td>
+            
+            <%# CUSTO BASE %>
+            <td style="padding: 15px; text-align: center; font-size: 14px; color: #475569; font-weight: 500; vertical-align: middle;">
+              <%= number_to_currency(produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %>
+            </td>
+            
+            <%# PREÇO DE VENDA REORGANIZADO %>
+            <td style="padding: 15px; text-align: center; font-weight: bold; font-size: 14px; vertical-align: middle;">
+              <% if produto.variacao_produtos.any? %>
+                <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: left; max-width: 180px; margin: 0 auto;">
+                  <% produto.variacao_produtos.each do |v| %>
+                    <span style="font-size: 11px; font-weight: normal; color: #475569; white-space: nowrap;">
+                      <%= v.tamanho.upcase %>: <strong style="color: #16a34a;"><%= number_to_currency(v.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></strong>
+                    </span>
+                  <% end %>
+                </div>
+              <% else %>
+                <span style="color: #16a34a; font-size: 14px;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
+              <% end %>
+            </td>
+
+            <%# AÇÕES %>
+            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+              <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                <%= link_to produto_path(produto), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                  Detalhes
+                <% end %>
+                
+                <% if current_funcionario.admin? %>
+                  <%= link_to edit_produto_path(produto), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; text-transform: uppercase; letter-spacing: 0.3px;" do %>
+                    Editar
+                  <% end %>
                 <% end %>
               </div>
-            <% else %>
-              <span style="color: #28a745; font-weight: bold;"><%= number_to_currency(produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></span>
-            <% end %>
-          </td>
+            </td>
 
-          <td style="text-align: center; padding: 10px;">
-            <%= link_to 'Detalhes', produto_path(produto), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
-            
-            <% if current_funcionario.admin? %>
-              <%= link_to 'Editar', edit_produto_path(produto), style: "color: #0000FF; text-decoration: underline;" %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-
-  <%# --- SEÇÃO 2: INSUMOS --- %>
-  <h2 style="text-align: left; margin-left: 20px; color: #555; border-bottom: 2px solid #555;">Insumos (Matéria-Prima)</h2>
-  <table style="width: 100%; border-collapse: collapse;" id="tabelaInsumos">
-    <thead>
-      <tr style="background-color: #555; color: white;">
-        <th style="padding: 10px; text-align: left; padding-left: 20px;">Código</th>
-        <th style="padding: 10px; text-align: left;">Nome</th>
-        <th style="padding: 10px;">Custo Unitário</th>
-        <th style="padding: 10px; text-align: center;">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @insumos.each do |insumo| %>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="text-align: left; padding-left: 20px; font-family: monospace; font-weight: bold; color: #555;">
-            <%= insumo.codigo.present? ? insumo.codigo : "---" %>
-          </td>
-          <td style="text-align: left;"><strong><%= insumo.nome %></strong></td>
-          <td><%= number_to_currency(insumo.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></td>
-          <td style="text-align: center; padding: 10px;">
-            <%= link_to 'Detalhes', produto_path(insumo), style: "color: #0000FF; text-decoration: underline; margin-right: 10px;" %>
-
-            <% if current_funcionario.admin? %>
-              <%= link_to 'Editar', edit_produto_path(insumo), style: "color: #0000FF; text-decoration: underline;" %>
-            <% end %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
 function filtrarProdutos() {
   var input = document.getElementById("buscaProdutos");
   var filter = input.value.toUpperCase();
-  var rows = document.querySelectorAll("tbody tr");
+  var rows = document.querySelectorAll("#tabelaVendas tbody tr");
 
   rows.forEach(function(row) {
     var tdCodigo = row.getElementsByTagName("td")[0];

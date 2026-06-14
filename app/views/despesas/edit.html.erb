@@ -1,21 +1,16 @@
-<div style="max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
-
-  <%# Título Centralizado %>
-  <h1 style="color: #D71920; font-size: 2.5em; margin-bottom: 10px;">Editar Despesa</h1>
-  <p style="color: #666; margin-bottom: 30px;">Altere as informações abaixo para atualizar o registro.</p>
-
-  <%# Container com Borda Vermelha (Igual ao formulário de novo gasto) %>
-  <div style="background-color: white; border: 2px solid #D71920; border-radius: 30px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;">
-    
-    <%# Renderiza o formulário que já ajustamos com a trava de segurança %>
-    <%= render "form", despesa: @despesa %>
-
-  </div>
-
-  <%# Botão Voltar estilo Pílula %>
-  <div style="margin-top: 20px;">
-  <%= link_to "Cancelar e Voltar", despesas_path, 
-      style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold; font-size: 0.9em;" %>
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 600px; margin: 20px auto 15px auto; padding: 0 10px; box-sizing: border-box; text-align: left; font-family: sans-serif;">
+  <%= link_to despesas_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← CANCELAR E VOLTAR
+  <% end %>
 </div>
 
+<%# CARD PRINCIPAL COM BORDA VERMELHA OFICIAL %>
+<div class="card-principal" style="max-width: 600px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important;">
+  <h1 style="color: #D71920; margin-top: 0; margin-bottom: 10px; font-size: 1.8em; text-align: center; font-weight: bold; letter-spacing: 0.5px;">
+    Editar Despesa
+  </h1>
+  <p style="color: #64748b; margin-bottom: 30px; font-size: 13px; text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; font-style: italic;">Altere as informações abaixo para atualizar o registro financeiro.</p>
+
+  <%= render "form", despesa: @despesa %>
 </div>

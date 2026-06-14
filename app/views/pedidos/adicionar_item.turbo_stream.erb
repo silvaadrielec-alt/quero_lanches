@@ -1,0 +1,91 @@
+<%= turbo_stream.append "itens-carrinho" do %>
+  <%= fields_for "pedido[item_pedidos_attributes][#{@index}]", @item_pedido do |item_form| %>
+    
+    <div class="item-linha" style="background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 20px; box-sizing: border-box;">
+      
+      <%# GRID PRINCIPAL DO PRODUTO %>
+      <div style="display: grid; grid-template-columns: 35% 25% 15% 15% 5%; gap: 15px; align-items: end; padding-bottom: 10px; box-sizing: border-box;">
+        
+        <%# COLUNA 1: BUSCA CONECTADA COM DATALIST %>
+        <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+          <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 6px; text-transform: uppercase; font-family: sans-serif;">Item do Cardápio</label>
+          <input type="text" 
+                 list="lista-produtos-venda" 
+                 class="input-busca-produto" 
+                 placeholder="Nome ou código..." 
+                 autocomplete="off"
+                 style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; font-size: 14px; color: #1e293b; font-weight: 500;">
+          
+          <%= item_form.hidden_field :produto_id, class: "select-produto" %>
+          
+          <div class="coluna-remocoes" style="display: none; margin-top: 8px; box-sizing: border-box;">
+            <input type="text" class="input-obs-item" placeholder=" Ex: Sem cebola, Sem tomate..." style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #fca5a5; background: #fffcfc; font-size: 13px; color: #b91c1c; box-sizing: border-box; height: 36px; font-weight: 500;">
+          </div>
+        </div>
+
+        <%# COLUNA 2: TAMANHO %>
+        <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+          <div class="coluna-tamanho" style="visibility: hidden; display: block; box-sizing: border-box;">
+            <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 5px; text-transform: uppercase; font-family: sans-serif;">Tamanho / Volume</label>
+            <%= item_form.select :tamanho, [
+              ["Copo 200ml", "Copo 200ml"], 
+              ["Copo 300ml", "Copo 300ml"], 
+              ["Copo 500ml", "Copo 500ml"], 
+              ["Copo 700ml", "Copo 700ml"], 
+              ["Jarra 1L", "Jarra 1L"],
+              ["Porção 300g", "Porção 300g"],
+              ["Porção 500g", "Porção 500g"],
+              ["Por Peso / Balança (KG)", "Por Peso / Balança (KG)"]
+            ], { prompt: "Tamanho Padrão" }, { class: "select-tamanho", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; background: #fff; font-size: 14px; color: #1e293b;" } %>
+          </div>
+        </div>
+
+        <%# COLUNA 3: QUANTIDADE %>
+        <div style="display: flex; flex-direction: column; text-align: left; box-sizing: border-box; width: 100%;">
+          <label style="font-weight: bold; font-size: 11px; color: #D71920; display: block; margin-bottom: 5px; text-transform: uppercase; font-family: sans-serif;">Qtd / Peso</label>
+          <%= item_form.number_field :quantidade, class: "input-quantidade", step: 1, min: 1, value: 1, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; height: 38px; font-size: 14px; color: #1e293b; font-weight: bold;" %>
+        </div>
+
+        <%# COLUNA 4: VALOR ITEM %>
+        <div style="text-align: right; display: flex; flex-direction: column; justify-content: flex-end; box-sizing: border-box; height: 58px;">
+          <label style="font-weight: bold; font-size: 11px; color: #64748b; display: block; margin-bottom: 8px; text-transform: uppercase; text-align: right; font-family: sans-serif;">Valor Base</label>
+          <span class="label-subtotal-item" style="font-size: 1.1em; font-weight: bold; color: #1e293b; display: block; padding-bottom: 4px;">R$ 0,00</span>
+          <%= item_form.hidden_field :preco_unitario, class: "input-preco-unitario-oculto", value: "0.00" %>
+        </div>
+
+        <%# COLUNA 5: BOTÃO EXCLUIR %>
+        <div style="text-align: center; box-sizing: border-box;">
+          <button type="button" onclick="removerLinha(this)" style="background: #dc2626; color: white; border: none; border-radius: 8px; padding: 9px 15px; cursor: pointer; font-weight: bold; width: 100%; box-sizing: border-box; height: 38px;">✕</button>
+        </div>
+      </div>
+
+      <%# CONTAINER DE ADICIONAIS %>
+      <div class="bloco-adicionais" style="background: #fff; padding: 15px; border-radius: 8px; border: 1px dashed #D71920; margin-top: 10px; display: none; box-sizing: border-box;">
+        <strong style="color: #D71920; font-size: 12px; display: block; margin-bottom: 12px; text-transform: uppercase; text-align: left; font-family: sans-serif; letter-spacing: 0.3px;"> Adicionais Extra (Opcional):</strong>
+        
+        <div class="container-adicionais-linhas" id="container-adicionais-linhas-<%= @index %>" style="box-sizing: border-box;"></div>
+
+        <div style="text-align: left;">
+          <%= link_to "+ Incluir Adicional", 
+                      adicionar_adicional_pedidos_path(index_item: @index), 
+                      data: { turbo_method: :post }, 
+                      class: "btn-adicionar-adicional",
+                      style: "background: #1e293b; color: white; text-decoration: none; display: inline-block; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.3px;" %>
+        </div>
+      </div>
+
+      <%# Subtotal da Linha %>
+      <div style="text-align: right; margin-top: 10px; font-size: 13px; border-top: 1px solid #f1f5f9; padding-top: 8px; font-family: sans-serif;">
+        <span style="color: #64748b;">Subtotal da Linha:</span>
+        <strong class="linha-subtotal-totalizado" style="color: #16a34a; font-size: 1.1em; margin-left: 5px;">R$ 0,00</strong>
+      </div>
+
+    </div>
+
+  <% end %>
+<% end %>
+
+<script>
+  // Recalcula o totalizador para computar o novo container inserido
+  calcularTudo();
+</script>

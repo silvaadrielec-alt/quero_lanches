@@ -1,11 +1,17 @@
 <% content_for :title, "Nova despesa" %>
 
-<h1>Nova despesa</h1>
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 600px; margin: 20px auto 15px auto; padding: 0 10px; box-sizing: border-box; text-align: left; font-family: sans-serif;">
+  <%= link_to despesas_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;" do %>
+    ← VOLTAR PARA DESPESAS
+  <% end %>
+</div>
 
-<%= render "form", despesa: @despesa %>
+<%# CARD PRINCIPAL COM BORDA VERMELHA OFICIAL %>
+<div class="card-principal" style="max-width: 600px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box; border: 2px solid #D71920 !important;">
+  <h1 style="color: #D71920; margin-top: 0; margin-bottom: 30px; font-size: 1.8em; text-align: center; font-weight: bold; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; letter-spacing: 0.5px;">
+    Registrar Nova Despesa
+  </h1>
 
-<br>
-
-<div>
-  <%= link_to "Voltar para despesas", despesas_path %>
+  <%= render "form", despesa: @despesa %>
 </div>

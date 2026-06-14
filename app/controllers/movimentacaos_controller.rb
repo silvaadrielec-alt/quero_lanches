@@ -1,17 +1,26 @@
 class MovimentacaosController < ApplicationController
-  before_action :set_movimentacao, only: %i[ show edit update destroy ]
+  # 🌟 CORREÇÃO: Removidos edit, update e destroy que não existem no arquivo
+  before_action :set_movimentacao, only: %i[ show ]
 
   def index
-    # Aqui buscamos de Auditoria para mostrar as entradas manuais no painel geral
-    @movimentacaos = Auditoria.where(acao: "ENTRADA").order(created_at: :desc)
+    # 🌟 CORREÇÃO: Removido o filtro .where(tipo_movimentacao: "ENTRADA") para trazer TUDO (Entradas e Saídas)
+    @movimentacaos = Movimentacao.all.order(created_at: :desc)
   end
 
   def create
-    # Quando a Rosa cadastrar uma entrada manual, criamos um registro em Auditoria
+    id_pesquisa = movimentacao_params[:produto_id]
+    
+    if id_pesquisa.include?("-")
+      tipo, id_real = id_pesquisa.split("-")
+      item_alvo = tipo == "PRODUTO" ? Produto.find(id_real) : Insumo.find(id_real)
+    else
+      item_alvo = Produto.find(id_pesquisa)
+    end
+
     @movimentacao = Auditoria.new(
-      produto: Produto.find(movimentacao_params[:produto_id]).nome,
+      produto: item_alvo.nome,
       responsavel: current_funcionario.nome,
-      unidade: movimentacao_params[:destino], # Onde o produto está entrando
+      unidade_id: movimentacao_params[:destino], 
       acao: "ENTRADA",
       qtd: movimentacao_params[:quantidade],
       data_hora: Time.current
@@ -19,36 +28,48 @@ class MovimentacaosController < ApplicationController
 
     respond_to do |format|
       if @movimentacao.save
-        # Além de salvar o log, precisamos aumentar o estoque real do produto!
         atualizar_estoque_real(@movimentacao)
-        
-        format.html { redirect_to relatorios_auditoria_path, notice: "Entrada de estoque registrada e auditada!" }
+        format.html { redirect_to movimentacaos_path, notice: "Entrada de estoque registrada e auditada com sucesso!" }
       else
         format.html { render :new, status: :unprocessable_entity }
       end
     end
   end
 
+  def show
+    # Ação show estruturada para renderizar os detalhes de uma auditoria específica
+  end
+
   private
 
-  # Método auxiliar para somar no estoque quando for entrada manual
   def atualizar_estoque_real(mov)
-    produto = Produto.find_by(nome: mov.produto)
-    return unless produto
+    target = Insumo.find_by(nome: mov.produto)
+    target ||= Produto.find_by(nome: mov.produto)
+    
+    return unless target
 
-    case mov.unidade.downcase
-    when /centro/ then produto.increment!(:estoque_centro, mov.qtd)
-    when /novo/   then produto.increment!(:estoque_pavilhao_novo, mov.qtd)
-    when /antigo/ then produto.increment!(:estoque_pavilhao_antigo, mov.qtd)
+    nome_unidade = mov.unidade&.nome&.downcase || ""
+
+    coluna = case nome_unidade
+             when /centro/ then :estoque_centro
+             when /novo/   then :estoque_pavilhao_novo
+             when /antigo/ then :estoque_pavilhao_antigo
+             end
+
+    if coluna && target.respond_to?(coluna)
+      novo_valor = (target.send(coluna).to_f + mov.qtd.to_f).round(3)
+      target.update_column(coluna, novo_valor)
     end
   end
 
+  private
+
   def set_movimentacao
-    @movimentacao = Auditoria.find(params[:id])
+    # 🌟 CORREÇÃO DEFINITIVA: Mudado de Auditoria para Movimentacao
+    @movimentacao = Movimentacao.find(params[:id])
   end
 
   def movimentacao_params
-    # Ajustei para os campos que vêm do seu formulário de movimentação
     params.require(:movimentacao).permit(:produto_id, :origem, :destino, :quantidade, :funcionario_id)
   end
 end

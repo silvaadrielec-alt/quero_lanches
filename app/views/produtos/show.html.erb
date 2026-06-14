@@ -1,110 +1,195 @@
-<p style="color: green"><%= notice %></p>
+<%# BOTÃO EXECUTIVO COMPACTO DE RETORNO NO TOPO %>
+<div style="max-width: 900px; margin: 20px auto 15px auto; padding: 0 20px; box-sizing: border-box; text-align: left;">
+  <%= link_to produtos_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;" do %>
+    ← VOLTAR PARA PRODUTOS
+  <% end %>
+</div>
 
-<div class="container-estoque" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+<%# CARD PRINCIPAL CENTRALIZADO COM MOLDURA VERMELHA OFICIAL %>
+<div class="card-principal" style="max-width: 900px; margin: 0 auto 40px auto; padding: 35px; background: #fff; border-radius: 12px; border: 2px solid #D71920 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.06); font-family: sans-serif; box-sizing: border-box;">
   
-  <%# Renderiza o partial com o Nome e dados principais do item %>
-  <%= render @produto %>
+  <%# Renderiza o partial original polido (Nome, Custo e Estoque) %>
+  <div style="margin-bottom: 35px; text-align: left; box-sizing: border-box;">
+    <%= render @produto %>
+  </div>
 
-  <div style="margin-top: 20px;">
-    <% if current_funcionario.admin? %>
-      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <%= link_to "← Voltar para Produtos", produtos_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif; font-weight: bold;" %>
-        <%= link_to 'Editar este produto', edit_produto_path(@produto), style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  <% if current_funcionario.admin? %>
+    
+    <%# SEÇÃO 1: SITUAÇÃO DE ESTOQUE POR UNIDADE %>
+    <h3 style="color: #D71920; font-weight: bold; font-size: 13px; margin-bottom: 15px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+      Situação de Estoque
+    </h3>
+
+    <% if @produto.composicoes.any? %>
+      <% # Cenário A: Produto produzido na hora que consome matérias-primas %>
+      <div style="background-color: #f8fafc; padding: 18px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #D71920; box-sizing: border-box; text-align: left; margin-bottom: 40px;">
+        <span style="font-size: 13px; color: #1e293b; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Item de Fabricação Interna</span>
+        <p style="margin: 0; font-size: 12px; color: #64748b; font-style: italic; font-weight: 500; line-height: 1.4;">
+          Este item não possui saldo de estoque direto por ser produzido na cantina. Toda venda realizada registrará baixas fracionadas e automáticas diretamente nas matérias-primas configuradas em sua Ficha Técnica.
+        </p>
       </div>
-      
-      <%# --- PAINEL DE QUANTIDADES EM ESTOQUE POR UNIDADE --- %>
-      <h3 style="color: #7D3C98; font-weight: bold; font-family: sans-serif; margin-bottom: 15px; border-bottom: 2px solid #7D3C98; padding-bottom: 5px; text-align: left;">Quantidade em Estoque nas Unidades</h3>
-      <div style="display: flex; gap: 15px; margin: 15px 0 30px 0; flex-wrap: wrap; text-align: left;">
+    <% else %>
+      <% # Cenário B: Item de revenda direta com quantidades reais e paleta azul %>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px; box-sizing: border-box;">
         
         <%# MATRIZ CENTRO %>
-        <div style="flex: 1; min-width: 180px; background: #fdf2e9; padding: 15px; border-radius: 12px; border-left: 6px solid #e67e22; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-          <span style="color: #666; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">Mínimo Matriz: <%= @produto.limite_centro.to_f %></span>
-          <h4 style="margin: 5px 0 2px 0; color: #333; font-size: 1.1em;">Matriz Centro</h4>
-          <strong style="font-size: 1.8em; color: <%= @produto.estoque_centro_baixo? ? '#D71920' : '#e67e22' %>;">
-            <%= @produto.estoque_centro.to_f %> <span style="font-size: 0.5em;"><%= @produto.unidade_medida %></span>
+        <% bg_centro = @produto.estoque_centro_baixo? ? '#fef2f2' : '#e0f2fe' %>
+        <% border_centro = @produto.estoque_centro_baixo? ? '#fee2e2' : '#bae6fd' %>
+        <% bar_centro = @produto.estoque_centro_baixo? ? '#dc2626' : '#0284c7' %>
+        <div style="background-color: <%= bg_centro %>; padding: 15px; border-radius: 8px; border: 1px solid <%= border_centro %>; text-align: left; box-sizing: border-box; border-left: 4px solid <%= bar_centro %>;">
+          <span style="color: #475569; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; letter-spacing: 0.3px;">
+            Mínimo Matriz: <%= number_with_precision(@produto.limite_centro, precision: 0) %>
+          </span>
+          <strong style="font-size: 1.6em; color: <%= @produto.estoque_centro_baixo? ? '#dc2626' : '#1e293b' %>; display: block; margin-top: 5px; font-weight: bold;">
+            <%= number_with_precision(@produto.estoque_centro, precision: 0) %> <span style="font-size: 12px; color: #475569; font-weight: normal;"><%= @produto.unidade_medida %></span>
           </strong>
-          <%= "⚠️ Reposição" if @produto.estoque_centro_baixo? %>
+          <span style="font-size: 11px; color: <%= @produto.estoque_centro_baixo? ? '#dc2626' : '#0369a1' %>; font-weight: bold; display: block; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+            <%= @produto.estoque_centro_baixo? ? "⚠️ Reposição" : "Matriz Centro" %>
+          </span>
         </div>
 
         <%# PAVILHÃO NOVO %>
-        <div style="flex: 1; min-width: 180px; background: #f5eef8; padding: 15px; border-radius: 12px; border-left: 6px solid #9b59b6; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-          <span style="color: #666; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">Mínimo Pav. Novo: <%= @produto.limite_pavilhao_novo.to_f %></span>
-          <h4 style="margin: 5px 0 2px 0; color: #333; font-size: 1.1em;">Pavilhão Novo</h4>
-          <strong style="font-size: 1.8em; color: <%= @produto.estoque_pavilhao_novo_baixo? ? '#D71920' : '#9b59b6' %>;">
-            <%= @produto.estoque_pavilhao_novo.to_f %> <span style="font-size: 0.5em;"><%= @produto.unidade_medida %></span>
+        <% bg_novo = @produto.estoque_pavilhao_novo_baixo? ? '#fef2f2' : '#e0f2fe' %>
+        <% border_novo = @produto.estoque_pavilhao_novo_baixo? ? '#fee2e2' : '#bae6fd' %>
+        <% bar_novo = @produto.estoque_pavilhao_novo_baixo? ? '#dc2626' : '#0284c7' %>
+        <div style="background-color: <%= bg_novo %>; padding: 15px; border-radius: 8px; border: 1px solid <%= border_novo %>; text-align: left; box-sizing: border-box; border-left: 4px solid <%= bar_novo %>;">
+          <span style="color: #475569; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; letter-spacing: 0.3px;">
+            Mínimo Pav. Novo: <%= number_with_precision(@produto.limite_pavilhao_novo, precision: 0) %>
+          </span>
+          <strong style="font-size: 1.6em; color: <%= @produto.estoque_pavilhao_novo_baixo? ? '#dc2626' : '#1e293b' %>; display: block; margin-top: 5px; font-weight: bold;">
+            <%= number_with_precision(@produto.estoque_pavilhao_novo, precision: 0) %> <span style="font-size: 12px; color: #475569; font-weight: normal;"><%= @produto.unidade_medida %></span>
           </strong>
-          <%= "⚠️ Reposição" if @produto.estoque_pavilhao_novo_baixo? %>
+          <span style="font-size: 11px; color: <%= @produto.estoque_pavilhao_novo_baixo? ? '#dc2626' : '#0369a1' %>; font-weight: bold; display: block; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+            <%= @produto.estoque_pavilhao_novo_baixo? ? "⚠️ Reposição" : "Pavilhão Novo" %>
+          </span>
         </div>
 
         <%# PAVILHÃO ANTIGO %>
-        <div style="flex: 1; min-width: 180px; background: #f4f6f7; padding: 15px; border-radius: 12px; border-left: 6px solid #7f8c8d; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-          <span style="color: #666; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">Mínimo Pav. Ant: <%= @produto.limite_pavilhao_antigo.to_f %></span>
-          <h4 style="margin: 5px 0 2px 0; color: #333; font-size: 1.1em;">Pavilhão Antigo</h4>
-          <strong style="font-size: 1.8em; color: <%= @produto.estoque_pavilhao_antigo_baixo? ? '#D71920' : '#7f8c8d' %>;">
-            <%= @produto.estoque_pavilhao_antigo.to_f %> <span style="font-size: 0.5em;"><%= @produto.unidade_medida %></span>
+        <% bg_antigo = @produto.estoque_pavilhao_antigo_baixo? ? '#fef2f2' : '#e0f2fe' %>
+        <% border_antigo = @produto.estoque_pavilhao_antigo_baixo? ? '#fee2e2' : '#bae6fd' %>
+        <% bar_antigo = @produto.estoque_pavilhao_antigo_baixo? ? '#dc2626' : '#0284c7' %>
+        <div style="background-color: <%= bg_antigo %>; padding: 15px; border-radius: 8px; border: 1px solid <%= border_antigo %>; text-align: left; box-sizing: border-box; border-left: 4px solid <%= bar_antigo %>;">
+          <span style="color: #475569; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; letter-spacing: 0.3px;">
+            Mínimo Pav. Ant: <%= number_with_precision(@produto.limite_pavilhao_antigo, precision: 0) %>
+          </span>
+          <strong style="font-size: 1.6em; color: <%= @produto.estoque_pavilhao_antigo_baixo? ? '#dc2626' : '#1e293b' %>; display: block; margin-top: 5px; font-weight: bold;">
+            <%= number_with_precision(@produto.estoque_pavilhao_antigo, precision: 0) %> <span style="font-size: 12px; color: #475569; font-weight: normal;"><%= @produto.unidade_medida %></span>
           </strong>
-          <%= "⚠️ Reposição" if @produto.estoque_pavilhao_antigo_baixo? %>
+          <span style="font-size: 11px; color: <%= @produto.estoque_pavilhao_antigo_baixo? ? '#dc2626' : '#0369a1' %>; font-weight: bold; display: block; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px;">
+            <%= @produto.estoque_pavilhao_antigo_baixo? ? "⚠️ Reposição" : "Pavilhão Antigo" %>
+          </span>
         </div>
       </div>
+    <% end %>
 
-      <%# Blocos Financeiros Inteligentes %>
-      <div style="display: flex; gap: 20px; margin: 25px 0; flex-wrap: wrap; clear: both; text-align: left;">
-        
-        <% if @produto.categoria == "Venda" %>
-          <%# --- VISÃO PARA PRODUTOS DE VENDA --- %>
-          <div style="flex: 1; min-width: 200px; background: #e3f2fd; padding: 15px; border-radius: 12px; border-left: 6px solid #2196f3;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Preço de Venda</span>
-            <h3 style="margin: 5px 0; color: #0d47a1; font-size: 1.6em;"><%= number_to_currency(@produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %></h3>
-          </div>
+    <%# LÓGICA DO CUSTO DE PRODUÇÃO DINÂMICO %>
+    <% custo_total = @produto.composicoes.sum do |c| 
+          qtd = c.quantidade.to_f
+          preco_insumo = c.insumo.preco_venda.to_f 
+          unidade = c.unidade_medida_uso.to_s.downcase
+          
+          if ['gramas', 'ml'].include?(unidade)
+            (qtd / 1000.0) * preco_insumo
+          elsif ['unidade', 'fatia', 'rodela', 'folha'].include?(unidade)
+            fator = c.insumo.media_unidades_kg.to_f > 0 ? c.insumo.media_unidades_kg.to_f : 1.0
+            (qtd / fator) * preco_insumo
+          else
+            qtd * preco_insumo
+          end
+        end 
+    %>
 
-          <div style="flex: 1; min-width: 200px; background: #fff3e0; padding: 15px; border-radius: 12px; border-left: 6px solid #ff9800;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Custo de Production</span>
-            <h3 style="margin: 5px 0; color: #e65100; font-size: 1.6em;">
-              <% custo_total = @produto.composicoes.sum do |c| 
-                    qtd = c.quantidade.to_f
-                    preco_insumo = c.insumo.valor_unitario.to_f
-                    unidade = c.unidade_medida_uso.to_s.downcase
-                    
-                    if ['gramas', 'ml'].include?(unidade)
-                      (qtd / 1000.0) * preco_insumo
-                    elsif ['unidade', 'fatia', 'rodela', 'folha'].include?(unidade)
-                      fator = c.insumo.media_unidades_kg.to_f > 0 ? c.insumo.media_unidades_kg.to_f : 1.0
-                      (qtd / fator) * preco_insumo
-                    else
-                      qtd * preco_insumo
-                    end
-                  end 
-              %>
-              <%= number_to_currency(custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
-            </h3>
-          </div>
+    <%# SEÇÃO 2: PRECIFICAÇÃO E LUCRO %>
+    <% if @produto.respond_to?(:variacao_produtos) && @produto.variacao_produtos.any? %>
+      
+      <h3 style="color: #D71920; font-weight: bold; font-size: 13px; margin-bottom: 20px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Precificação e Lucro por Tamanho / Volume
+      </h3>
+      
+      <%# LISTAGEM EM FILAS EXECUTIVAS BEM DELIMITADAS %>
+      <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; box-sizing: border-box;">
+        <% @produto.variacao_produtos.each do |variacao| %>
+          <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; text-align: left; box-sizing: border-box; background: #fff; border-bottom: 2px solid #cbd5e1;">
+            
+            <%# TÍTULO DA VARIAÇÃO %>
+            <div style="margin-bottom: 14px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px;">
+              <span style="display: block; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.3px;">Tamanho / Volume</span>
+              <strong style="font-size: 1.2em; color: #1e293b;"><%= variacao.tamanho.upcase %></strong>
+            </div>
 
-          <div style="flex: 1; min-width: 200px; background: #e8f5e9; padding: 15px; border-radius: 12px; border-left: 6px solid #4caf50;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Lucro p/ Unidade</span>
-            <h3 style="margin: 5px 0; color: #1b5e20; font-size: 1.6em;">
-              <%= number_to_currency(@produto.preco_venda.to_f - custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
-            </h3>
-          </div>
+            <%# GRID EXECUTIVO DE DADOS FINANCEIROS %>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; box-sizing: border-box;">
+              <div>
+                <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 3px;">Custo Total</span>
+                <span style="font-size: 1.1em; color: #b45309; font-weight: bold;">
+                  <%= number_to_currency(custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
+                </span>
+              </div>
 
-        <% else %>
-          <%# --- VISÃO PARA INSUMOS --- %>
-          <div style="flex: 1; min-width: 200px; background: #f1f8e9; padding: 15px; border-radius: 12px; border-left: 6px solid #8bc34a;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Custo de Aquisição</span>
-            <h3 style="margin: 5px 0; color: #33691e; font-size: 1.6em;"><%= number_to_currency(@produto.valor_unitario, unit: "R$ ", separator: ",", delimiter: ".") %></h3>
-          </div>
+              <div>
+                <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 3px;">Preço Venda</span>
+                <span style="font-size: 1.1em; color: #1d4ed8; font-weight: bold;">
+                  <%= number_to_currency(variacao.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %>
+                </span>
+              </div>
 
-          <div style="flex: 1; min-width: 200px; background: #fffde7; padding: 15px; border-radius: 12px; border-left: 6px solid #fbc02d;">
-            <span style="color: #666; font-size: 0.85em; font-weight: bold; text-transform: uppercase;">Fator (Unid/Kg ou L)</span>
-            <h3 style="margin: 5px 0; color: #f57f17; font-size: 1.6em;"><%= @produto.media_unidades_kg %></h3>
+              <div>
+                <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 3px;">Lucro Líquido</span>
+                <% lucro_var = variacao.preco_venda.to_f - custo_total %>
+                <span style="font-size: 1.1em; color: <%= lucro_var >= 0 ? '#16a34a' : '#dc2626' %>; font-weight: bold;">
+                  <%= number_to_currency(lucro_var, unit: "R$ ", separator: ",", delimiter: ".") %>
+                </span>
+              </div>
+            </div>
+
           </div>
         <% end %>
       </div>
 
-      <%# --- DESTRUIÇÃO REMOVIDA DAQUI E FORMULÁRIO TAMBÉM --- %>
+    <% else %>
+      
+      <%# SEÇÃO 2 ALTERNATIVA: SEM VARIAÇÕES %>
+      <h3 style="color: #D71920; font-weight: bold; font-size: 13px; margin-bottom: 15px; text-align: left; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Valores e Custos Gerais
+      </h3>
 
-      <div style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; text-align: left;">
-        <%= button_to "Excluir este produto permanentemente", @produto, method: :delete, data: { confirm: "Atenção: Esta ação não pode ser desfeita. Confirmar exclusão?" }, style: "background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; opacity: 0.7; font-size: 0.9em;" %>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px; text-align: left; box-sizing: border-box;">
+        <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+          <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">Preço de Venda</span>
+          <span style="font-size: 1.2em; color: #1d4ed8; font-weight: bold;">
+            <%= number_to_currency(@produto.preco_venda, unit: "R$ ", separator: ",", delimiter: ".") %>
+          </span>
+        </div>
+
+        <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+          <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">Custo de Produção</span>
+          <span style="font-size: 1.2em; color: #b45309; font-weight: bold;">
+            <%= number_to_currency(custo_total, unit: "R$ ", separator: ",", delimiter: ".") %>
+          </span>
+        </div>
+
+        <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+          <span style="display: block; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">Lucro p/ Unidade</span>
+          <% lucro_simples = @produto.preco_venda.to_f - custo_total %>
+          <span style="font-size: 1.2em; color: <%= lucro_simples >= 0 ? '#16a34a' : '#dc2626' %>; font-weight: bold;">
+            <%= number_to_currency(lucro_simples, unit: "R$ ", separator: ",", delimiter: ".") %>
+          </span>
+        </div>
       </div>
+
     <% end %>
-  </div>
+
+    <%# BOTÕES DE AÇÃO PARALELOS PREMIUM (ALINHAMENTO BLINDADO) %>
+    <div style="display: flex; gap: 15px; justify-content: center; align-items: stretch; border-top: 1px solid #f1f5f9; padding-top: 25px; margin-top: 20px; width: 100%;">
+      
+      <%# BOTÃO EDITAR (LINK_TO) %>
+      <%= link_to 'EDITAR PRODUTO', edit_produto_path(@produto), 
+          style: "background-color: #D71920; color: white; padding: 14px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; box-shadow: 0 4px 10px rgba(215, 25, 32, 0.18); text-align: center; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;" %>
+          
+      <%= botao_excluir @produto, texto: 'EXCLUIR PRODUTO', mensagem: 'Atenção: Esta ação não pode ser desfeita. Confirmar exclusão?',
+      estilo: "flex: 1; background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; padding: 14px 25px; border-radius: 8px; font-weight: bold; font-size: 13px; text-transform: uppercase; text-align: center; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;" %>
+      
+    </div>
+
+  <% end %>
 </div>

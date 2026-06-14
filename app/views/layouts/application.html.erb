@@ -25,7 +25,7 @@
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.js"></script>
 
-    <%# --- ESTILIZAÇÃO DO MENU SUSPENSO (DROPDOWN) --- %>
+    <%# --- ESTILIZAÇÃO DO MENU SUSPENSO E DO SININHO --- %>
     <style>
       .dropdown-quero {
         position: relative;
@@ -66,40 +66,54 @@
         transition: background 0.2s;
       }
 
-      .dropdown-conteudo a:last-child {
-        border-bottom: none;
-      }
-
       .dropdown-conteudo a:hover {
         background-color: #fcebeb;
         color: #D71920 !important;
       }
 
-      /* Exibe o menu ao passar o mouse */
       .dropdown-quero:hover .dropdown-conteudo {
         display: block;
       }
       
-      /* Mantém o botão destacado enquanto o menu está aberto */
       .dropdown-quero:hover .nav-link-quero {
         background: #D71920;
         color: white !important;
+      }
+
+      /* ESTILO DO BALÃO NOTIFICADOR DO SININHO */
+      .container-sininho {
+        position: relative;
+        display: inline-block;
+      }
+
+      .badge-sininho {
+        position: absolute;
+        top: -6px;
+        right: -4px;
+        background-color: #D71920;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: bold;
+        border: 2px solid white;
+        font-family: sans-serif;
       }
     </style>
   </head>
 
   <body>
     <nav class="navbar-quero">
-  <%# Logo centralizada com link para a home %>
-  <%= link_to root_path do %>
-    <%= image_tag "logo.png", alt: "Logo Quero Lanches", class: "logo-sistema" %>
-  <% end %>
+      <%# Logo centralizada com link para a home %>
+      <%= link_to root_path do %>
+        <%= image_tag "logo.png", alt: "Logo Quero Lanches", class: "logo-sistema" %>
+      <% end %>
 
-  <%# Botão de Início %>
-  <div style="margin-top: 10px;">
-    <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
-  </div>
-</nav>
+      <%# Botão de Início %>
+      <div style="margin-top: 10px;">
+        <%= link_to "INÍCIO / ALERTAS", root_path, style: "text-decoration: none; color: white; background: #D71920; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.8em; border: 2px solid white;" %>
+      </div>
+    </nav>
       
     <div style="margin-top: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-items: center;">
       <% if funcionario_signed_in? %>
@@ -108,43 +122,57 @@
         <%= link_to "PEDIDOS", pedidos_path, class: "nav-link-quero" %>
         
         <% if current_funcionario.admin? %>
-          <%# --- VISÃO DO ADMIN: Mantém o menu agrupado e completo --- %>
+          <%# --- VISÃO DO ADMIN --- %>
           <div class="dropdown-quero">
-            <%# AJUSTE 1: Adicionada a classe no-print para ocultar a palavra "CADASTROS" no PDF %>
             <span class="nav-link-quero no-print" style="cursor: pointer; padding-right: 15px;">
               CADASTROS ▼
             </span>
             <div class="dropdown-conteudo">
               <%= link_to "Cardápio", cardapio_index_path %>
-              <%= link_to "Produtos e Insumos", produtos_path %>
+              <%= link_to "Produtos", produtos_path %>
+              <%= link_to "Insumos", insumos_path %>
               <%= link_to "Fichas Técnicas", gerenciar_composicoes_path %>
               <%= link_to "Despesas", despesas_path %>
-              <%= link_to "Movimentar Estoque", estoques_path %>
+              <%# ✂️ LINHA DE MOVIMENTAÇÕES REMOVIDA DAQUI %>
+              <%= link_to "Reposição de Estoque", estoques_path %>
               <%= link_to "Funcionários", funcionarios_path %>
             </div>
           </div>
         <% else %>
-          <%# --- VISÃO DO FUNCIONÁRIO COMUM: Links diretos e sem submenus escondidos --- %>
+          <%# --- VISÃO DO FUNCIONÁRIO COMUM --- %>
           <%= link_to "CARDÁPIO", cardapio_index_path, class: "nav-link-quero" %>
           <%= link_to "DESPESAS", despesas_path, class: "nav-link-quero" %>
         <% end %>
         
         <% if current_funcionario.admin? %>
-          <%# AJUSTE 2: Adicionada a classe no-print no span para ocultar o caractere "|" no PDF %>
           <span class="no-print" style="margin: 0 5px; color: #ccc;">|</span>
 
           <%# --- SEÇÃO ADMINISTRATIVA EXCLUSIVA --- %>
           <%= link_to "FATURAMENTO", faturamentos_path, class: "nav-link-quero" %>
           <%= link_to "FLUXO DE CAIXA", fluxo_de_caixa_path, class: "nav-link-quero" %>
+          <%# 🌟 NOVA POSIÇÃO: Inserido como um botão direto do menu principal %>
+          <%= link_to "MOVIMENTAÇÕES DE ESTOQUE", movimentacaos_path, class: "nav-link-quero" %>
           <%= link_to "RELATÓRIOS", relatorios_path, class: "nav-link-quero" %>
-          <%= link_to 'AUDITORIA', auditoria_path, class: "nav-link-quero" %>
+          <%# 🌟 O NOVO CORAÇÃO DA FISCALIZAÇÃO DO DINHEIRO %>
+          <%= link_to 'AUDITORIA FINANCEIRA', auditorias_path, class: "nav-link-quero" %>
         <% end %>
+
+       <div class="container-sininho" style="margin-left: 5px;">
+        <%#  Esta tag faz o navegador "ouvir" o canal de rádio que criamos no Model %>
+        <%= turbo_stream_from "notificacoes_global" %>
+
+        <%= link_to notificacaos_path, class: "nav-link-quero", style: "text-decoration: none;", id: "sininho-container" do %>
+        🔔 Alertas
+        <%# Renderiza o parcial do badge pela primeira vez ao carregar a página %>
+        <%= render "notificacaos/badge" %>
+       <% end %>
+       </div>
 
         <%# Botão de Sair %>
         <%= link_to "SAIR", destroy_funcionario_session_path, 
-    data: { turbo_method: :delete }, 
-    class: "nav-link-quero", 
-    style: "border: 2px solid #D71920; padding: 5px 15px; border-radius: 20px; font-size: 13px; margin-left: 10px;" %>
+            data: { turbo_method: :delete }, 
+            class: "nav-link-quero", 
+            style: "border: 2px solid #D71920; padding: 5px 15px; border-radius: 20px; font-size: 13px; margin-left: 10px;" %>
       
       <% else %>
         <%= link_to "ENTRAR", new_funcionario_session_path, class: "nav-link-quero" %>

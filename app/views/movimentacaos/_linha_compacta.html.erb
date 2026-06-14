@@ -1,0 +1,75 @@
+<%# --- 🌟 REGRA DE NEGÓCIO SEGURO COMPACTA (VIA REGEX) --- %>
+<% 
+  tipo_mov = movimentacao.tipo_movimentacao.to_s.upcase
+  eh_saida = tipo_mov.match?(/SAÍDA|SAIDA/) || tipo_mov.include?("BAIXA")
+%>
+
+<div class="card-mov-compacto" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 20px; box-sizing: border-box; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: block; width: 100%; border-bottom: 2px solid #edf2f7;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-sizing: border-box; width: 100%;">
+    
+    <%# Coluna da Esquerda: Categorias, Identificadores e Título %>
+    <div style="flex: 1; min-width: 280px; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        
+        <%# 1. Categoria (Insumo ou Cardápio) - Mantido o cinza padrão %>
+        <% tipo_registro = movimentacao.insumo.present? ? "INSUMO" : "CARDÁPIO" %>
+        <span style="font-size: 10px; font-weight: bold; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; text-transform: uppercase;">
+          <%= tipo_registro %>
+        </span>
+        
+        <%# 2. Unidade Alvo - 🌟 NOVO: Azul-marinho corporativo para dar contraste %>
+        <span style="font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; text-transform: uppercase; letter-spacing: 0.3px;">
+          <%= movimentacao.unidade&.nome&.upcase || "SEM UNIDADE" %>
+        </span>
+
+        <%# 3. Status da Operação (Entrada ou Saída) %>
+        <span style="font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; background-color: <%= eh_saida ? '#FFF0F0' : '#EFFFF0' %>; color: <%= eh_saida ? '#D71920' : '#28a745' %>; border: 1px solid <%= eh_saida ? '#FFDCDC' : '#D1F2D9' %>; text-transform: uppercase; letter-spacing: 0.3px;">
+          <%= movimentacao.tipo_movimentacao.to_s.upcase %>
+        </span>
+
+        <%# 4. Funcionário / Sistema %>
+        <span style="font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; background-color: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 0.3px;">
+           <%= movimentacao.funcionario.present? ? movimentacao.funcionario.nome.split.first.upcase : "SISTEMA" %>
+        </span>
+      </div>
+
+      <%# Nome do Item %>
+      <h3 style="margin: 8px 0 0 0; font-size: 15px; color: #1e293b; font-weight: bold; font-family: sans-serif; letter-spacing: 0.3px;">
+        <%= movimentacao.insumo.present? ? movimentacao.insumo.nome.upcase : (movimentacao.produto.present? ? movimentacao.produto.nome.upcase : "ITEM REMOVIDO") %>
+      </h3>
+    </div>
+
+    <%# Coluna da Direita: Metadados, Valores e Link %>
+    <div style="display: flex; align-items: center; gap: 20px; justify-content: flex-end; flex-wrap: wrap; box-sizing: border-box;">
+      
+      <%# Data e hora %>
+      <div style="text-align: right; font-family: sans-serif; min-width: 85px; box-sizing: border-box;">
+        <span style="font-size: 13px; color: #1e293b; font-weight: bold; display: block; margin-bottom: 2px;">
+          <%= movimentacao.created_at.strftime("%d/%m/%Y") if movimentacao.created_at %>
+        </span>
+        <span style="font-size: 12px; color: #475569; font-weight: 600; display: block;">
+          <%= movimentacao.created_at.strftime("%H:%M") if movimentacao.created_at %>
+        </span>
+      </div>
+
+      <%# Quantidade Dinâmica %>
+      <div style="min-width: 95px; text-align: right; font-family: sans-serif; box-sizing: border-box;">
+        <span style="color: <%= eh_saida ? '#D71920' : '#16a34a' %>; font-weight: bold; font-size: 15px; display: block;">
+          <%= eh_saida ? "-" : "+" %> <%= number_with_precision(movimentacao.quantidade, precision: 3, separator: ',') %>
+        </span>
+        <small style="font-size: 10px; color: #64748b; font-weight: bold; display: block; text-transform: uppercase; letter-spacing: 0.3px;">
+          <%= movimentacao.insumo.present? ? (movimentacao.insumo.respond_to?(:unidade_medida) ? movimentacao.insumo.unidade_medida : 'KG') : 'UN' %>
+        </small>
+      </div>
+
+      <%# Link de Detalhes %>
+      <div style="box-sizing: border-box;">
+        <%= link_to movimentacao_path(movimentacao), style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.3px; text-align: center;" do %>
+          Detalhes
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>

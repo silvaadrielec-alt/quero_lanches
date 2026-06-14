@@ -12,23 +12,26 @@ class SetupController < ApplicationController
   end
 
   def create
-    @funcionario = Funcionario.new(setup_params)
-    
-    # REGRAS DE NEGÓCIO BLINDADAS (Sem brechas para o usuário burlar)
-    @funcionario.admin = true
-    @funcionario.role = "admin"       # Garante o nível mais alto no sistema de roles
-    @funcionario.cargo = "Dono"       # Deixa explícito no perfil dele
-    @funcionario.unidade = "Matriz"   # Define uma unidade inicial padrão para evitar erros de queries
-    @funcionario.turno = "Integral"   # Define um turno padrão inicial
+  @funcionario = Funcionario.new(setup_params)
+  
+  @funcionario.admin = true
+  @funcionario.role = "admin"
+  @funcionario.cargo = "Dono"
+  
+  # CORREÇÃO: Busca a unidade pelo nome ou cria se não existir, 
+  # e atribui o ID através da associação.
+  unidade_matriz = Unidade.find_or_create_by!(nome: "Matriz")
+  @funcionario.unidade = unidade_matriz
+  
+  @funcionario.turno = "Integral"
 
-    if @funcionario.save
-      sign_in(@funcionario) # Faz o login automático para facilitar a vida do Davi
-      redirect_to root_path, notice: "Bem-vindo! Sua conta de Administrador Geral foi criada com sucesso."
-    else
-      # Se houver erro (ex: senha curta ou e-mail inválido), volta para o form
-      render :index, status: :unprocessable_entity
-    end
+  if @funcionario.save
+    sign_in(@funcionario)
+    redirect_to root_path, notice: "Bem-vindo! Sua conta de Administrador Geral foi criada com sucesso."
+  else
+    render :index, status: :unprocessable_entity
   end
+end
 
   private
 

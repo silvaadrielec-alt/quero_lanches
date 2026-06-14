@@ -1,8 +1,12 @@
-<%= form_with(model: produto) do |form| %>
+<%= form_with(model: produto, id: "form-produto-principal") do |form| %>
+  
+  <%# EXIBIÇÃO DE ERROS NO PADRÃO TONAL PREMIUM %>
   <% if produto.errors.any? %>
-    <div style="color: red; margin-bottom: 20px; font-family: sans-serif;">
-      <h2><%= produto.errors.count %> <%= produto.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar:</h2>
-      <ul>
+    <div style="color: #dc2626; background: #fef2f2; padding: 18px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #fee2e2; text-align: left; box-sizing: border-box; font-family: sans-serif; font-size: 14px;">
+      <h2 style="font-size: 15px; font-weight: bold; margin-top: 0; text-transform: uppercase; letter-spacing: 0.3px;">
+        <%= produto.errors.count %> <%= produto.errors.count > 1 ? "erros impediram" : "erro impediu" %> de salvar o produto:
+      </h2>
+      <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #b91c1c; line-height: 1.4;">
         <% produto.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -10,198 +14,99 @@
     </div>
   <% end %>
 
-  <%# CÓDIGO DO PRODUTO (MANUAL OU AUTOMÁTICO) %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :codigo, "Código do Produto / Insumo", style: "display: block; font-weight: bold; margin-bottom: 5px; color: #D71920;" %>
-    <%= form.text_field :codigo, 
-        placeholder: "Digite o código próprio ou deixe em BRANCO para gerar automaticamente", 
-        style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
+  <%# Força a categoria a ser sempre Venda de forma oculta %>
+  <%= form.hidden_field :categoria, value: "Venda" %>
+
+  <%#  ORIENTAÇÃO DE CADASTRO OPERACIONAL %>
+  <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 15px 18px; border-radius: 8px; margin-bottom: 25px; text-align: left; box-sizing: border-box;">
+    <strong style="color: #14532d; font-size: 13px; display: block; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px;">
+        O QUE CADASTRAR NESTA TELA?
+    </strong>
+    <p style="margin: 0; font-size: 12px; color: #166534; font-style: italic; font-weight: 500; line-height: 1.4;">
+      Cadastre aqui **apenas itens de revenda direta** que entram acabados no estoque (ex: Coca-Cola Lata 350ml, Coca-Cola 600ml, Picolé, Salgadinho). Cada variação de tamanho deve ser um cadastro individual para controle preciso de saldo e código.
+    </p>
   </div>
 
-  <%# 1. NOME %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :nome, "Nome do Produto/Insumo", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.text_field :nome, style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-  </div>
-
-  <%# 2. CATEGORIA %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :categoria, "Tipo do Item (Venda ou Insumo)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.select :categoria, ["Venda", "Insumo"], { prompt: "Selecione o tipo" }, { id: "select-categoria", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
-  </div>
-
-  <%# 3. UNIDADE DE MEDIDA %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :unidade_medida, "Unidade de Medida", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.select :unidade_medida, 
-        ['unidade', 'fatia', 'folha', 'rodela', 'kg', 'litro', 'gramas', 'ml'], 
-        { prompt: 'Como este item é contado?' }, 
-        { style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" } %>
-  </div>
-
-  <%# MÉDIA POR KG (Exibido condicionalmente para Insumos) %>
-  <div id="bloco-media" style="margin-bottom: 20px; background-color: #fcf3cf; padding: 10px; border-radius: 8px; border: 1px dashed #f39c12; display: none;">
-    <%= form.label :media_unidades_kg, "Média do item por kg ou litro (Tradução)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.number_field :media_unidades_kg, step: 0.01, placeholder: "Ex: 4.5 para laranjas ou 50 para fatias", style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-    <small style="color: #666;">Preencha apenas se o item for comprado em KG mas usado em unidade/fatia/rodela.</small>
-  </div>
-
-  <%# 4. VALOR DE CUSTO (FORMATADO COM 2 CASAS DECIMAIS) %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :valor_unitario, "Valor de Custo (Compra/Produção)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.number_field :valor_unitario, 
-        step: 0.01, 
-        value: form.object.valor_unitario.present? ? sprintf("%.2f", form.object.valor_unitario) : "", 
-        style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-  </div>
-
-  <%# 5. PREÇO DE VENDA PADRÃO (FORMATADO COM 2 CASAS DECIMAIS) %>
-  <div style="margin-bottom: 20px;">
-    <%= form.label :preco_venda, "Preço de Venda Padrão (Sem variação de tamanho)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
-    <%= form.number_field :preco_venda, 
-        step: 0.01, 
-        value: form.object.preco_venda.present? ? sprintf("%.2f", form.object.preco_venda) : "", 
-        style: "width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" %>
-  </div>
-
-  <%# --- BLOCO: OPÇÕES SELECIONÁVEIS, ESPAÇADAS E COM FORMATO FINANCEIRO CORRETO --- %>
-  <div id="secao-variacoes-tamanho" style="margin-bottom: 40px; background: #fdfefe; border: 1px solid #7D3C98; padding: 20px; border-radius: 12px; font-family: sans-serif;">
-    <h3 style="color: #7D3C98; margin-top: 0; font-size: 1.1em; font-weight: bold;">Precificação Especial por Tamanho / Volume</h3>
-    <p style="font-size: 13px; color: #666; margin-bottom: 20px;">* Escolha o tamanho e defina o preço específico para o cardápio e a tela de pedidos. Deixe vazio para usar o preço padrão acima.</p>
-    
-    <div id="container-variacoes">
-      <% options_tamanhos = ["Copo 200ml", "Copo 300ml", "Copo 500ml", "Copo 700ml", "Jarra 1L", "Porção 300g", "Porção 500g", "Por Peso / Balança (KG)"] %>
-
-      <%= form.fields_for :variacao_produtos do |v_form| %>
-        <div class="linha-variacao" style="display: flex; gap: 25px; margin-bottom: 18px; align-items: center;">
-          <%= v_form.hidden_field :_destroy, class: "destroy-flag", value: "false" %>
-          
-          <div style="flex: 2;">
-            <%= v_form.select :tamanho, options_tamanhos, { prompt: "Selecione o Tamanho..." }, { style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff;" } %>
-          </div>
-          <div style="flex: 1;">
-            <%# FORÇA DUAS CASAS DECIMAIS NAS LINHAS QUE VÊM SALVAS DO BANCO %>
-            <%= v_form.number_field :preco_venda, 
-                step: 0.01, 
-                placeholder: "Preço de Venda R$", 
-                value: v_form.object.preco_venda.present? ? sprintf("%.2f", v_form.object.preco_venda) : "", 
-                style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px;" %>
-          </div>
-          <div>
-            <button type="button" onclick="removerVariacao(this)" style="background: #ff4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">✕</button>
-          </div>
-        </div>
-      <% end %>
+  <%# GRID 1: Código e Unidade de Medida lado a lado %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; margin-bottom: 20px; text-align: left; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; flex-direction: column;">
+      <%= form.label :codigo, "Código do Produto", style: "font-size: 11px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= form.text_field :codigo, 
+          placeholder: "Deixe em branco para gerar automático", 
+          style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
     </div>
 
-    <button type="button" id="btn-add-variacao" style="background: #7D3C98; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9em; margin-top: 10px;">
-      + Adicionar Tamanho e Preço
-    </button>
-  </div>
-
-  <%# LIMITES %>
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #D2B4DE; padding-bottom: 15px;">
-    <div>
-      <%= form.label :limite_centro, "Mínimo Matriz", style: "color: #7D3C98; font-weight: bold;" %>
-      <%= form.number_field :limite_centro, class: "form-control" %>
-    </div>
-    <div>
-      <%= form.label :limite_pavilhao_novo, "Mínimo Pav. Novo", style: "color: #7D3C98; font-weight: bold;" %>
-      <%= form.number_field :limite_pavilhao_novo, class: "form-control" %>
-    </div>
-    <div>
-      <%= form.label :limite_pavilhao_antigo, "Mínimo Pav. Antigo", style: "color: #7D3C98; font-weight: bold;" %>
-      <%= form.number_field :limite_pavilhao_antigo, class: "form-control" %>
+    <div style="display: flex; flex-direction: column;">
+      <%= form.label :unidade_medida, "Unidade de Medida", style: "font-size: 11px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= form.select :unidade_medida, 
+          ['unidade', 'fatia', 'porção', 'kg', 'litro', 'ml'], 
+          { prompt: 'Como este item é vendido?' }, 
+          { style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; height: 41px; background: #fff; box-sizing: border-box; color: #1e293b;" } %>
     </div>
   </div>
 
-  <%# BOTÃO DE SALVAR %>
-  <div style="text-align: center;">
-    <%= form.submit "SALVAR DADOS DO PRODUTO", class: "btn-quero", style: "padding: 15px 40px; cursor: pointer; border: none; width: 100%; max-width: 400px; font-weight: bold;" %>
-    
-    <div style="margin-top: 25px;">
-      <%= link_to "← VOLTAR PARA O CADASTRO", produtos_path, style: "color: #0000FF; text-decoration: underline; font-family: sans-serif;" %>
+  <%# NOME DO PRODUTO %>
+  <div style="margin-bottom: 20px; text-align: left; display: flex; flex-direction: column; box-sizing: border-box;">
+    <%= form.label :nome, "Nome do Produto", style: "font-size: 11px; font-weight: bold; color: #D71920; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+    <%= form.text_field :nome, placeholder: "Ex: Coca-Cola Lata 350ml, Suco Prats Laranja 900ml", style: "width: 100%; padding: 11px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; color: #1e293b; font-weight: 500;" %>
+  </div>
+
+  <%# GRID 2: Valores Financeiros %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; margin-bottom: 30px; text-align: left; width: 100%; box-sizing: border-box;">
+    <div style="background-color: #fff7ed; padding: 15px 18px; border-radius: 8px; border: 1px solid #ffedd5; box-sizing: border-box; border-left: 4px solid #ea580c;">
+      <%= form.label :valor_unitario, "Custo de Compra (R$)", style: "display: block; font-weight: bold; margin-bottom: 6px; color: #c2410c; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= form.number_field :valor_unitario, 
+          step: 0.01, 
+          value: form.object.valor_unitario.present? ? sprintf("%.2f", form.object.valor_unitario) : "", 
+          placeholder: "0,00",
+          style: "width: 100%; padding: 10px 14px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; background: #fff; color: #1e293b; font-weight: bold;" %>
     </div>
+
+    <div style="background-color: #f0f9ff; padding: 15px 18px; border-radius: 8px; border: 1px solid #e0f2fe; box-sizing: border-box; border-left: 4px solid #0284c7;">
+      <%= form.label :preco_venda, "Preço de Venda Praticado (R$)", style: "display: block; font-weight: bold; margin-bottom: 6px; color: #0369a1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;" %>
+      <%= form.number_field :preco_venda, 
+          step: 0.01, 
+          value: form.object.preco_venda.present? ? sprintf("%.2f", form.object.preco_venda) : "", 
+          placeholder: "0,00",
+          style: "width: 100%; padding: 10px 14px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; background: #fff; color: #1e293b; font-weight: bold;" %>
+    </div>
+  </div>
+
+<%# 🌟 CONFIGURAÇÃO DE CONTROLE DE ESTOQUE %>
+<div style="margin-bottom: 25px; background: #e0f2fe; padding: 18px; border-radius: 8px; border: 1px solid #bae6fd; text-align: left; box-sizing: border-box;">
+  <label style="display: flex; align-items: center; gap: 14px; font-weight: bold; color: #0369a1; cursor: pointer; margin: 0;">
+    <%= form.check_box :estoque_controlado, checked: true, style: "width: 20px; height: 20px; cursor: pointer; accent-color: #0369a1;" %>
+    <span style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.3px;">ATIVAR CONTROLE DE ESTOQUE FÍSICO</span>
+  </label>
+</div>
+
+<%# 🌟 CONFIGURAÇÃO DE ALERTA DE ESTOQUE (LIMITES MÍNIMOS) %>
+  <div style="background-color: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 30px; text-align: left;">
+    <h3 style="color: #1e293b; font-size: 14px; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">
+      ⚠️ Limites para Alerta de Reposição
+    </h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+      
+      <div style="display: flex; flex-direction: column;">
+        <%= form.label :limite_centro, "Limite Centro", style: "font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 5px;" %>
+        <%= form.number_field :limite_centro, step: 0.001, style: "padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; font-weight: bold;" %>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <%= form.label :limite_pavilhao_novo, "Limite Pav. Novo", style: "font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 5px;" %>
+        <%= form.number_field :limite_pavilhao_novo, step: 0.001, style: "padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; font-weight: bold;" %>
+      </div>
+
+      <div style="display: flex; flex-direction: column;">
+        <%= form.label :limite_pavilhao_antigo, "Limite Pav. Antigo", style: "font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 5px;" %>
+        <%= form.number_field :limite_pavilhao_antigo, step: 0.001, style: "padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; font-weight: bold;" %>
+      </div>
+
+    </div>
+  </div>
+
+  <%# BOTÃO DE SALVAR PRODUTO INDIVIDUAL %>
+  <div style="text-align: center; box-sizing: border-box; width: 100%;">
+    <%= form.submit "SALVAR DADOS DO PRODUTO", style: "background-color: #D71920; color: white; padding: 13px; cursor: pointer; border: none; width: 100%; font-weight: bold; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 10px rgba(215,25,32,0.18); text-transform: uppercase; letter-spacing: 0.5px; box-sizing: border-box;" %>
   </div>
 <% end %>
-
-<script>
-  function gerenciarCamposDinamicos() {
-    const selectCategoria = document.getElementById("select-categoria");
-    const blocoMedia = document.getElementById("bloco-media");
-    const secaoVariacoes = document.getElementById("secao-variacoes-tamanho");
-
-    if (selectCategoria) {
-      if (selectCategoria.value === "Insumo") {
-        if (blocoMedia) blocoMedia.style.display = "block";
-        if (secaoVariacoes) secaoVariacoes.style.display = "none";
-      } else {
-        if (blocoMedia) blocoMedia.style.display = "none";
-        if (secaoVariacoes) secaoVariacoes.style.display = "block";
-      }
-    }
-  }
-
-  window.removerVariacao = function(botao) {
-    const linha = botao.closest(".linha-variacao");
-    const flagDestruicao = inline = linha.querySelector(".destroy-flag");
-    
-    if (flagDestruicao) {
-      flagDestruicao.value = "true";
-      linha.style.display = "none";
-    } else {
-      linha.remove();
-    }
-  }
-
-  function inicializarEventosVariacoes() {
-    const selectCategoria = document.getElementById("select-categoria");
-    if (selectCategoria) {
-      gerenciarCamposDinamicos();
-      selectCategoria.removeEventListener("change", gerenciarCamposDinamicos);
-      selectCategoria.addEventListener("change", gerenciarCamposDinamicos);
-    }
-
-    const btnAdd = document.getElementById("btn-add-variacao");
-    if (btnAdd) {
-      const novoBtn = btnAdd.cloneNode(true);
-      btnAdd.parentNode.replaceChild(novoBtn, btnAdd);
-
-      novoBtn.addEventListener("click", function(e) {
-        e.preventDefault();
-        const container = document.getElementById("container-variacoes");
-        const tempoIndex = new Date().getTime();
-
-        // Insere as novas linhas também com o formato placeholder correto
-        const novaLinhaHTML = `
-          <div class="linha-variacao" style="display: flex; gap: 25px; margin-bottom: 18px; align-items: center;">
-            <div style="flex: 2;">
-              <select name="produto[variacao_produtos_attributes][${tempoIndex}][tamanho]" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px; background: #fff;">
-                <option value="">Selecione o Tamanho...</option>
-                <option value="Copo 200ml">Copo 200ml</option>
-                <option value="Copo 300ml">Copo 300ml</option>
-                <option value="Copo 500ml">Copo 500ml</option>
-                <option value="Copo 700ml">Copo 700ml</option>
-                <option value="Jarra 1L">Jarra 1L</option>
-                <option value="Porção 300g">Porção 300g</option>
-                <option value="Porção 500g">Porção 500g</option>
-                <option value="Por Peso / Balança (KG)">Por Peso / Balança (KG)</option>
-              </select>
-            </div>
-            <div style="flex: 1;">
-              <input type="number" step="0.01" name="produto[variacao_produtos_attributes][${tempoIndex}][preco_venda]" placeholder="0,00" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; height: 40px;">
-            </div>
-            <div>
-              <button type="button" onclick="removerVariacao(this)" style="background: #ff4444; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 40px;">✕</button>
-            </div>
-          </div>
-        `;
-        
-        container.insertAdjacentHTML('beforeend', novaLinhaHTML);
-      });
-    }
-  }
-
-  document.addEventListener("turbo:load", inicializarEventosVariacoes);
-  document.addEventListener("DOMContentLoaded", inicializarEventosVariacoes);
-</script>

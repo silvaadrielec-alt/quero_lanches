@@ -1,108 +1,108 @@
-require 'csv'
-
 class FaturamentosController < ApplicationController
   before_action :authenticate_funcionario!
   before_action :verificar_admin
 
   def index
-    # Define o período com base no parâmetro da URL
     @periodo = params[:periodo] || 'semanal'
     
     case @periodo
     when 'diario'
       @range = Time.current.beginning_of_day..Time.current
-      # Agrupamento nativo por hora formatada (ex: "14:00")
-      @formato_data = "strftime('%H:00', created_at)"
+      @granularidade = :hour
     when 'semanal'
       @range = 7.days.ago.beginning_of_day..Time.current
-      # Agrupamento nativo por data pura (ex: "19/05/2026")
-      @formato_data = "strftime('%d/%m/%Y', created_at)"
+      @granularidade = :day
     when 'mensal'
       @range = 30.days.ago.beginning_of_day..Time.current
-      @formato_data = "strftime('%d/%m/%Y', created_at)"
+      @granularidade = :day
     when 'anual'
       @range = 1.year.ago.beginning_of_day..Time.current
-      # Agrupamento nativo por mês (ex: "05/2026")
-      @formato_data = "strftime('%m/%Y', created_at)"
+      @granularidade = :month
     else
       @range = 7.days.ago.beginning_of_day..Time.current
-      @formato_data = "strftime('%d/%m/%Y', created_at)"
+      @granularidade = :day
     end
 
-    # 1. Evolução Geral (Calculado de forma pura pelo SQLite, sem Groupdate)
+    # Definição clara para cada gráfico
+    titulos = { 'diario' => 'Tendência Diária', 'semanal' => 'Tendência Semanal', 'mensal' => 'Tendência Mensal', 'anual' => 'Tendência Anual' }
+    @titulo_evolucao = "Evolução de Vendas (#{titulos[@periodo].split(' ').last})"
+    @titulo_tendencia = titulos[@periodo] || 'Tendência de Vendas'
+
+    # Evolução Geral: Agrupamento dinâmico
+    agrupamento_geral = ['mensal', 'anual'].include?(@periodo) ? :week : @granularidade
     @vendas_geral_diaria = Pedido.where(created_at: @range)
-                                 .group(@formato_data)
+                                 .group_by_period(agrupamento_geral, :created_at)
                                  .sum(:valor_total)
 
-    # 2. Vendas por Unidade (Totais do período selecionado)
+    # Vendas por Unidade
     @vendas_por_unidade = {
-      "Matriz Centro" => Pedido.where(unidade: 'centro', created_at: @range).sum(:valor_total),
-      "Pavilhão Novo" => Pedido.where(unidade: 'pavilhao_novo', created_at: @range).sum(:valor_total),
-      "Pavilhão Antigo" => Pedido.where(unidade: 'pavilhao_antigo', created_at: @range).sum(:valor_total)
+      "Centro" => Pedido.where(unidade_id: 1, created_at: @range).sum(:valor_total),
+      "Pavilhão Novo" => Pedido.where(unidade_id: 2, created_at: @range).sum(:valor_total),
+      "Pavilhão Antigo" => Pedido.where(unidade_id: 3, created_at: @range).sum(:valor_total)
     }
 
-    # 3. Evolução Comparativa entre Unidades (Nativo)
-    @vendas_unidades_comparativo = [
-      { name: "Matriz", data: Pedido.where(unidade: 'centro', created_at: @range).group(@formato_data).sum(:valor_total) },
-      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo', created_at: @range).group(@formato_data).sum(:valor_total) },
-      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo', created_at: @range).group(@formato_data).sum(:valor_total) }
-    ]
+    # Tendência Mensal
+    @vendas_unidades_mensal = Pedido.where(created_at: @range)
+                                    .group_by_period(:month, :created_at)
+                                    .sum(:valor_total)
     
-    # 4. Desempenho Mensal (Nativo por mês nos últimos 12 meses)
-    formato_mensal = "strftime('%m/%Y', created_at)"
-    @vendas_unidades_mensal = [
-      { name: "Matriz", data: Pedido.where(unidade: 'centro').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) },
-      { name: "Pav. Novo", data: Pedido.where(unidade: 'pavilhao_novo').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) },
-      { name: "Pav. Antigo", data: Pedido.where(unidade: 'pavilhao_antigo').where("created_at >= ?", 12.months.ago).group(formato_mensal).sum(:valor_total) }
-    ]
+    # Comparativo
+    intervalo_comp = ['mensal', 'anual'].include?(@periodo) ? :week : :day
+    @vendas_unidades_comparativo = Pedido.where(created_at: @range)
+                                         .joins(:unidade) # Garante que a unidade existe
+                                         .group("unidades.nome")
+                                         .group_by_period(intervalo_comp, :created_at)
+                                         .sum(:valor_total)
 
-    # AJUSTADO AQUI: Agora faz o join cruzando o carrinho para somar as quantidades dos itens
-    @itens_mais_vendidos = Pedido.where(created_at: @range)
-                                 .joins(item_pedidos: :produto)
-                                 .group('produtos.nome')
-                                 .sum('item_pedidos.quantidade')
-                                 .sort_by { |_nome, qtd| -qtd }
-                                 .first(5)
+    # 4. Ranking de Produtos (Corrigido para evitar conflitos de objeto)
+    produtos_ids = ItemPedido.joins(:pedido)
+                             .where(pedidos: { created_at: @range })
+                             .group(:produto_id)
+                             .sum(:quantidade) # Retorna um hash {produto_id => total}
+    
+    # Transformamos o hash {id => total} em uma lista de objetos Produto decorados
+    @itens_mais_vendidos = produtos_ids.map do |id, total|
+      produto = Produto.find(id)
+      produto.define_singleton_method(:total_vendido) { total }
+      produto
+    end.sort_by(&:total_vendido).reverse.first(5)
 
-    # Variáveis para os Cards de valor
+    # 5. Ranking de Funcionários (Corrigido da mesma forma)
+    func_vendas = Pedido.where(created_at: @range)
+                        .group(:funcionario_id)
+                        .sum(:valor_total)
+    
+    @ranking_funcionarios = func_vendas.map do |id, total|
+      func = Funcionario.find(id)
+      func.define_singleton_method(:total_vendas) { total }
+      func
+    end.sort_by(&:total_vendas).reverse.first(5)
+
+    @ranking_funcionarios = Funcionario.joins(:pedidos)
+                                       .where(pedidos: { created_at: @range })
+                                       .group('funcionarios.id')
+                                       .select('funcionarios.*, SUM(pedidos.valor_total) as total_vendas')
+                                       .order('total_vendas DESC')
+                                       .limit(5)
+
     @total_geral = @vendas_por_unidade.values.sum
-    @vendas_matriz = @vendas_por_unidade["Matriz Centro"]
-    @vendas_pavilhao_novo = @vendas_por_unidade["Pavilhão Novo"]
-    @vendas_pavilhao_antigo = @vendas_por_unidade["Pavilhão Antigo"]
   end
 
   def exportar
-    @periodo = params[:periodo] || 'mensal'
-    
-    data_inicial = case @periodo
-                   when 'diario'  then Time.current.beginning_of_day
+    data_inicial = case params[:periodo]
+                   when 'diario' then Time.current.beginning_of_day
                    when 'semanal' then 7.days.ago.beginning_of_day
-                   when 'mensal'  then 30.days.ago.beginning_of_day
-                   when 'anual'   then 1.year.ago.beginning_of_day
+                   when 'mensal' then 30.days.ago.beginning_of_day
                    else 30.days.ago.beginning_of_day
                    end
-
     @pedidos = Pedido.where("created_at >= ?", data_inicial).order(created_at: :desc)
-
     respond_to do |format|
       format.csv do
-        filename = "QueroLanches_Faturamento_#{@periodo}_#{Date.today}.csv"
-        
         csv_data = CSV.generate(col_sep: ';', force_quotes: true) do |csv|
-          csv << ["ID Pedido", "Data e Hora", "Unidade", "Total (R$)", "Funcionario"]
-          
-          @pedidos.each do |pedido|
-             csv << [
-               pedido.id,
-               " " + pedido.created_at.strftime("%d/%m/%y %H:%M"), 
-               pedido.unidade&.upcase,
-               format("%.2f", pedido.valor_total).gsub('.', ','),
-               pedido.funcionario&.nome || "Sistema"
-             ]
-          end
+          csv << ["ID Pedido", "Data", "Unidade", "Total R$", "Funcionario"]
+          @pedidos.each { |p| csv << [p.id, p.created_at.strftime("%d/%m/%y %H:%M"), p.unidade&.nome&.upcase, '%.2f' % p.valor_total, p.funcionario&.nome] }
         end
-
-        send_data "\xEF\xBB\xBF" + csv_data, filename: filename, type: 'text/csv; charset=utf-8'
+        send_data "\xEF\xBB\xBF" + csv_data, filename: "Faturamento_#{Date.today}.csv", type: 'text/csv'
       end
     end
   end
@@ -110,6 +110,6 @@ class FaturamentosController < ApplicationController
   private
 
   def verificar_admin
-    redirect_to root_path, alert: "Acesso restrito à gerência." unless current_funcionario.admin?
+    redirect_to root_path, alert: "Acesso restrito." unless current_funcionario&.admin?
   end
 end

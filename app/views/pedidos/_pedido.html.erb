@@ -1,99 +1,100 @@
-<div id="<%= dom_id pedido %>" style="background: white; border: 1px solid #ddd; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); max-width: 500px; line-height: 1.8; font-family: sans-serif;">
+<div id="<%= dom_id pedido %>" style="background: white; border: 2px solid #D71920 !important; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); max-width: 500px; line-height: 1.8; font-family: sans-serif; box-sizing: border-box; text-align: left;">
   
-  <div style="border-bottom: 2px dashed #eee; margin-bottom: 15px; padding-bottom: 10px;">
-    <h3 style="color: #D71920; margin: 0;">Detalhamento do Pedido</h3>
+  <div style="border-bottom: 2px dashed #e2e8f0; margin-bottom: 20px; padding-bottom: 10px; text-align: center;">
+    <h3 style="color: #D71920; margin: 0; font-weight: bold; font-size: 1.35em; letter-spacing: 0.3px;">DETALHAMENTO DO PEDIDO</h3>
   </div>
 
-  <%# --- SEÇÃO DE PRODUTOS CORRIGIDA --- %>
-  <div style="margin-bottom: 15px; background: #fff8f8; padding: 12px; border-radius: 8px; border-left: 4px solid #7D3C98;">
-    <strong style="color: #7D3C98; display: block; margin-bottom: 5px;">🛒 Itens do Pedido:</strong>
+  <%# --- SEÇÃO DE PRODUTOS --- %>
+  <div style="margin-bottom: 20px; background: #fffcfc; padding: 15px; border-radius: 8px; border-left: 4px solid #D71920; box-sizing: border-box;">
+    <strong style="color: #D71920; display: block; margin-bottom: 8px; text-transform: uppercase; font-size: 0.9em; font-weight: bold;"> Itens do Carrinho:</strong>
+    
     <% if pedido.item_pedidos.any? %>
-      <ul style="margin: 0; padding-left: 20px; color: #333;">
+      <ul style="margin: 0; padding-left: 18px; color: #1a202c;">
         <% pedido.item_pedidos.each do |item| %>
-          <% 
-            # Puxa o preço unitário real gravado no banco de dados
-            preco_un = item.respond_to?(:preco_unitario) && item.preco_unitario.to_f > 0 ? item.preco_unitario.to_f : item.produto&.preco_venda.to_f
-          %>
-          <li style="margin-bottom: 5px;">
-            <strong><%= item.produto&.nome %></strong> 
-            <%= "<span style='color: #7D3C98; font-size:0.9em;'>[#{item.tamanho}]</span>".html_safe if item.tamanho.present? %>
+          <% preco_un = item.respond_to?(:preco_unitario) && item.preco_unitario.to_f > 0 ? item.preco_unitario.to_f : item.produto&.preco_venda.to_f %>
+          <li style="margin-bottom: 8px;">
+            <strong style="color: #1a202c; font-size: 14px; text-transform: uppercase;"><%= item.produto&.nome %></strong> 
+            <span style="color: #1a202c; font-weight: bold;"><%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome.upcase : "Produto legado" %></span>
             <br>
-            <span style="color: #666; font-size: 0.9em;">
-              <%= item.quantidade %>x de <%= number_to_currency(preco_un, unit: "R$ ", separator: ",", delimiter: ".") %> 
-              (Total: <%= number_to_currency(preco_un * item.quantidade.to_f, unit: "R$ ", separator: ",", delimiter: ".") %>)
+            <span style="color: #4a5568; font-size: 0.9em; font-weight: 500;">
+              <% precisao_qtd = item.tamanho.to_s.downcase.include?('kg') || item.tamanho.to_s.downcase.include?('balança') ? 3 : 0 %>
+              <%= number_with_precision(item.quantidade, precision: precisao_qtd, separator: ",") %>x de <%= number_to_currency(preco_un, unit: "R$ ") %> 
+              (Subtotal: <%= number_to_currency(preco_un * item.quantidade.to_f, unit: "R$ ") %>)
             </span>
+
+            <% if item.item_pedido_adicionais.any? %>
+              <ul style="margin: 6px 0 0 0; padding: 0; list-style: none; font-size: 0.9em; color: #155724; background: #f0fdf4; padding: 8px; border-radius: 6px; border: 1px solid #d1fae5;">
+                <% item.item_pedido_adicionais.each do |add| %>
+                  <li style="font-weight: 600;">
+                    Extra: <%= add.quantidade.to_i %>x <%= add.insumo&.nome&.upcase %> 
+                    <% if add.preco_unitario.to_f > 0 %>
+                      (+ <%= number_to_currency(add.preco_unitario.to_f * add.quantidade.to_f, unit: "R$ ") %>)
+                    <% else %>
+                      <span style="font-size: 0.85em; color: #718096; font-weight: normal;">(Cortesia)</span>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            <% end %>
           </li>
         <% end %>
       </ul>
     <% else %>
-      <span style="color: #333;"><%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome : "Produto legado" %></span>
+      <span style="color: #1a202c; font-weight: bold;"><%= pedido.respond_to?(:produto) && pedido.produto ? pedido.produto.nome.upcase : "Produto legado" %></span>
     <% end %>
   </div>
 
-  <div>
-    <strong style="color: #555;">Cliente:</strong> 
-    <span style="color: #333;"><%= pedido.cliente_nome.presence || "Não identificado" %></span>
-  </div>
-
-  <div>
-    <strong style="color: #555;">Atendido por:</strong> 
-    <span style="color: #333;"><%= pedido.funcionario&.nome %></span>
-  </div>
-
-  <div>
-    <strong style="color: #555;">Quantidade Total:</strong> 
-    <span style="color: #333;">
-      <% if pedido.item_pedidos.any? %>
-        <%= number_with_precision(pedido.item_pedidos.sum(:quantidade), precision: 2, separator: ",", delimiter: ".")&.gsub(',00', '') %> un
-      <% else %>
-        <%= pedido.respond_to?(:quantidade) ? number_with_precision(pedido.quantidade, precision: 2, separator: ",", delimiter: ".")&.gsub(',00', '') : 1 %>
-      <% end %>
-    </span>
-  </div>
-
-  <div style="margin-top: 5px;">
-    <strong style="color: #555;">Data:</strong> 
-    <span style="color: #333;"><%= pedido.created_at.strftime("%d/%m/%Y") %></span>
-  </div>
-
-  <div style="margin-bottom: 10px;">
-    <strong style="color: #555;">Horário:</strong> 
-    <span style="color: #333;"><%= pedido.created_at.strftime("%H:%M") %></span>
-  </div>
-
-  <div>
-    <strong style="color: #555;">Forma de Pagamento:</strong> 
-    <span style="color: #333;">
-      <%
-        formas = []
-        formas << "Dinheiro" if pedido.pago_dinheiro.to_f > 0
-        formas << "Pix" if pedido.pago_pix.to_f > 0
-        formas << "Débito" if pedido.pago_cartao_debito.to_f > 0
-        formas << "Crédito" if pedido.pago_cartao_credito.to_f > 0
-      %>
-      <%= formas.any? ? formas.join(" + ") : "Não informada" %>
-    </span>
-  </div>
-
-  <% if pedido.observacao.present? %>
-    <div>
-      <strong style="color: #555;">Observações:</strong> 
-      <span style="color: #333; font-style: italic;"><%= pedido.observacao %></span>
+  <%# DETALHES DE AUDITORIA %>
+  <div style="font-size: 14px; color: #2d3748; display: flex; flex-direction: column; gap: 6px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box;">
+    <div><strong style="color: #4a5568;">Código Localizador:</strong> <span style="color: #D71920; font-weight: bold; font-size: 1.05em;">#<%= pedido.id %></span></div>
+    <div><strong style="color: #4a5568;">Identificação / Mesa:</strong> <span style="font-weight: bold; color: #1a202c; text-transform: uppercase;"><%= pedido.cliente_nome.presence || "Não identificado" %></span></div>
+    <div><strong style="color: #4a5568;">Atendido por:</strong> <span style="font-weight: 600;"><%= pedido.funcionario&.nome %></span></div>
+    <div><strong style="color: #4a5568;">Quantidade Total:</strong> 
+      <span style="font-weight: bold;">
+        <% if pedido.item_pedidos.any? %>
+          <%# 🌟 EVITA QUERY N+1: soma os elementos direto do array mapeado na memória %>
+          <%= number_with_precision(pedido.item_pedidos.map(&:quantidade).sum, precision: 3, separator: ",", strip_insignificant_zeros: true) %> un
+        <% else %>
+          <%= pedido.respond_to?(:quantidade) ? number_with_precision(pedido.quantidade, precision: 3, separator: ",", strip_insignificant_zeros: true) : 1 %>
+        <% end %>
+      </span>
     </div>
-  <% end %>
+    <div><strong style="color: #4a5568;">Data da Venda:</strong> <span style="font-weight: 600;"><%= pedido.created_at.strftime("%d/%m/%Y") %></span></div>
+    <div><strong style="color: #4a5568;">Horário do Registro:</strong> <span style="font-weight: 600;"><%= pedido.created_at.strftime("%H:%M") %></span></div>
+    <div><strong style="color: #4a5568;">Unidade / Posto:</strong> <span style="font-weight: bold; color: #D71920; text-transform: uppercase;"><%= pedido.unidade&.nome&.gsub('_', ' ') %></span></div>
+    <div><strong style="color: #4a5568;">Meio de Pagamento:</strong> 
+      <span style="font-weight: 600;">
+        <%
+          formas = []
+          formas << "Dinheiro" if pedido.pago_dinheiro.to_f > 0
+          formas << "Pix" if pedido.pago_pix.to_f > 0
+          formas << "Débito" if pedido.pago_cartao_debito.to_f > 0
+          formas << "Crédito" if pedido.pago_cartao_credito.to_f > 0
+        %>
+        <%= formas.any? ? formas.join(" + ") : "Não informada" %>
+      </span>
+    </div>
 
-  <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
-    <strong style="color: #D71920; font-size: 1.2em;">Valor Total:</strong> 
-    <span style="color: #28a745; font-size: 1.2em; font-weight: bold;">
-      <%= number_to_currency(pedido.valor_total, unit: "R$ ", separator: ",", delimiter: ".") %>
+    <% if pedido.observacao.present? %>
+      <div style="margin-top: 5px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; box-sizing: border-box;">
+        <strong style="color: #4a5568; display: block; margin-bottom: 2px;">Observações:</strong>
+        <span style="color: #1a202c; font-style: italic;"><%= pedido.observacao %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="margin-top: 20px; padding-top: 12px; border-top: 2px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
+    <strong style="color: #D71920; font-size: 1.3em; font-weight: bold; letter-spacing: 0.5px;">VALOR TOTAL:</strong> 
+    <span style="color: #16a34a; font-size: 1.4em; font-weight: bold;">
+      <%= number_to_currency(pedido.valor_total, unit: "R$ ") %>
     </span>
   </div>
 
   <% if pedido.respond_to?(:calcular_troco) && pedido.calcular_troco > 0 %>
-    <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e9; border-radius: 8px; border-left: 5px solid #28a745;">
-      <strong style="color: #2e7d32;">Troco a devolver (Dinheiro):</strong> 
-      <span style="color: #1b5e20; font-weight: bold;">
-        <%= number_to_currency(pedido.calcular_troco, unit: "R$ ", separator: ",", delimiter: ".") %>
+    <div style="margin-top: 15px; padding: 12px; background-color: #f0fdf4; border-radius: 8px; border-left: 5px solid #16a34a; border-top: 1px solid #d1fae5; border-right: 1px solid #d1fae5; border-bottom: 1px solid #d1fae5; box-sizing: border-box;">
+      <strong style="color: #155724; display: block; font-size: 13px; font-weight: bold;">Troco a devolver em Dinheiro:</strong> 
+      <span style="color: #155724; font-weight: bold; font-size: 17px;">
+        <%= number_to_currency(pedido.calcular_troco, unit: "R$ ") %>
       </span>
     </div>
   <% end %>

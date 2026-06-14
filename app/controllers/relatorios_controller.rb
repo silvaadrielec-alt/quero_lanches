@@ -3,65 +3,76 @@ class RelatoriosController < ApplicationController
   require 'csv'
 
   def index
-    # Aplica o sistema de permissões baseado no nível de acesso
+    @data_inicio = params[:data_inicio].presence
+    @data_fim = params[:data_fim].presence
+
     if current_funcionario.admin?
       base_produtos = Produto.all
       base_pedidos = Pedido.all
       base_despesas = Despesa.all
       base_movimentacoes = Movimentacao.all
     else
-      # Funcionário comum fica restrito à sua respectiva unidade
-      base_produtos = Produto.all # Estoque geralmente é global ou filtrado se tiver campo unidade
-      base_pedidos = Pedido.where(unidade: current_funcionario.unidade)
-      base_despesas = Despesa.where(unidade: current_funcionario.unidade)
-      base_movimentacoes = Movimentacao.where(unidade: current_funcionario.unidade)
+      base_produtos = Produto.all
+      base_pedidos = Pedido.where(unidade: current_funcionario.unidade.nome)
+      base_despesas = Despesa.where(unidade: current_funcionario.unidade.nome)
+      base_movimentacoes = Movimentacao.where(unidade: current_funcionario.unidade.nome)
     end
 
-    # 1. Dados de Reposição de Estoque
+    @pedidos_filtrados = base_pedidos.includes(:unidade)
+    @despesas_pagas_filtradas = base_despesas.includes(:unidade).where(pago: true)
+    @movimentacoes_filtradas = base_movimentacoes.includes(:funcionario, :produto)
+
+    if @data_inicio.present? && @data_fim.present?
+      range = Date.parse(@data_inicio).beginning_of_day..Date.parse(@data_fim).end_of_day
+      @pedidos_filtrados = @pedidos_filtrados.where(created_at: range)
+      
+      if Despesa.column_names.include?('data_pagamento')
+        @despesas_pagas_filtradas = @despesas_pagas_filtradas.where(data_pagamento: range)
+      else
+        @despesas_pagas_filtradas = @despesas_pagas_filtradas.where(updated_at: range)
+      end
+      @movimentacoes_filtradas = @movimentacoes_filtradas.where(created_at: range)
+    end
+
     @produtos_para_comprar = base_produtos.select(&:precisa_reposicao?)
     
-    # 2. Dados do Resumo Financeiro / Faturamento (Escopados)
-    @total_vendas = base_pedidos.sum(:valor_total)
-    @total_despesas = base_despesas.where(pago: true).sum(:valor)
-    @lucro_liquido = @total_vendas - @total_despesas
+    @total_vendas = @pedidos_filtrados.sum(:valor_total)
+    @total_despesas = @despesas_pagas_filtradas.sum(:valor)
+    @total_custo_insumos = calcular_cmv(@pedidos_filtrados)
     
-    # 3. Despesas a Pagar (Controle de contas pendentes)
+    @lucro_liquido = @total_vendas - @total_despesas - @total_custo_insumos
+    
     @despesas_a_pagar = base_despesas.where(pago: false).order(data_vencimento: :asc)
-    
-    # 4. Fluxo de Caixa Recente (Alinhado com as permissões)
-    @pedidos_recentes = base_pedidos.order(created_at: :desc).limit(50)
-    @despesas_pagas_detalhado = base_despesas.where(pago: true).order(data_pagamento: :desc).limit(50)
-    
-    # 5. Auditoria do Sistema
-    @movimentacoes = base_movimentacoes.order(created_at: :desc).limit(100)
+    @pedidos_recentes = @pedidos_filtrados.order(created_at: :desc)
+    @despesas_pagas_detalhado = @despesas_pagas_filtradas.order(updated_at: :desc)
+    @movimentacoes = @movimentacoes_filtradas.order(created_at: :desc)
   end
 
-  def auditoria
-    @movimentacoes = Movimentacao.all.order(created_at: :desc)
-  end
+  private
 
-  def exportar_auditoria
-    @movimentacoes = Movimentacao.all.order(created_at: :desc)
-    
-    respond_to do |format|
-      format.csv do
-        filename = "Auditoria_CantinaTech_#{Date.today}.csv"
-        csv_data = CSV.generate(col_sep: ';', force_quotes: true) do |csv|
-          csv << ["Data/Hora", "Responsável", "Unidade", "Item", "Ação", "Quantidade"]
-          
-          @movimentacoes.each do |log|
-            csv << [
-              log.created_at.strftime("%d/%m/%y %H:%M"),
-              log.respond_to?(:responsavel) ? log.responsavel : log.funcionario&.nome,
-              log.unidade&.upcase,
-              log.respond_to?(:produto_nome) ? log.produto_nome : log.produto&.nome,
-              log.respond_to?(:acao) ? log.acao : log.tipo_movimentacao,
-              log.respond_to?(:qtd) ? log.qtd : log.quantidade
-            ]
-          end
+  def calcular_cmv(pedidos)
+    custo_total = 0.0
+    pedidos.includes(item_pedidos: [{ produto: { composicoes: :insumo } }, { item_pedido_adicionais: :insumo }]).find_each do |pedido|
+      pedido.item_pedidos.each do |item|
+        prod = item.produto
+        next unless prod
+        qtd_item = item.quantidade.to_f
+
+        if prod.respond_to?(:preco_custo) && prod.preco_custo.to_f > 0 && prod.composicoes.empty?
+          fator = pedido.respond_to?(:descobrir_fator_proporcao, true) ? pedido.send(:descobrir_fator_proporcao, prod, item) : 1.0
+          custo_total += (prod.preco_custo.to_f * fator * qtd_item)
         end
-        send_data "\xEF\xBB\xBF" + csv_data, filename: filename, type: 'text/csv; charset=utf-8'
+
+        prod.composicoes.each do |comp|
+          insumo = comp.insumo
+          next unless insumo && insumo.preco_custo.present?
+          next if pedido.observacao.to_s.downcase.include?(insumo.nome.to_s.downcase.strip)
+          
+          qtd_real = pedido.respond_to?(:calcular_quantidade_real, true) ? pedido.send(:calcular_quantidade_real, comp, item) : comp.quantidade.to_f
+          custo_total += (insumo.preco_custo.to_f * qtd_real * qtd_item)
+        end
       end
     end
+    custo_total
   end
 end
