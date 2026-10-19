@@ -3,9 +3,10 @@ class AuditoriasController < ApplicationController
   before_action :verificar_admin
 
   def index
-    # 🌟 CORREÇÃO DE INFLEXÃO: Apontamos explicitamente para o model 'Auditorium'
-    # para o Rails não tentar adivinhar o plural em inglês/português.
-    @auditorias = Auditorium.includes(:funcionario).order(created_at: :desc)
+   @auditorias = Auditoria.where.not(tabela_afetada: 'movimentacaos')
+                           .includes(:funcionario)
+                           .order(created_at: :desc)
+                           .limit(500)
   end
 
   private

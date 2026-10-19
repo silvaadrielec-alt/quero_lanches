@@ -13,13 +13,16 @@ class InsumosController < ApplicationController
   end
 
   def show
+    @referencias = ReferenciaRendimento.all
   end
 
   def new
     @insumo = Insumo.new
+    @referencias = ReferenciaRendimento.all
   end
 
   def edit
+    @referencias = ReferenciaRendimento.all
   end
 
   def create
@@ -28,6 +31,7 @@ class InsumosController < ApplicationController
     if @insumo.save
       redirect_to insumos_path, notice: "Insumo cadastrado com sucesso!"
     else
+      @referencias = ReferenciaRendimento.all
       render :new, status: :unprocessable_entity
     end
   end
@@ -36,6 +40,7 @@ class InsumosController < ApplicationController
     if @insumo.update(insumo_params)
       redirect_to insumos_path, notice: "Insumo atualizado com sucesso!"
     else
+      @referencias = ReferenciaRendimento.all
       render :edit, status: :unprocessable_entity
     end
   end

@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   resources :produtos
   resources :insumos
   resources :despesas
+  resources :referencia_rendimentos
 
   resources :estoques, only: [:index, :edit, :update] do
     collection do

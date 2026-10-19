@@ -1,0 +1,2 @@
+class ReferenciaRendimento < ApplicationRecord
+end

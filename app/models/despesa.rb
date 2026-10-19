@@ -22,7 +22,7 @@ class Despesa < ApplicationRecord
   def auditar_alteracao(funcionario_id)
     # Garante que só audita se algo REALMENTE mudou
     if saved_changes.slice(:valor, :descricao, :pago).any?
-      Auditorium.create!(
+      Auditoria.create!(
         funcionario_id: funcionario_id,
         tabela_afetada: 'Despesas',
         registro_id: self.id,
@@ -36,7 +36,7 @@ class Despesa < ApplicationRecord
   end
 
   def auditar_exclusao(funcionario_id)
-    Auditorium.create!(
+    Auditoria.create!(
       funcionario_id: funcionario_id,
       tabela_afetada: 'Despesas',
       registro_id: self.id,

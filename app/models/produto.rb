@@ -58,12 +58,4 @@ class Produto < ApplicationRecord
       self.codigo = self.codigo.to_s.strip.upcase
     end
   end
-
-  def exibir_quantidade(quantidade)
-    # Produtos simples apenas exibem a quantidade e unidade cadastrada
-    { 
-      qtd: quantidade, 
-      unidade: "un" 
-    }
-  end
 end

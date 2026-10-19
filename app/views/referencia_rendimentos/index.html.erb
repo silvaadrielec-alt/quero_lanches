@@ -1,0 +1,74 @@
+<%# --- 🌟 BOTÃO VOLTAR --- %>
+<div style="text-align: left; margin-bottom: 20px; max-width: 800px; margin-left: auto; margin-right: auto;" class="no-print">
+  <%= link_to root_path, style: "background: #f1f5f9; color: #0000FF; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 11px; text-decoration: none; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);" do %>
+    ← VOLTAR PARA O PAINEL
+  <% end %>
+</div>
+
+<div style="max-width: 800px; margin: 0 auto 40px auto; font-family: sans-serif; box-sizing: border-box;">
+  
+  <h1 style="color: #D71920; margin-top: 0; margin-bottom: 30px; font-size: 1.6em; text-align: center;">
+    Gerenciar Tabelas de Referência
+  </h1>
+
+  <%# 🔍 BARRA DE PESQUISA (Agora FORA da moldura) %>
+  <div style="margin-bottom: 30px; text-align: center;">
+    <input type="text" id="buscaReferencia" onkeyup="filtrarReferências()" placeholder="🔍 Pesquisar por insumo..." 
+           style="width: 100%; max-width: 500px; padding: 12px 20px; border-radius: 30px; border: 1px solid #cbd5e1; outline: none; font-size: 14px; box-sizing: border-box; color: #1e293b; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+  </div>
+
+  <%# INÍCIO DO CARTÃO (A moldura começa aqui) %>
+  <div style="background: #fff; border-radius: 12px; border: 2px solid #D71920; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+    
+    <%# Formulário estilizado %>
+    <%= form_with model: ReferenciaRendimento.new, url: referencia_rendimentos_path, style: "background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 30px; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px;" do |f| %>
+      <%= f.text_field :insumo_nome, placeholder: "Nome do Insumo", required: true, style: "padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" %>
+      <%= f.text_field :unidade_medida, placeholder: "Ex: Fatia", style: "padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" %>
+      <%= f.number_field :fator, step: 0.1, placeholder: "Fator", style: "padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;" %>
+      <%= f.submit "ADICIONAR", style: "background: #16a34a; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;" %>
+    <% end %>
+
+    <%# Tabela estilizada com ID para o filtro %>
+    <table id="tabelaReferencias" style="width: 100%; border-collapse: collapse; text-align: left; margin-top: 20px;">
+      <thead>
+        <tr style="background-color: #D71920; color: white; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+          <th style="padding: 12px 15px; border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 20px;">Insumo</th>
+          <th style="padding: 12px 15px;">Unidade</th>
+          <th style="padding: 12px 15px; text-align: center;">Fator</th>
+          <th style="padding: 12px 15px; text-align: center; border-top-right-radius: 6px; border-bottom-right-radius: 6px;">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @referencias.each do |ref| %>
+          <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
+            <td style="padding: 15px; padding-left: 20px; font-weight: 500; color: #1e293b; font-size: 14px;"><%= ref.insumo_nome %></td>
+            <td style="padding: 15px; color: #475569; font-size: 14px;"><%= ref.unidade_medida %></td>
+            <td style="padding: 15px; text-align: center; font-weight: bold; color: #1e293b; font-size: 14px;">
+              <%= number_with_precision(ref.fator, precision: 1, separator: ",") %>
+            </td>
+            <td style="padding: 15px; text-align: center;">
+              <%= button_to "EXCLUIR", referencia_rendimento_path(ref), method: :delete, data: { confirm: 'Tem certeza?' }, 
+                  style: "background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; text-transform: uppercase;" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function filtrarReferências() {
+    var input = document.getElementById("buscaReferencia");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("tabelaReferencias");
+    var rows = table.getElementsByTagName("tr");
+    for (var i = 1; i < rows.length; i++) {
+      var tdInsumo = rows[i].getElementsByTagName("td")[0];
+      if (tdInsumo) {
+        var txtValue = tdInsumo.textContent || tdInsumo.innerText;
+        rows[i].style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+      }
+    }
+  }
+</script>

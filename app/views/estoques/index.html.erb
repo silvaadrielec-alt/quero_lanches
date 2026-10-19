@@ -69,18 +69,18 @@
       
       <div id="campos-unidade-origem" style="display:none;">
         <label>Origem:</label>
-        <select name="unidade_origem" class="form-control" style="width: 100%; margin-bottom: 10px;">
-          <option value="centro">Matriz Centro</option>
-          <option value="pavilhao_novo">Pavilhão Novo</option>
-          <option value="pavilhao_antigo">Pavilhão Antigo</option>
-        </select>
+       <select name="unidade_origem" id="select-unidade" class="form-control" style="width: 100%; margin-bottom: 10px;">
+       <% Unidade.all.each do |u| %>
+       <option value="<%= u.id %>"><%= u.nome %></option>
+       <% end %>
+      </select>
       </div>
 
       <label id="label-unidade_destino">Unidade:</label>
       <select name="unidade_destino" id="select-unidade" class="form-control" style="width: 100%; margin-bottom: 10px;">
-        <option value="centro">Matriz Centro</option>
-        <option value="pavilhao_novo">Pavilhão Novo</option>
-        <option value="pavilhao_antigo">Pavilhão Antigo</option>
+      <% Unidade.all.each do |u| %>
+      <option value="<%= u.id %>"><%= u.nome %></option>
+      <% end %>
       </select>
 
       <label>Quantidade:</label>

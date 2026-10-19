@@ -61,6 +61,8 @@ end
 
   # Permite apenas os dados comerciais e de identificação do lanche
   def produto_params
-    params.require(:produto).permit(:nome, :preco_venda, :codigo, :unidade_medida, :aceita_adicional, :custo_producao, :estoque_controlado, :categoria)
+    params.require(:produto).permit(:nome, :preco_venda, :codigo, :unidade_medida, :aceita_adicional, :custo_producao, :estoque_controlado, :categoria,
+    variacao_produtos_attributes: [:id, :tamanho, :preco_venda, :_destroy]
+    )
   end
 end

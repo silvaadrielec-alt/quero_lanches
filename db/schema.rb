@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_184115) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_04_160018) do
   create_table "auditoria", force: :cascade do |t|
     t.string "acao"
     t.datetime "created_at", null: false
@@ -128,6 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_184115) do
     t.string "destino"
     t.integer "funcionario_id", null: false
     t.integer "insumo_id"
+    t.integer "item_pedido_id"
     t.string "origem"
     t.integer "produto_id"
     t.decimal "quantidade", precision: 10, scale: 3
@@ -135,6 +136,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_184115) do
     t.integer "unidade_id"
     t.string "unidade_medida"
     t.datetime "updated_at", null: false
+    t.decimal "valor_custo", precision: 10, scale: 2, default: "0.0"
+    t.decimal "valor_receita", precision: 10, scale: 2, default: "0.0"
     t.index ["funcionario_id"], name: "index_movimentacaos_on_funcionario_id"
     t.index ["insumo_id"], name: "index_movimentacaos_on_insumo_id"
     t.index ["produto_id"], name: "index_movimentacaos_on_produto_id"
@@ -193,6 +196,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_184115) do
     t.string "unidade_medida"
     t.datetime "updated_at", null: false
     t.decimal "valor_unitario"
+  end
+
+  create_table "referencia_rendimentos", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.decimal "fator"
+    t.string "insumo_nome"
+    t.string "unidade_medida"
+    t.datetime "updated_at", null: false
   end
 
   create_table "unidades", force: :cascade do |t|

@@ -54,6 +54,7 @@
       text-align: left; 
       font-size: 12px; 
       color: black !important;
+      white-space: nowrap;
     }
 
     /* Remove a borda direita da última coluna para não cortar o traço da tabela */
@@ -376,42 +377,33 @@
   <thead>
     <tr>
       <th>DATA/HORA</th>
-      <th>ITEM</th>
+      <th>UNIDADE</th> <th>ITEM</th>
       <th>AÇÃO</th>
       <th>QTD</th>
-      <th>CUSTO ESTIMADO</th>
+      <th style="text-align: right; width: 80px;">VALOR CUSTO</th>
+      <th style="text-align: right; width: 80px;">VALOR RECEITA</th>
     </tr>
   </thead>
   <tbody>
     <% @movimentacoes.each do |log| %>
       <% 
         item = log.produto || log.insumo
+        # Busca a unidade de medida do cadastro (ou padrão 'un')
+        unidade_medida = item&.respond_to?(:unidade_medida) ? item.unidade_medida : "un"
+        qtd_formatada = sprintf("%.2f", log.quantidade.to_f).gsub('.', ',').gsub(',00', '')
         
-        # 1. Lógica inteligente para buscar o preço, independente do nome da coluna
-        custo_unit = 0.0
-        if item.respond_to?(:preco_custo) && item.preco_custo.present?
-          custo_unit = item.preco_custo.to_f
-        elsif item.respond_to?(:valor_unitario) && item.valor_unitario.present?
-          custo_unit = item.valor_unitario.to_f
-        elsif item.respond_to?(:preco_venda) && item.preco_venda.present?
-          custo_unit = item.preco_venda.to_f
-        end
-        
-        # 2. Chama o método centralizado nos Models para exibição correta (fatias/un)
-        res = item&.respond_to?(:exibir_quantidade) ? item.exibir_quantidade(log.quantidade.to_f) : { qtd: log.quantidade.to_f, unidade: "un" }
-        
-        # 3. Formatação brasileira
-        qtd_formatada = sprintf("%.2f", res[:qtd]).gsub('.', ',').gsub(',00', '')
-        total_mov = custo_unit * log.quantidade.to_f
+        # Lógica para separar colunas:
+        # Se for Entrada, mostra custo. Se for Saída, mostra receita.
+        custo_val = log.valor_custo.to_f > 0 ? number_to_currency(log.valor_custo, unit: "R$ ", separator: ",", delimiter: ".") : "-"
+        receita_val = log.valor_receita.to_f > 0 ? number_to_currency(log.valor_receita, unit: "R$ ", separator: ",", delimiter: ".") : "-"
       %>
       <tr>
-        <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
-        <td><%= item&.nome || "Item Removido" %></td>
-        <td><%= log.respond_to?(:acao) ? log.acao.to_s.upcase : log.tipo_movimentacao.to_s.upcase %></td>
-        <td><%= "#{qtd_formatada} #{res[:unidade]}" %></td>
-        <td style="font-weight: bold; color: #d71920;">
-          <%= number_to_currency(total_mov, unit: "R$ ", separator: ",", delimiter: ".") %>
-        </td>
+      <td><%= log.created_at.strftime("%d/%m/%y %H:%M") %></td>
+      <td><%= log.unidade&.nome || "---" %></td> <td><%= item&.nome || "Item Removido" %></td>
+      <td><%= log.tipo_movimentacao.to_s.upcase %></td>
+      <td style="white-space: nowrap;"><%= "#{qtd_formatada} #{unidade_medida}" %></td>
+      <td style="text-align: right; white-space: nowrap;"><%= custo_val %></td>
+      <td style="text-align: right; white-space: nowrap;"><%= receita_val %></td>
       </tr>
     <% end %>
   </tbody>

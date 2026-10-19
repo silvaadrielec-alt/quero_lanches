@@ -156,88 +156,90 @@ class EstoquesController < ApplicationController
 
   # Reposição rápida direto botão da tabela de estoque
   def repor
-    quantidade_adicional = params[:quantidade].to_f
-    unidade_nome = params[:unidade] || params[:unidade_destino]
-    
-    if params[:produto_id].present?
-      @item = Produto.find(params[:produto_id])
-      polymorphic_params = { produto_id: @item.id }
-    elsif params[:insumo_id].present?
-      @item = Insumo.find(params[:insumo_id])
-      polymorphic_params = { insumo_id: @item.id }
-    end
+  quantidade_adicional = params[:quantidade].to_f
+  unidade_id = params[:unidade] || params[:unidade_destino]
+  
+  if params[:produto_id].present?
+    @item = Produto.find(params[:produto_id])
+    polymorphic_params = { produto_id: @item.id }
+  elsif params[:insumo_id].present?
+    @item = Insumo.find(params[:insumo_id])
+    polymorphic_params = { insumo_id: @item.id }
+  end
 
-    if @item && quantidade_adicional > 0
-      coluna = case unidade_nome
-               when 'centro' then :estoque_centro
-               when 'pavilhao_novo' then :estoque_pavilhao_novo
-               when 'pavilhao_antigo' then :estoque_pavilhao_antigo
+  if @item && quantidade_adicional > 0
+    ActiveRecord::Base.transaction do
+      unidade_obj = Unidade.find(unidade_id) # Busca direta pelo ID
+      
+      coluna = case unidade_obj.nome.downcase
+               when /centro/ then :estoque_centro
+               when /novo/   then :estoque_pavilhao_novo
+               when /antigo/ then :estoque_pavilhao_antigo
                end
 
-      novo_valor = (@item.send(coluna).to_f + quantidade_adicional).round(3)
-      @item.update_column(coluna, novo_valor)
-
-      # CORREÇÃO AQUI: Buscamos o objeto unidade antes de criar a movimentação
-      unidade_obj = Unidade.find_by(nome: unidade_nome.gsub('_', ' ').titleize)
+      @item.update!(coluna => (@item.send(coluna).to_f + quantidade_adicional).round(3))
 
       Movimentacao.create!(
         {
           funcionario: current_funcionario,
           quantidade: quantidade_adicional,
           tipo_movimentacao: 'ENTRADA',
-          unidade: unidade_obj # Agora passamos o objeto (relação), não a string
+          unidade: unidade_obj
         }.merge(polymorphic_params)
       )
-
-      flash[:notice] = "Estoque de #{@item.nome.upcase} abastecido com +#{quantidade_adicional}!"
-    else
-      flash[:alert] = "Insira uma quantidade válida."
     end
-
-    redirect_to estoques_path
+    flash[:notice] = "Estoque de #{@item.nome.upcase} abastecido!"
+  else
+    flash[:alert] = "Dados inválidos."
   end
+  redirect_to estoques_path
+rescue => e
+  flash[:alert] = "Erro ao processar reposição: #{e.message}"
+  redirect_to estoques_path
+end
 
   def transferir
-    origem = params[:unidade_origem]
-    destino = params[:unidade_destino]
-    quantidade = params[:quantidade].to_f
+  origem_id = params[:unidade_origem]
+  destino_id = params[:unidade_destino]
+  quantidade = params[:quantidade].to_f
 
-    if origem.blank? || destino.blank?
-      flash[:alert] = "Selecione origem e destino."
-      redirect_to estoques_path and return
-    end
-
-    # Identificar o item
-    if params[:produto_id].present?
-      @item = Produto.find(params[:produto_id])
-      polymorphic_params = { produto_id: @item.id }
-    elsif params[:insumo_id].present?
-      @item = Insumo.find(params[:insumo_id])
-      polymorphic_params = { insumo_id: @item.id }
-    end
-
-    if origem == destino
-      flash[:alert] = "Origem e destino iguais."
-    elsif @item && quantidade > 0
-      ActiveRecord::Base.transaction do
-        colunas = { 'centro' => :estoque_centro, 'pavilhao_novo' => :estoque_pavilhao_novo, 'pavilhao_antigo' => :estoque_pavilhao_antigo }
-
-        @item.update_column(colunas[origem], (@item.send(colunas[origem]).to_f - quantidade).round(3))
-        @item.update_column(colunas[destino], (@item.send(colunas[destino]).to_f + quantidade).round(3))
-
-        # CORREÇÃO AQUI: Buscamos os objetos para passar para a Movimentação
-        unidade_origem_obj = Unidade.find_by(nome: origem.gsub('_', ' ').titleize)
-        unidade_destino_obj = Unidade.find_by(nome: destino.gsub('_', ' ').titleize)
-
-        Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'SAIDA_TRANSFERENCIA', unidade: unidade_origem_obj))
-        Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'ENTRADA_TRANSFERENCIA', unidade: unidade_destino_obj))
-      end
-      flash[:notice] = "Transferência concluída!"
-    else
-      flash[:alert] = "Dados inválidos."
-    end
-    redirect_to estoques_path
+  if origem_id.blank? || destino_id.blank? || origem_id == destino_id
+    flash[:alert] = "Selecione origem e destino diferentes."
+    redirect_to estoques_path and return
   end
+
+  # Identificar o item
+  if params[:produto_id].present?
+    @item = Produto.find(params[:produto_id])
+    polymorphic_params = { produto_id: @item.id }
+  elsif params[:insumo_id].present?
+    @item = Insumo.find(params[:insumo_id])
+    polymorphic_params = { insumo_id: @item.id }
+  end
+
+  if @item && quantidade > 0
+    ActiveRecord::Base.transaction do
+      u_origem = Unidade.find(origem_id)
+      u_destino = Unidade.find(destino_id)
+
+      colunas = { '1' => :estoque_centro, '2' => :estoque_pavilhao_novo, '3' => :estoque_pavilhao_antigo }
+      
+      # Atualiza origem e destino usando update!
+      @item.update!(colunas[origem_id] => (@item.send(colunas[origem_id]).to_f - quantidade).round(3))
+      @item.update!(colunas[destino_id] => (@item.send(colunas[destino_id]).to_f + quantidade).round(3))
+
+      Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'SAIDA_TRANSFERENCIA', unidade: u_origem))
+      Movimentacao.create!(polymorphic_params.merge(funcionario: current_funcionario, quantidade: quantidade, tipo_movimentacao: 'ENTRADA_TRANSFERENCIA', unidade: u_destino))
+    end
+    flash[:notice] = "Transferência concluída!"
+  else
+    flash[:alert] = "Dados inválidos."
+  end
+  redirect_to estoques_path
+rescue => e
+  flash[:alert] = "Erro na transferência: #{e.message}"
+  redirect_to estoques_path
+end
   
   def edit
     # Abre o formulário compacto para alteração/ajuste manual de saldos

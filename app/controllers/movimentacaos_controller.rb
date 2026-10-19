@@ -7,34 +7,35 @@ class MovimentacaosController < ApplicationController
     @movimentacaos = Movimentacao.all.order(created_at: :desc)
   end
 
-  def create
-    id_pesquisa = movimentacao_params[:produto_id]
-    
-    if id_pesquisa.include?("-")
-      tipo, id_real = id_pesquisa.split("-")
-      item_alvo = tipo == "PRODUTO" ? Produto.find(id_real) : Insumo.find(id_real)
+ def create
+  # Lógica de identificação do item
+  id_pesquisa = movimentacao_params[:produto_id]
+  item_alvo = nil
+
+  if id_pesquisa.include?("-")
+    tipo, id_real = id_pesquisa.split("-")
+    item_alvo = tipo == "PRODUTO" ? Produto.find(id_real) : Insumo.find(id_real)
+  else
+    item_alvo = Produto.find(id_pesquisa)
+  end
+
+  # Instancia a Movimentacao com os params
+  @movimentacao = Movimentacao.new(movimentacao_params)
+  
+  # Associações diretas
+  @movimentacao.produto = item_alvo if item_alvo.is_a?(Produto)
+  @movimentacao.insumo = item_alvo if item_alvo.is_a?(Insumo)
+  @movimentacao.funcionario = current_funcionario
+
+  respond_to do |format|
+    if @movimentacao.save
+      atualizar_estoque_real(@movimentacao)
+      format.html { redirect_to movimentacaos_path, notice: "Movimentação e Auditoria registradas com sucesso!" }
     else
-      item_alvo = Produto.find(id_pesquisa)
-    end
-
-    @movimentacao = Auditoria.new(
-      produto: item_alvo.nome,
-      responsavel: current_funcionario.nome,
-      unidade_id: movimentacao_params[:destino], 
-      acao: "ENTRADA",
-      qtd: movimentacao_params[:quantidade],
-      data_hora: Time.current
-    )
-
-    respond_to do |format|
-      if @movimentacao.save
-        atualizar_estoque_real(@movimentacao)
-        format.html { redirect_to movimentacaos_path, notice: "Entrada de estoque registrada e auditada com sucesso!" }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-      end
+      format.html { render :new, status: :unprocessable_entity }
     end
   end
+end
 
   def show
     # Ação show estruturada para renderizar os detalhes de uma auditoria específica
@@ -43,10 +44,9 @@ class MovimentacaosController < ApplicationController
   private
 
   def atualizar_estoque_real(mov)
-    target = Insumo.find_by(nome: mov.produto)
-    target ||= Produto.find_by(nome: mov.produto)
-    
-    return unless target
+  target = mov.produto || mov.insumo
+  
+  return unless target
 
     nome_unidade = mov.unidade&.nome&.downcase || ""
 
@@ -57,7 +57,7 @@ class MovimentacaosController < ApplicationController
              end
 
     if coluna && target.respond_to?(coluna)
-      novo_valor = (target.send(coluna).to_f + mov.qtd.to_f).round(3)
+      novo_valor = (target.send(coluna).to_f + mov.quantidade.to_f).round(3)
       target.update_column(coluna, novo_valor)
     end
   end
@@ -70,6 +70,6 @@ class MovimentacaosController < ApplicationController
   end
 
   def movimentacao_params
-    params.require(:movimentacao).permit(:produto_id, :origem, :destino, :quantidade, :funcionario_id)
+    params.require(:movimentacao).permit(:produto_id, :origem, :destino, :quantidade, :funcionario_id, :tipo_movimentacao, :unidade_id)
   end
 end

@@ -17,6 +17,14 @@ class Insumo < ApplicationRecord
           presence: { message: "deve ser definido para controle de estoque" }, 
           numericality: { greater_than_or_equal_to: 0 }
 
+  validates :media_unidades_kg, presence: true, numericality: { greater_than: 0 }
+
+  before_validation :set_default_rendimento, on: :create
+
+  def set_default_rendimento
+    self.media_unidades_kg ||= 1.0
+  end
+    
   # LÓGICA DE ESTOQUE CRÍTICO REESTRUTURADA COM LIMITES POR FILIAL
   def precisa_reposicao?
     estoque_centro_baixo? || estoque_pavilhao_novo_baixo? || estoque_pavilhao_antigo_baixo?
@@ -33,12 +41,4 @@ end
 def estoque_pavilhao_antigo_baixo?
   estoque_pavilhao_antigo.to_f < limite_pavilhao_antigo.to_f
 end
-
-def exibir_quantidade(quantidade)
-    fator = media_unidades_kg.to_f > 1.0 ? media_unidades_kg.to_f : 1.0
-    { 
-      qtd: (quantidade * fator), 
-      unidade: unidade_medida.presence || "un" 
-    }
-   end
 end
